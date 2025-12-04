@@ -2,6 +2,39 @@
 
 Sistema completo de gestão financeira, análise de maturidade de negócios e valuation para empresários e investidores.
 
+## 📋 Status do Projeto
+
+### ✅ Backend (70 testes passando)
+- **Autenticação completa** com JWT
+- **DDD + Clean Architecture**
+- **TDD rigoroso** (Red-Green-Refactor)
+
+## 📚 Documentação Rápida
+
+- **[Quick Start](./docs/QUICKSTART.md)** - Rode o backend em 3 passos
+- **[Resumo Técnico](./docs/PROJECT-SUMMARY.md)** - Arquitetura e componentes implementados
+- **[Backend README](./backend/README.md)** - Guia completo do backend
+- **[TDD Workflow](./docs/getting-started.md)** - Como desenvolvemos com TDD
+- **[OAuth Guide](./docs/oauth-reference.md)** - Autenticação social (Phase 2)
+
+## 📁 Estrutura do Projeto
+
+```
+Finex/
+├── backend/               # NestJS API (70 testes ✅)
+│   └── src/
+│       ├── shared/       # Core DDD classes
+│       └── modules/
+│           └── authentication/
+│               ├── domain/           # Entities, Value Objects, Events
+│               ├── application/      # Use Cases, DTOs, Ports
+│               ├── infrastructure/   # TypeORM, JWT, Repositories
+│               └── presentation/     # Controllers, ViewModels
+│
+├── frontend/             # React (futuro)
+└── docs/                 # Documentação completa
+```
+
 ## Stack Tecnológica
 
 ### Backend

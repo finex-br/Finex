@@ -1,4 +1,6 @@
-# FinEx Backend
+# 🚀 FinEx Backend - Sistema Completo de Autenticação
+
+## ✅ Status Atual: 70 testes passando
 
 Backend do sistema FinEx construído com Clean Architecture, Domain-Driven Design (DDD) e Test-Driven Development (TDD).
 

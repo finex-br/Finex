@@ -9,10 +9,11 @@ import { AuthenticationModule } from './modules/authentication/infrastructure/au
     TypeOrmModule.forRootAsync({
       inject: [EnvService],
       useFactory: (envService: EnvService) => ({
-        type: 'postgres', // Change to DuckDB when driver is available
+        type: 'postgres',
         url: envService.databaseUrl,
-        autoLoadEntities: true,
+        entities: [__dirname + '/**/*.schema{.ts,.js}'],
         synchronize: envService.nodeEnv === 'development',
+        logging: envService.nodeEnv === 'development',
       }),
     }),
     AuthenticationModule,
