@@ -1,7 +1,8 @@
 import { User } from './user';
 import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';
-import { UserRole } from '../value-objects/user-role';
+import { PhoneNumber } from '../value-objects/phone-number';
+import { UserRole, UserRoleEnum } from '../value-objects/user-role';
 
 describe('User Entity', () => {
   describe('create', () => {
@@ -9,14 +10,14 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = await Password.create('StrongPass123!');
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
 
       // Act
       const result = User.create({
         email,
         password: password.getValue(),
         name: 'John Doe',
-        role,
+        phoneNumber,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -27,7 +28,8 @@ describe('User Entity', () => {
       const user = result.getValue();
       expect(user.email).toBe(email);
       expect(user.name).toBe('John Doe');
-      expect(user.role).toBe(role);
+      expect(user.phoneNumber).toBe(phoneNumber);
+      expect(user.role.value).toBe(UserRoleEnum.ENTREPRENEUR);
       expect(user.isActive).toBe(true);
     });
 
@@ -35,14 +37,14 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
 
       // Act
       const result = User.create({
         email,
         password,
         name: '',
-        role,
+        phoneNumber,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -57,14 +59,14 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
 
       // Act
       const result = User.create({
         email,
         password,
         name: '   ',
-        role,
+        phoneNumber,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -79,14 +81,14 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
 
       // Act
       const result = User.create({
         email,
         password,
         name: 'J',
-        role,
+        phoneNumber,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -101,14 +103,14 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
 
       // Act
       const result = User.create({
         email,
         password,
         name: 'John Doe',
-        role,
+        phoneNumber,
         isActive: undefined as any,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -123,7 +125,7 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
       const beforeCreate = new Date();
 
       // Act
@@ -131,7 +133,7 @@ describe('User Entity', () => {
         email,
         password,
         name: 'John Doe',
-        role,
+        phoneNumber,
         isActive: true,
         createdAt: undefined as any,
         updatedAt: undefined as any,
@@ -153,12 +155,12 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
       const user = User.create({
         email,
         password,
         name: 'John Doe',
-        role,
+        phoneNumber,
         isActive: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -183,12 +185,12 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
       const user = User.create({
         email,
         password,
         name: 'John Doe',
-        role,
+        phoneNumber,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -213,12 +215,12 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const oldPassword = (await Password.create('OldPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
       const user = User.create({
         email,
         password: oldPassword,
         name: 'John Doe',
-        role,
+        phoneNumber,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -244,13 +246,13 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
       
       const user1 = User.create({
         email,
         password,
         name: 'John Doe',
-        role,
+        phoneNumber,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -265,13 +267,14 @@ describe('User Entity', () => {
       const email1 = Email.create('user1@example.com').getValue();
       const email2 = Email.create('user2@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber1 = PhoneNumber.create('11987654321').getValue();
+      const phoneNumber2 = PhoneNumber.create('11987654322').getValue();
       
       const user1 = User.create({
         email: email1,
         password,
         name: 'John Doe',
-        role,
+        phoneNumber: phoneNumber1,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -281,7 +284,7 @@ describe('User Entity', () => {
         email: email2,
         password,
         name: 'Jane Doe',
-        role,
+        phoneNumber: phoneNumber2,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -295,13 +298,13 @@ describe('User Entity', () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
-      const role = UserRole.create('ENTREPRENEUR').getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
       
       const user = User.create({
         email,
         password,
         name: 'John Doe',
-        role,
+        phoneNumber,
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -310,6 +313,27 @@ describe('User Entity', () => {
       // Act & Assert
       expect(user.equals(null as any)).toBe(false);
       expect(user.equals(undefined as any)).toBe(false);
+    });
+
+    it('should fail when phoneNumber is null or undefined', async () => {
+      // Arrange
+      const email = Email.create('user@example.com').getValue();
+      const password = (await Password.create('StrongPass123!')).getValue();
+
+      // Act
+      const result = User.create({
+        email,
+        password,
+        name: 'John Doe',
+        phoneNumber: null as any,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Assert
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('phoneNumber is required');
     });
   });
 });

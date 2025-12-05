@@ -19,7 +19,7 @@ export class AuthController {
       email: body.email,
       password: body.password,
       name: body.name,
-      role: body.role,
+      phoneNumber: body.phoneNumber,
     });
 
     if (result.isFailure) {

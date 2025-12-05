@@ -19,6 +19,9 @@ export class UserSchema {
   name: string;
 
   @Column()
+  phoneNumber: string;
+
+  @Column()
   role: string;
 
   @Column({ default: true })

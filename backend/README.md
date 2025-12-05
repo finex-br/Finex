@@ -1,6 +1,6 @@
 # 🚀 FinEx Backend - Sistema Completo de Autenticação
 
-## ✅ Status Atual: 70 testes passando
+## ✅ Status Atual: 88 testes passando
 
 Backend do sistema FinEx construído com Clean Architecture, Domain-Driven Design (DDD) e Test-Driven Development (TDD).
 
@@ -187,15 +187,46 @@ module-name/
 
 ## Módulos Disponíveis
 
-### Authentication (Em Desenvolvimento com TDD)
+### Authentication (✅ Fase 1 Completa)
 
-#### Fase 1: Autenticação Local ⏳
-- [ ] Registro de usuários (Sign Up)
-- [ ] Login (Sign In)
-- [ ] Autenticação JWT
-- [ ] Refresh Tokens
-- [ ] Recuperação de senha
-- [ ] Controle de Permissões (Admin, Empresário, Investidor)
+#### Fase 1: Autenticação Local ✅
+- ✅ Registro de usuários (Sign Up) com validação de phoneNumber
+- ✅ Login (Sign In)
+- ✅ Autenticação JWT
+- ✅ Validação de email, senha e telefone
+- ✅ Role padrão: ENTREPRENEUR (todos usuários são empresários)
+- ✅ Campos obrigatórios: email, senha, nome, telefone
+
+**API Endpoints:**
+
+```bash
+# Sign Up (Cadastro)
+POST /auth/sign-up
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "StrongPass123!",
+  "name": "John Doe",
+  "phoneNumber": "+5511987654321"
+}
+
+# Sign In (Login)
+POST /auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "StrongPass123!"
+}
+```
+
+**Validações Implementadas:**
+- Email: Formato válido, único no sistema
+- Senha: Mínimo 8 caracteres, uppercase, lowercase, número e caractere especial
+- Telefone: Formato E.164 brasileiro (+5511987654321), 10-11 dígitos
+- Nome: Mínimo 2 caracteres
+- Role: Sempre ENTREPRENEUR (não é mais solicitado no cadastro)
 
 #### Fase 2: Autenticação Social 🔜
 - [ ] Login com Google OAuth 2.0

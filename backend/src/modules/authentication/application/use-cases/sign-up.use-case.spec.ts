@@ -4,7 +4,8 @@ import { ITokenService } from '../../domain/ports/token-service.interface';
 import { User } from '../../domain/entities/user';
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
-import { UserRole } from '../../domain/value-objects/user-role';
+import { PhoneNumber } from '../../domain/value-objects/phone-number';
+import { UserRoleEnum } from '../../domain/value-objects/user-role';
 
 describe('SignUpUseCase', () => {
   let signUpUseCase: SignUpUseCase;
@@ -38,7 +39,7 @@ describe('SignUpUseCase', () => {
       email: 'newuser@example.com',
       password: 'StrongPass123!',
       name: 'John Doe',
-      role: 'ENTREPRENEUR',
+      phoneNumber: '11987654321',
     };
 
     // Act
@@ -54,7 +55,8 @@ describe('SignUpUseCase', () => {
     expect(response.token).toBe('jwt-token-123');
     expect(response.user.email).toBe('newuser@example.com');
     expect(response.user.name).toBe('John Doe');
-    expect(response.user.role).toBe('ENTREPRENEUR');
+    expect(response.user.phoneNumber).toBe('+5511987654321');
+    expect(response.user.role).toBe(UserRoleEnum.ENTREPRENEUR);
   });
 
   it('should fail when email is invalid', async () => {
@@ -63,7 +65,7 @@ describe('SignUpUseCase', () => {
       email: 'invalid-email',
       password: 'StrongPass123!',
       name: 'John Doe',
-      role: 'ENTREPRENEUR',
+      phoneNumber: '11987654321',
     };
 
     // Act
@@ -83,7 +85,7 @@ describe('SignUpUseCase', () => {
       email: 'existing@example.com',
       password: 'StrongPass123!',
       name: 'John Doe',
-      role: 'ENTREPRENEUR',
+      phoneNumber: '11987654321',
     };
 
     // Act
@@ -103,7 +105,7 @@ describe('SignUpUseCase', () => {
       email: 'user@example.com',
       password: 'weak',
       name: 'John Doe',
-      role: 'ENTREPRENEUR',
+      phoneNumber: '11987654321',
     };
 
     // Act
@@ -114,7 +116,7 @@ describe('SignUpUseCase', () => {
     expect(userRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should fail when role is invalid', async () => {
+  it('should fail when phoneNumber is invalid', async () => {
     // Arrange
     userRepository.exists.mockResolvedValue(false);
 
@@ -122,7 +124,7 @@ describe('SignUpUseCase', () => {
       email: 'user@example.com',
       password: 'StrongPass123!',
       name: 'John Doe',
-      role: 'INVALID_ROLE',
+      phoneNumber: '123', // too short
     };
 
     // Act
@@ -130,7 +132,7 @@ describe('SignUpUseCase', () => {
 
     // Assert
     expect(result.isFailure).toBe(true);
-    expect(result.error).toContain('Invalid user role');
+    expect(result.error).toContain('invalid');
     expect(userRepository.save).not.toHaveBeenCalled();
   });
 
@@ -142,7 +144,7 @@ describe('SignUpUseCase', () => {
       email: 'user@example.com',
       password: 'StrongPass123!',
       name: '',
-      role: 'ENTREPRENEUR',
+      phoneNumber: '11987654321',
     };
 
     // Act

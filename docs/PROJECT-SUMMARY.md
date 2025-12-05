@@ -4,7 +4,7 @@
 
 ### ✅ Módulo de Autenticação Completo
 
-**70 testes passando** seguindo **TDD estrito** (Red-Green-Refactor)
+**88 testes passando** seguindo **TDD estrito** (Red-Green-Refactor)
 
 ---
 
@@ -12,7 +12,7 @@
 
 ### 1. Domain Layer (Lógica de Negócio Pura)
 
-#### Value Objects (42 testes)
+#### Value Objects (58 testes)
 - **Email** (9 testes)
   - Validação de formato
   - Normalização (lowercase + trim)
@@ -23,14 +23,22 @@
   - Hash bcrypt (10 salt rounds)
   - Método comparePassword
   
+- **PhoneNumber** (16 testes) 🆕
+  - Validação de formato brasileiro E.164 (+5511987654321)
+  - Suporte a fixo (10 dígitos) e celular (11 dígitos)
+  - Normalização automática
+  - Método getFormatted() para exibição
+  
 - **UserRole** (15 testes)
   - Enum: ADMIN, ENTREPRENEUR, INVESTOR
   - Case-insensitive
   - Métodos helper: isAdmin(), isEntrepreneur(), isInvestor()
 
-#### Entities (12 testes)
+#### Entities (13 testes)
 - **User** (Aggregate Root)
-  - Composição de VOs (Email, Password, UserRole)
+  - Composição de VOs (Email, Password, PhoneNumber, UserRole)
+  - PhoneNumber obrigatório 🆕
+  - Role opcional com padrão ENTREPRENEUR 🆕
   - Métodos: activate(), deactivate(), updatePassword()
   - Validação de nome (min 2 chars)
 
@@ -45,9 +53,10 @@
 
 #### Use Cases (10 testes)
 - **SignUpUseCase** (6 testes)
-  - Valida email/password/role/name
+  - Valida email/password/phoneNumber/name 🆕
+  - Role removido dos parâmetros (padrão ENTREPRENEUR) 🆕
   - Verifica se email já existe
-  - Cria entidade User
+  - Cria entidade User com phoneNumber 🆕
   - Salva no repositório
   - Gera JWT token
   
@@ -56,11 +65,12 @@
   - Verifica se está ativo
   - Compara senha
   - Gera JWT token
+  - Retorna phoneNumber na resposta 🆕
 
 #### DTOs
-- SignUpDTO
-- SignInDTO
-- AuthResponseDTO (com isActive e createdAt)
+- SignUpDTO (email, password, name, phoneNumber) 🆕
+- SignInDTO (email, password)
+- AuthResponseDTO (com phoneNumber no user object) 🆕
 
 #### Ports (Interfaces)
 - IUserRepository
@@ -70,14 +80,16 @@
 
 ### 3. Infrastructure Layer (Implementações Técnicas)
 
-#### Persistence (5 testes)
+#### Persistence (8 testes)
 - **UserSchema** (TypeORM Entity)
   - Tabela `users`
-  - Colunas: id, email, password, name, role, isActive, createdAt, updatedAt
+  - Colunas: id, email, password, name, phoneNumber, role, isActive, createdAt, updatedAt 🆕
   
-- **UserMapper** (3 testes)
-  - toDomain(): UserSchema → User Entity
-  - toPersistence(): User Entity → UserSchema
+- **UserMapper** (6 testes) 🆕
+  - toDomain(): UserSchema → User Entity (com phoneNumber)
+  - toPersistence(): User Entity → UserSchema (com phoneNumber)
+  - Validação de phoneNumber no mapeamento
+  - Teste de phoneNumber inválido
   - Validação de dados
   
 - **UserRepository**
@@ -92,15 +104,15 @@
 
 #### HTTP Layer
 - **AuthController**
-  - POST /auth/sign-up
+  - POST /auth/sign-up (com phoneNumber obrigatório) 🆕
   - POST /auth/sign-in
   - Validação automática (ValidationPipe)
   - Tratamento de erros
   
 - **ViewModels**
-  - SignUpViewModel (com decorators class-validator)
+  - SignUpViewModel (phoneNumber obrigatório, role removido) 🆕
   - SignInViewModel
-  - AuthResponseViewModel
+  - AuthResponseViewModel (com phoneNumber) 🆕
 
 ---
 
@@ -138,7 +150,7 @@
 
 ### Domain-Driven Design (DDD)
 ✅ Aggregate Root (User)  
-✅ Value Objects (Email, Password, UserRole)  
+✅ Value Objects (Email, Password, PhoneNumber, UserRole) 🆕  
 ✅ Domain Events (UserCreatedEvent)  
 ✅ Repository Pattern (IUserRepository)  
 
@@ -335,6 +347,73 @@ backend/
 - [x] authentication-plan.md
 - [x] getting-started.md (TDD guide)
 - [x] oauth-reference.md
+
+---
+
+## 📱 API Endpoints
+
+### POST /auth/sign-up
+Cadastro de novo usuário com validação completa.
+
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "password": "StrongPass123!",
+  "name": "John Doe",
+  "phoneNumber": "+5511987654321"
+}
+```
+
+**Response (201):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "phoneNumber": "+5511987654321",
+    "role": "ENTREPRENEUR",
+    "isActive": true,
+    "createdAt": "2025-12-05T18:00:00.000Z"
+  }
+}
+```
+
+**Validações:**
+- Email: formato válido, único
+- Senha: min 8 chars, uppercase, lowercase, número, especial
+- Telefone: E.164 brasileiro (+55XXXXXXXXXXX), 10-11 dígitos
+- Nome: min 2 caracteres
+- Role: sempre ENTREPRENEUR (não enviado no request)
+
+### POST /auth/sign-in
+Login de usuário existente.
+
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "password": "StrongPass123!"
+}
+```
+
+**Response (200):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "phoneNumber": "+5511987654321",
+    "role": "ENTREPRENEUR",
+    "isActive": true,
+    "createdAt": "2025-12-05T18:00:00.000Z"
+  }
+}
+```
 
 ---
 

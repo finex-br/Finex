@@ -4,7 +4,7 @@ import { IUserRepository } from '../../domain/ports/user-repository.interface';
 import { ITokenService } from '../../domain/ports/token-service.interface';
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
-import { UserRole } from '../../domain/value-objects/user-role';
+import { PhoneNumber } from '../../domain/value-objects/phone-number';
 import { User } from '../../domain/entities/user';
 import { SignUpDTO } from '../dtos/sign-up.dto';
 import { AuthResponseDTO } from '../dtos/auth-response.dto';
@@ -34,18 +34,18 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
       return Result.fail<AuthResponseDTO>(passwordOrError.error!);
     }
 
-    // Validate role
-    const roleOrError = UserRole.create(request.role);
-    if (roleOrError.isFailure) {
-      return Result.fail<AuthResponseDTO>(roleOrError.error!);
+    // Validate phoneNumber
+    const phoneNumberOrError = PhoneNumber.create(request.phoneNumber);
+    if (phoneNumberOrError.isFailure) {
+      return Result.fail<AuthResponseDTO>(phoneNumberOrError.error!);
     }
 
-    // Create user
+    // Create user (role will default to ENTREPRENEUR)
     const userOrError = User.create({
       email: emailOrError.getValue(),
       password: passwordOrError.getValue(),
       name: request.name,
-      role: roleOrError.getValue(),
+      phoneNumber: phoneNumberOrError.getValue(),
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -74,6 +74,7 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
         id: user.id.toString(),
         email: user.email.value,
         name: user.name,
+        phoneNumber: user.phoneNumber.value,
         role: user.role.value,
         isActive: user.isActive,
         createdAt: user.createdAt,

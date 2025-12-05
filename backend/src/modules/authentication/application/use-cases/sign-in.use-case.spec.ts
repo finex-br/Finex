@@ -4,6 +4,7 @@ import { ITokenService } from '../../domain/ports/token-service.interface';
 import { User } from '../../domain/entities/user';
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
+import { PhoneNumber } from '../../domain/value-objects/phone-number';
 import { UserRole } from '../../domain/value-objects/user-role';
 
 describe('SignInUseCase', () => {
@@ -33,12 +34,14 @@ describe('SignInUseCase', () => {
     // Arrange
     const email = Email.create('user@example.com').getValue();
     const password = (await Password.create('StrongPass123!')).getValue();
+    const phoneNumber = PhoneNumber.create('+5511987654321').getValue();
     const role = UserRole.create('ENTREPRENEUR').getValue();
     
     const user = User.create({
       email,
       password,
       name: 'John Doe',
+      phoneNumber,
       role,
       isActive: true,
       createdAt: new Date(),
@@ -88,12 +91,14 @@ describe('SignInUseCase', () => {
     // Arrange
     const email = Email.create('user@example.com').getValue();
     const password = (await Password.create('StrongPass123!')).getValue();
+    const phoneNumber = PhoneNumber.create('+5511987654321').getValue();
     const role = UserRole.create('ENTREPRENEUR').getValue();
     
     const user = User.create({
       email,
       password,
       name: 'John Doe',
+      phoneNumber,
       role,
       isActive: true,
       createdAt: new Date(),
@@ -120,12 +125,14 @@ describe('SignInUseCase', () => {
     // Arrange
     const email = Email.create('user@example.com').getValue();
     const password = (await Password.create('StrongPass123!')).getValue();
+    const phoneNumber = PhoneNumber.create('+5511987654321').getValue();
     const role = UserRole.create('ENTREPRENEUR').getValue();
     
     const user = User.create({
       email,
       password,
       name: 'John Doe',
+      phoneNumber,
       role,
       isActive: false,
       createdAt: new Date(),

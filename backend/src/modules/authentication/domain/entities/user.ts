@@ -3,13 +3,15 @@ import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 import { Result } from '../../../../shared/core/result';
 import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';
-import { UserRole } from '../value-objects/user-role';
+import { UserRole, UserRoleEnum } from '../value-objects/user-role';
+import { PhoneNumber } from '../value-objects/phone-number';
 
 interface UserProps {
   email: Email;
   password: Password;
   name: string;
-  role: UserRole;
+  phoneNumber: PhoneNumber;
+  role?: UserRole;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -36,8 +38,13 @@ export class User extends Entity<UserProps> {
     return this.props.name;
   }
 
+  get phoneNumber(): PhoneNumber {
+    return this.props.phoneNumber;
+  }
+
   get role(): UserRole {
-    return this.props.role;
+    // Role is always defined after creation due to default in create method
+    return this.props.role!;
   }
 
   get isActive(): boolean {
@@ -77,10 +84,19 @@ export class User extends Entity<UserProps> {
       return Result.fail<User>('User name must have at least 2 characters');
     }
 
+    // Validate phoneNumber
+    if (!props.phoneNumber) {
+      return Result.fail<User>('User phoneNumber is required');
+    }
+
+    // Default role to ENTREPRENEUR
+    const defaultRole = props.role || UserRole.create(UserRoleEnum.ENTREPRENEUR).getValue();
+
     // Create user with defaults
     const user = new User(
       {
         ...props,
+        role: defaultRole,
         isActive: props.isActive ?? true,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? new Date(),

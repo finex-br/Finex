@@ -1,5 +1,4 @@
-import { IsEmail, IsString, MinLength, IsEnum, IsNotEmpty } from 'class-validator';
-import { UserRoleEnum } from '../../../domain/value-objects/user-role';
+import { IsEmail, IsString, MinLength, IsNotEmpty } from 'class-validator';
 
 export class SignUpViewModel {
   @IsEmail({}, { message: 'Email inválido' })
@@ -16,7 +15,7 @@ export class SignUpViewModel {
   @IsNotEmpty({ message: 'Nome é obrigatório' })
   name: string;
 
-  @IsEnum(UserRoleEnum, { message: 'Tipo de usuário inválido' })
-  @IsNotEmpty({ message: 'Tipo de usuário é obrigatório' })
-  role: UserRoleEnum;
+  @IsString({ message: 'Telefone deve ser uma string' })
+  @IsNotEmpty({ message: 'Telefone é obrigatório' })
+  phoneNumber: string;
 }
