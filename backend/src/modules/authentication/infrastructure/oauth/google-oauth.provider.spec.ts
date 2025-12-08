@@ -1,0 +1,107 @@
+import { GoogleOAuthProvider } from './google-oauth.provider';
+import { SocialProfileDto } from '../../application/dtos/social-profile.dto';
+
+describe('GoogleOAuthProvider', () => {
+  let provider: GoogleOAuthProvider;
+  let mockHttpClient: any;
+
+  beforeEach(() => {
+    mockHttpClient = {
+      post: jest.fn(),
+      get: jest.fn(),
+    };
+
+    provider = new GoogleOAuthProvider(
+      mockHttpClient,
+      'test-client-id',
+      'test-client-secret',
+    );
+  });
+
+  describe('getProvider', () => {
+    it('should return GOOGLE', () => {
+      expect(provider.getProvider()).toBe('GOOGLE');
+    });
+  });
+
+  describe('exchangeCodeForProfile', () => {
+    it('should exchange code for user profile', async () => {
+      const mockTokenResponse = {
+        data: {
+          access_token: 'test-access-token',
+          token_type: 'Bearer',
+          expires_in: 3600,
+        },
+      };
+
+      const mockProfileResponse = {
+        data: {
+          id: 'google123',
+          email: 'user@gmail.com',
+          name: 'John Doe',
+          picture: 'https://example.com/avatar.jpg',
+        },
+      };
+
+      mockHttpClient.post.mockResolvedValue(mockTokenResponse);
+      mockHttpClient.get.mockResolvedValue(mockProfileResponse);
+
+      const profile = await provider.exchangeCodeForProfile(
+        'auth-code-123',
+        'https://example.com/callback',
+      );
+
+      expect(profile.id).toBe('google123');
+      expect(profile.email).toBe('user@gmail.com');
+      expect(profile.displayName).toBe('John Doe');
+      expect(profile.avatarUrl).toBe('https://example.com/avatar.jpg');
+      expect(profile.provider).toBe('GOOGLE');
+    });
+
+    it('should handle profile without picture', async () => {
+      const mockTokenResponse = {
+        data: {
+          access_token: 'test-access-token',
+        },
+      };
+
+      const mockProfileResponse = {
+        data: {
+          id: 'google456',
+          email: 'user2@gmail.com',
+          name: 'Jane Doe',
+        },
+      };
+
+      mockHttpClient.post.mockResolvedValue(mockTokenResponse);
+      mockHttpClient.get.mockResolvedValue(mockProfileResponse);
+
+      const profile = await provider.exchangeCodeForProfile('auth-code-456');
+
+      expect(profile.avatarUrl).toBeUndefined();
+    });
+
+    it('should throw error when token exchange fails', async () => {
+      mockHttpClient.post.mockRejectedValue(new Error('Token exchange failed'));
+
+      await expect(
+        provider.exchangeCodeForProfile('invalid-code'),
+      ).rejects.toThrow('Token exchange failed');
+    });
+
+    it('should throw error when profile fetch fails', async () => {
+      const mockTokenResponse = {
+        data: {
+          access_token: 'test-access-token',
+        },
+      };
+
+      mockHttpClient.post.mockResolvedValue(mockTokenResponse);
+      mockHttpClient.get.mockRejectedValue(new Error('Profile fetch failed'));
+
+      await expect(
+        provider.exchangeCodeForProfile('auth-code'),
+      ).rejects.toThrow('Profile fetch failed');
+    });
+  });
+});

@@ -1,0 +1,108 @@
+import { SocialProvider } from './social-provider';
+
+describe('SocialProvider Value Object', () => {
+  describe('create', () => {
+    it('should create a valid GOOGLE provider', () => {
+      const providerOrError = SocialProvider.create('GOOGLE');
+      
+      expect(providerOrError.isSuccess).toBe(true);
+      expect(providerOrError.getValue().value).toBe('GOOGLE');
+    });
+
+    it('should create a valid GITHUB provider', () => {
+      const providerOrError = SocialProvider.create('GITHUB');
+      
+      expect(providerOrError.isSuccess).toBe(true);
+      expect(providerOrError.getValue().value).toBe('GITHUB');
+    });
+
+    it('should create a valid APPLE provider', () => {
+      const providerOrError = SocialProvider.create('APPLE');
+      
+      expect(providerOrError.isSuccess).toBe(true);
+      expect(providerOrError.getValue().value).toBe('APPLE');
+    });
+
+    it('should create a valid FACEBOOK provider', () => {
+      const providerOrError = SocialProvider.create('FACEBOOK');
+      
+      expect(providerOrError.isSuccess).toBe(true);
+      expect(providerOrError.getValue().value).toBe('FACEBOOK');
+    });
+
+    it('should be case-insensitive for GOOGLE', () => {
+      const providerOrError = SocialProvider.create('google');
+      
+      expect(providerOrError.isSuccess).toBe(true);
+      expect(providerOrError.getValue().value).toBe('GOOGLE');
+    });
+
+    it('should be case-insensitive for mixed case', () => {
+      const providerOrError = SocialProvider.create('GiThUb');
+      
+      expect(providerOrError.isSuccess).toBe(true);
+      expect(providerOrError.getValue().value).toBe('GITHUB');
+    });
+
+    it('should fail with invalid provider', () => {
+      const providerOrError = SocialProvider.create('TWITTER');
+      
+      expect(providerOrError.isFailure).toBe(true);
+      expect(providerOrError.error).toContain('Invalid social provider');
+    });
+
+    it('should fail with empty string', () => {
+      const providerOrError = SocialProvider.create('');
+      
+      expect(providerOrError.isFailure).toBe(true);
+      expect(providerOrError.error).toContain('Social provider is required');
+    });
+
+    it('should fail with null', () => {
+      const providerOrError = SocialProvider.create(null as any);
+      
+      expect(providerOrError.isFailure).toBe(true);
+      expect(providerOrError.error).toContain('Social provider is required');
+    });
+
+    it('should fail with undefined', () => {
+      const providerOrError = SocialProvider.create(undefined as any);
+      
+      expect(providerOrError.isFailure).toBe(true);
+      expect(providerOrError.error).toContain('Social provider is required');
+    });
+
+    it('should fail with whitespace only', () => {
+      const providerOrError = SocialProvider.create('   ');
+      
+      expect(providerOrError.isFailure).toBe(true);
+      expect(providerOrError.error).toContain('Social provider is required');
+    });
+  });
+
+  describe('helper methods', () => {
+    it('should identify GOOGLE provider with isGoogle()', () => {
+      const provider = SocialProvider.create('GOOGLE').getValue();
+      
+      expect(provider.isGoogle()).toBe(true);
+      expect(provider.isGitHub()).toBe(false);
+      expect(provider.isApple()).toBe(false);
+    });
+
+    it('should identify GITHUB provider with isGitHub()', () => {
+      const provider = SocialProvider.create('GITHUB').getValue();
+      
+      expect(provider.isGoogle()).toBe(false);
+      expect(provider.isGitHub()).toBe(true);
+      expect(provider.isApple()).toBe(false);
+    });
+
+    it('should identify APPLE provider with isApple()', () => {
+      const provider = SocialProvider.create('APPLE').getValue();
+      
+      expect(provider.isGoogle()).toBe(false);
+      expect(provider.isGitHub()).toBe(false);
+      expect(provider.isApple()).toBe(true);
+    });
+  });
+});

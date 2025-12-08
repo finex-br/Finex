@@ -3,6 +3,10 @@ import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';
 import { PhoneNumber } from '../value-objects/phone-number';
 import { UserRole, UserRoleEnum } from '../value-objects/user-role';
+import { SocialAccount } from './social-account';
+import { SocialProvider } from '../value-objects/social-provider';
+import { SocialAccountId } from '../value-objects/social-account-id';
+import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 
 describe('User Entity', () => {
   describe('create', () => {
@@ -334,6 +338,228 @@ describe('User Entity', () => {
       // Assert
       expect(result.isFailure).toBe(true);
       expect(result.error).toContain('phoneNumber is required');
+    });
+  });
+
+  describe('linkSocialAccount', () => {
+    it('should link a social account successfully', async () => {
+      const email = Email.create('user@example.com').getValue();
+      const password = (await Password.create('StrongPass123!')).getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
+      const user = User.create({
+        email,
+        password,
+        name: 'John Doe',
+        phoneNumber,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).getValue();
+
+      const provider = SocialProvider.create('GOOGLE').getValue();
+      const providerId = SocialAccountId.create('google123').getValue();
+      const socialEmail = Email.create('user@gmail.com').getValue();
+      const socialAccount = SocialAccount.create({
+        userId: user.id,
+        provider,
+        providerId,
+        email: socialEmail,
+        displayName: 'John Doe',
+      }).getValue();
+
+      const result = user.linkSocialAccount(socialAccount);
+
+      expect(result.isSuccess).toBe(true);
+      expect(user.socialAccounts).toHaveLength(1);
+      expect(user.socialAccounts[0]).toBe(socialAccount);
+    });
+
+    it('should fail to link duplicate provider', async () => {
+      const email = Email.create('user@example.com').getValue();
+      const password = (await Password.create('StrongPass123!')).getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
+      const user = User.create({
+        email,
+        password,
+        name: 'John Doe',
+        phoneNumber,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).getValue();
+
+      const provider = SocialProvider.create('GOOGLE').getValue();
+      const providerId = SocialAccountId.create('google123').getValue();
+      const socialEmail = Email.create('user@gmail.com').getValue();
+      
+      const socialAccount1 = SocialAccount.create({
+        userId: user.id,
+        provider,
+        providerId,
+        email: socialEmail,
+        displayName: 'John Doe',
+      }).getValue();
+
+      const socialAccount2 = SocialAccount.create({
+        userId: user.id,
+        provider,
+        providerId: SocialAccountId.create('google456').getValue(),
+        email: socialEmail,
+        displayName: 'John Doe',
+      }).getValue();
+
+      user.linkSocialAccount(socialAccount1);
+      const result = user.linkSocialAccount(socialAccount2);
+
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('already linked');
+      expect(user.socialAccounts).toHaveLength(1);
+    });
+
+    it('should link multiple different providers', async () => {
+      const email = Email.create('user@example.com').getValue();
+      const password = (await Password.create('StrongPass123!')).getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
+      const user = User.create({
+        email,
+        password,
+        name: 'John Doe',
+        phoneNumber,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).getValue();
+
+      const googleProvider = SocialProvider.create('GOOGLE').getValue();
+      const githubProvider = SocialProvider.create('GITHUB').getValue();
+      const socialEmail = Email.create('user@example.com').getValue();
+
+      const googleAccount = SocialAccount.create({
+        userId: user.id,
+        provider: googleProvider,
+        providerId: SocialAccountId.create('google123').getValue(),
+        email: socialEmail,
+        displayName: 'John Doe',
+      }).getValue();
+
+      const githubAccount = SocialAccount.create({
+        userId: user.id,
+        provider: githubProvider,
+        providerId: SocialAccountId.create('github123').getValue(),
+        email: socialEmail,
+        displayName: 'John Doe',
+      }).getValue();
+
+      user.linkSocialAccount(googleAccount);
+      user.linkSocialAccount(githubAccount);
+
+      expect(user.socialAccounts).toHaveLength(2);
+    });
+  });
+
+  describe('unlinkSocialAccount', () => {
+    it('should unlink a social account successfully', async () => {
+      const email = Email.create('user@example.com').getValue();
+      const password = (await Password.create('StrongPass123!')).getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
+      const user = User.create({
+        email,
+        password,
+        name: 'John Doe',
+        phoneNumber,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).getValue();
+
+      const provider = SocialProvider.create('GOOGLE').getValue();
+      const providerId = SocialAccountId.create('google123').getValue();
+      const socialEmail = Email.create('user@gmail.com').getValue();
+      const socialAccount = SocialAccount.create({
+        userId: user.id,
+        provider,
+        providerId,
+        email: socialEmail,
+        displayName: 'John Doe',
+      }).getValue();
+
+      user.linkSocialAccount(socialAccount);
+      const result = user.unlinkSocialAccount(provider);
+
+      expect(result.isSuccess).toBe(true);
+      expect(user.socialAccounts).toHaveLength(0);
+    });
+
+    it('should fail to unlink non-existent provider', async () => {
+      const email = Email.create('user@example.com').getValue();
+      const password = (await Password.create('StrongPass123!')).getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
+      const user = User.create({
+        email,
+        password,
+        name: 'John Doe',
+        phoneNumber,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).getValue();
+
+      const provider = SocialProvider.create('GOOGLE').getValue();
+      const result = user.unlinkSocialAccount(provider);
+
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('not linked');
+    });
+  });
+
+  describe('hasSocialAccount', () => {
+    it('should return true when provider is linked', async () => {
+      const email = Email.create('user@example.com').getValue();
+      const password = (await Password.create('StrongPass123!')).getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
+      const user = User.create({
+        email,
+        password,
+        name: 'John Doe',
+        phoneNumber,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).getValue();
+
+      const provider = SocialProvider.create('GOOGLE').getValue();
+      const providerId = SocialAccountId.create('google123').getValue();
+      const socialEmail = Email.create('user@gmail.com').getValue();
+      const socialAccount = SocialAccount.create({
+        userId: user.id,
+        provider,
+        providerId,
+        email: socialEmail,
+        displayName: 'John Doe',
+      }).getValue();
+
+      user.linkSocialAccount(socialAccount);
+
+      expect(user.hasSocialAccount(provider)).toBe(true);
+    });
+
+    it('should return false when provider is not linked', async () => {
+      const email = Email.create('user@example.com').getValue();
+      const password = (await Password.create('StrongPass123!')).getValue();
+      const phoneNumber = PhoneNumber.create('11987654321').getValue();
+      const user = User.create({
+        email,
+        password,
+        name: 'John Doe',
+        phoneNumber,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).getValue();
+
+      const provider = SocialProvider.create('GOOGLE').getValue();
+
+      expect(user.hasSocialAccount(provider)).toBe(false);
     });
   });
 });

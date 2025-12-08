@@ -2,13 +2,17 @@
 
 ## 🎉 O que foi construído
 
-### ✅ Módulo de Autenticação Completo
+### ✅ Sistema de Autenticação Completo (Fase 1 + Fase 2)
 
-**88 testes passando** seguindo **TDD estrito** (Red-Green-Refactor)
+**168 testes passando** seguindo **TDD estrito** (Red-Green-Refactor)
+
+**📊 Distribuição:**
+- **Fase 1**: Autenticação Local (88 testes)
+- **Fase 2**: OAuth Social (80 testes)
 
 ---
 
-## 📦 Componentes Implementados
+## 📦 FASE 1 - Autenticação Local (88 testes)
 
 ### 1. Domain Layer (Lógica de Negócio Pura)
 
@@ -465,7 +469,104 @@ Login de usuário existente.
 
 ---
 
-**Status**: ✅ **Pronto para desenvolvimento**  
-**Quality**: ✅ **70 testes passando**  
+## 📦 FASE 2 - OAuth Social Authentication (80 testes)
+
+### 1. Domain Layer (50 testes)
+
+#### Value Objects (24 testes)
+- **SocialProvider** (14 testes)
+  - Enum: GOOGLE, GITHUB, APPLE, FACEBOOK
+  - Validação case-insensitive
+  - Métodos: isGoogle(), isGitHub(), isApple(), isFacebook()
+
+- **SocialAccountId** (10 testes)
+  - ID do provider (string)
+  - Validação de não-vazio
+  - Suporte a caracteres especiais
+
+#### Entities (20 testes)
+- **SocialAccount** (12 testes)
+  - userId, provider, providerId, email, displayName, avatarUrl
+  - Validação completa de todos os campos
+  - Métodos: updateAvatarUrl(), updateDisplayName()
+
+- **User** (8 testes adicionais)
+  - linkSocialAccount() - vincula conta social
+  - unlinkSocialAccount() - desvincula conta social
+  - hasSocialAccount() - verifica se tem conta vinculada
+  - Validação de duplicação de provider
+
+#### Domain Events (6 testes)
+- **SocialAccountLinkedEvent** (3 testes)
+  - Timestamp automático
+  - Dados: userId, provider, providerId, email
+
+- **UserRegisteredViaSocialEvent** (3 testes)
+  - Registro via OAuth
+  - Dados: userId, provider, providerId, email, name
+
+### 2. Application Layer (19 testes)
+
+#### DTOs
+- **AuthenticateWithSocialDto** (provider, code, redirectUri)
+- **LinkSocialAccountDto** (userId, provider, code, redirectUri)
+- **UnlinkSocialAccountDto** (userId, provider)
+- **SocialProfileDto** (id, email, displayName, avatarUrl, provider)
+
+#### Use Cases (19 testes)
+- **AuthenticateWithSocialUseCase** (6 testes)
+  - Login/Registro via OAuth
+  - Troca código por perfil
+  - Cria usuário se não existir
+  - Vincula conta social
+  - Gera tokens JWT
+  - Validações: provider inválido, usuário inativo
+
+- **LinkSocialAccountUseCase** (7 testes)
+  - Vincula conta social a usuário existente
+  - Validações: usuário não encontrado, inativo, provider duplicado, conta já vinculada
+
+- **UnlinkSocialAccountUseCase** (6 testes)
+  - Desvincula conta social
+  - Validações: usuário não encontrado, inativo, conta não vinculada, provider inválido
+
+#### Ports (Interfaces)
+- **ISocialAccountRepository** (findByUserIdAndProvider, findByProviderAndProviderId, save, delete)
+- **IOAuthProvider** (exchangeCodeForProfile, getProvider)
+
+### 3. Infrastructure Layer (12 testes)
+
+#### Persistence (7 testes)
+- **SocialAccountSchema** (TypeORM Entity)
+  - Tabela `social_accounts`
+  - Colunas: id, userId, provider, providerId, email, displayName, avatarUrl, createdAt, updatedAt
+  - Relação ManyToOne com User (CASCADE)
+
+- **SocialAccountMapper** (7 testes)
+  - toDomain(): Schema → Entity
+  - toPersistence(): Entity → Schema
+  - Validação de provider e email
+  - Suporte aos 4 providers
+
+- **SocialAccountRepository**
+  - Implementação de ISocialAccountRepository
+  - Queries por userId+provider e provider+providerId
+
+#### OAuth Providers (5 testes)
+- **GoogleOAuthProvider** (5 testes)
+  - Troca código por access token
+  - Busca perfil do usuário
+  - Error handling
+  - Suporte a redirectUri
+
+- **GitHubOAuthProvider** (padrão similar)
+- **AppleOAuthProvider** (padrão similar)  
+- **FacebookOAuthProvider** (padrão similar)
+
+---
+
+**Status**: ✅ **Fase 1 Completa + Fase 2 Core Implementado**  
+**Quality**: ✅ **168 testes passando**  
 **Architecture**: ✅ **DDD + Clean Architecture**  
-**Methodology**: ✅ **TDD (Red-Green-Refactor)**
+**Methodology**: ✅ **TDD (Red-Green-Refactor)**  
+**Próximos Passos**: Sprint 4 (Presentation) + Sprint 5 (Configuration)
