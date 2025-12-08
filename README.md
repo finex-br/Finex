@@ -4,8 +4,9 @@ Sistema completo de gestão financeira, análise de maturidade de negócios e va
 
 ## 📋 Status do Projeto
 
-### ✅ Backend (70 testes passando)
+### ✅ Backend (200 testes passando)
 - **Autenticação completa** com JWT
+- **OAuth social** (Google, GitHub, Apple, Facebook)
 - **DDD + Clean Architecture**
 - **TDD rigoroso** (Red-Green-Refactor)
 
@@ -21,14 +22,14 @@ Sistema completo de gestão financeira, análise de maturidade de negócios e va
 
 ```
 Finex/
-├── backend/               # NestJS API (70 testes ✅)
+├── backend/               # NestJS API (200 testes ✅)
 │   └── src/
 │       ├── shared/       # Core DDD classes
 │       └── modules/
 │           └── authentication/
 │               ├── domain/           # Entities, Value Objects, Events
 │               ├── application/      # Use Cases, DTOs, Ports
-│               ├── infrastructure/   # TypeORM, JWT, Repositories
+│               ├── infrastructure/   # TypeORM, JWT, Repositories, OAuth
 │               └── presentation/     # Controllers, ViewModels
 │
 ├── frontend/             # React (futuro)
