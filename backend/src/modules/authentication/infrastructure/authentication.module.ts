@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import axios from 'axios';
 import { UserSchema } from './persistence/typeorm/entities/user.schema';
 import { SocialAccountSchema } from './persistence/typeorm/schemas/social-account.schema';
 import { UserRepository } from './persistence/typeorm/repositories/user.repository';
@@ -44,10 +45,9 @@ import { EnvService } from '../../../shared/infra/env';
     {
       provide: 'GOOGLE_OAUTH_PROVIDER',
       useFactory: (envService: EnvService) => {
-        // TODO: Implement proper HTTP client
         const httpClient = {
-          post: async () => ({}),
-          get: async () => ({}),
+          post: async (url: string, data: any) => axios.post(url, data),
+          get: async (url: string, config?: any) => axios.get(url, config),
         };
         return new GoogleOAuthProvider(
           httpClient,
@@ -61,8 +61,8 @@ import { EnvService } from '../../../shared/infra/env';
       provide: 'GITHUB_OAUTH_PROVIDER',
       useFactory: (envService: EnvService) => {
         const httpClient = {
-          post: async () => ({}),
-          get: async () => ({}),
+          post: async (url: string, data: any) => axios.post(url, data),
+          get: async (url: string, config?: any) => axios.get(url, config),
         };
         return new GitHubOAuthProvider(
           httpClient,
@@ -76,8 +76,8 @@ import { EnvService } from '../../../shared/infra/env';
       provide: 'APPLE_OAUTH_PROVIDER',
       useFactory: (envService: EnvService) => {
         const httpClient = {
-          post: async () => ({}),
-          get: async () => ({}),
+          post: async (url: string, data: any) => axios.post(url, data),
+          get: async (url: string, config?: any) => axios.get(url, config),
         };
         return new AppleOAuthProvider(
           httpClient,
@@ -93,8 +93,8 @@ import { EnvService } from '../../../shared/infra/env';
       provide: 'FACEBOOK_OAUTH_PROVIDER',
       useFactory: (envService: EnvService) => {
         const httpClient = {
-          post: async () => ({}),
-          get: async () => ({}),
+          post: async (url: string, data: any) => axios.post(url, data),
+          get: async (url: string, config?: any) => axios.get(url, config),
         };
         return new FacebookOAuthProvider(
           httpClient,
@@ -117,11 +117,71 @@ import { EnvService } from '../../../shared/infra/env';
       provide: 'ITokenService',
       useClass: JwtTokenService,
     },
-    SignUpUseCase,
-    SignInUseCase,
-    AuthenticateWithSocialUseCase,
-    LinkSocialAccountUseCase,
-    UnlinkSocialAccountUseCase,
+    {
+      provide: SignUpUseCase,
+      useFactory: (userRepo: UserRepository, tokenService: JwtTokenService) => {
+        return new SignUpUseCase(userRepo, tokenService);
+      },
+      inject: [UserRepository, JwtTokenService],
+    },
+    {
+      provide: SignInUseCase,
+      useFactory: (userRepo: UserRepository, tokenService: JwtTokenService) => {
+        return new SignInUseCase(userRepo, tokenService);
+      },
+      inject: [UserRepository, JwtTokenService],
+    },
+    {
+      provide: AuthenticateWithSocialUseCase,
+      useFactory: (
+        userRepo: UserRepository,
+        socialAccountRepo: SocialAccountRepository,
+        googleProvider: any,
+        tokenService: JwtTokenService,
+      ) => {
+        return new AuthenticateWithSocialUseCase(
+          userRepo,
+          socialAccountRepo,
+          googleProvider,
+          tokenService,
+        );
+      },
+      inject: [
+        UserRepository,
+        SocialAccountRepository,
+        'GOOGLE_OAUTH_PROVIDER',
+        JwtTokenService,
+      ],
+    },
+    {
+      provide: LinkSocialAccountUseCase,
+      useFactory: (
+        userRepo: UserRepository,
+        socialAccountRepo: SocialAccountRepository,
+        googleProvider: any,
+      ) => {
+        return new LinkSocialAccountUseCase(
+          userRepo,
+          socialAccountRepo,
+          googleProvider,
+        );
+      },
+      inject: [
+        UserRepository,
+        SocialAccountRepository,
+        'GOOGLE_OAUTH_PROVIDER',
+      ],
+    },
+    {
+      provide: UnlinkSocialAccountUseCase,
+      useFactory: (
+        userRepo: UserRepository,
+        socialAccountRepo: SocialAccountRepository,
+      ) => {
+        return new UnlinkSocialAccountUseCase(userRepo, socialAccountRepo);
+      },
+      inject: [UserRepository, SocialAccountRepository],
+    },
   ],
   exports: [UserRepository, SocialAccountRepository, JwtTokenService],
 })
