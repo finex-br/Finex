@@ -32,7 +32,7 @@ import { EnvService } from '../../../shared/infra/env';
       useFactory: (envService: EnvService) => ({
         secret: envService.jwtSecret,
         signOptions: {
-          expiresIn: envService.jwtExpiresIn,
+          expiresIn: envService.jwtExpiresIn as any,
         },
       }),
     }),
