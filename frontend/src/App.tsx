@@ -10,6 +10,7 @@ import { LoginView } from "./views/LoginView";
 import { SignUpView } from "./views/SignUpView";
 import { UploadView } from "./views/UploadView";
 import { DashboardView } from "./views/DashboardView";
+import { GoogleCallbackView } from "./views/GoogleCallbackView";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,9 @@ const App = () => (
               
               {/* Rota Pública - Cadastro */}
               <Route path="/signup" element={<SignUpView />} />
+              
+              {/* Rota Pública - Google OAuth Callback */}
+              <Route path="/auth/google/callback" element={<GoogleCallbackView />} />
               
               {/* Rota Protegida - Upload */}
               <Route 
