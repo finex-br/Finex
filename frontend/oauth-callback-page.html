@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processando OAuth...</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .loader {
+            text-align: center;
+            color: white;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        pre {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            overflow: auto;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <h2 id="message">Processando autenticação...</h2>
+        <p id="submessage">Você será redirecionado em instantes.</p>
+        <pre id="debug"></pre>
+    </div>
+
+    <script>
+        // This page is loaded when the backend redirects after OAuth
+        // It receives the JSON response and stores it, then redirects to the main app
+        
+        const messageEl = document.getElementById('message');
+        const submessageEl = document.getElementById('submessage');
+        const debugEl = document.getElementById('debug');
+        
+        // Get the full page content
+        async function processOAuthCallback() {
+            try {
+                // The backend returns JSON, so we need to fetch it again or parse from body
+                const response = await fetch(window.location.href);
+                const data = await response.json();
+                
+                debugEl.textContent = JSON.stringify(data, null, 2);
+                debugEl.style.display = 'block';
+                
+                if (data.accessToken) {
+                    messageEl.textContent = '✅ Autenticação bem-sucedida!';
+                    submessageEl.textContent = 'Salvando dados e redirecionando...';
+                    
+                    // Store in localStorage
+                    localStorage.setItem('authToken', data.accessToken);
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        id: data.userId,
+                        email: data.email || '',
+                        isNewUser: data.isNewUser || false
+                    }));
+                    
+                    // Redirect to main page after 1 second
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 1000);
+                } else {
+                    throw new Error('No access token in response');
+                }
+            } catch (error) {
+                console.error('Error processing OAuth response:', error);
+                messageEl.textContent = '❌ Erro ao processar autenticação';
+                submessageEl.textContent = error.message;
+                
+                setTimeout(() => {
+                    window.location.href = '/index.html?error=oauth_processing_failed';
+                }, 3000);
+            }
+        }
+        
+        processOAuthCallback();
+    </script>
+</body>
+</html>

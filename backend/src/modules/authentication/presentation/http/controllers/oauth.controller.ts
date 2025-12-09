@@ -1,8 +1,10 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   Param,
+  Query,
   BadRequestException,
   Inject,
   HttpCode,
@@ -130,5 +132,41 @@ export class OAuthController {
     } catch (error) {
       throw error;
     }
+  }
+
+  /**
+   * OAuth callback endpoint (GET)
+   * Receives authorization code from OAuth provider via redirect
+   * 
+   * @param provider - OAuth provider name
+   * @param code - Authorization code from OAuth provider
+   * @param state - State parameter for CSRF protection
+   * @returns Access token and user information
+   */
+  @Get(':provider/callback')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'OAuth callback endpoint (GET)',
+    description: 'Handles OAuth redirect with authorization code in query params',
+  })
+  @ApiParam({
+    name: 'provider',
+    description: 'OAuth provider name',
+    enum: ['google', 'github', 'apple', 'facebook'],
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User authenticated successfully',
+    type: OAuthResponseDto,
+  })
+  async callbackGet(
+    @Param('provider') providerName: string,
+    @Query('code') code: string,
+    @Query('state') state?: string,
+  ): Promise<OAuthResponseDto> {
+    return this.callback(providerName, { 
+      code,
+      redirectUri: `http://localhost:3000/auth/oauth/${providerName}/callback`
+    });
   }
 }
