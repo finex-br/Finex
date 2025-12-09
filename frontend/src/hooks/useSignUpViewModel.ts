@@ -1,0 +1,190 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
+
+/**
+ * Interface para os dados do formulário de cadastro
+ */
+export interface SignUpFormData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phoneNumber: string;
+}
+
+/**
+ * Hook personalizado para gerenciar a lógica de cadastro (Sign Up)
+ * 
+ * Este hook implementa:
+ * - Gerenciamento de estado do formulário
+ * - Validação de campos
+ * - Chamada à API de cadastro
+ * - Tratamento de erros
+ * - Redirecionamento após sucesso
+ * 
+ * @returns Objeto contendo estado e funções do view model
+ */
+export const useSignUpViewModel = () => {
+  const navigate = useNavigate();
+  
+  const [formData, setFormData] = useState<SignUpFormData>({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phoneNumber: '',
+  });
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Atualiza um campo específico do formulário
+   * 
+   * @param field - Nome do campo a ser atualizado
+   * @param value - Novo valor do campo
+   */
+  const handleChange = (field: keyof SignUpFormData, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+    // Limpa o erro quando o usuário começa a digitar
+    if (error) {
+      setError(null);
+    }
+  };
+
+  /**
+   * Valida os dados do formulário
+   * 
+   * @returns true se os dados são válidos, false caso contrário
+   */
+  const validateForm = (): boolean => {
+    // Verifica se todos os campos estão preenchidos
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.password.trim() ||
+      !formData.confirmPassword.trim() ||
+      !formData.phoneNumber.trim()
+    ) {
+      setError('Todos os campos são obrigatórios');
+      return false;
+    }
+
+    // Valida nome (mínimo 2 caracteres)
+    if (formData.name.trim().length < 2) {
+      setError('Nome deve ter no mínimo 2 caracteres');
+      return false;
+    }
+
+    // Valida telefone (10 ou 11 dígitos)
+    const phoneDigits = formData.phoneNumber.replace(/\D/g, '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      setError('Telefone inválido. Use formato: (11) 98765-4321');
+      return false;
+    }
+
+    // Valida senha (mínimo 8 caracteres)
+    if (formData.password.length < 8) {
+      setError('Senha deve ter no mínimo 8 caracteres');
+      return false;
+    }
+
+    // Valida senha - Letra maiúscula
+    if (!/[A-Z]/.test(formData.password)) {
+      setError('Senha deve conter pelo menos uma letra maiúscula');
+      return false;
+    }
+
+    // Valida senha - Letra minúscula
+    if (!/[a-z]/.test(formData.password)) {
+      setError('Senha deve conter pelo menos uma letra minúscula');
+      return false;
+    }
+
+    // Valida senha - Número
+    if (!/\d/.test(formData.password)) {
+      setError('Senha deve conter pelo menos um número');
+      return false;
+    }
+
+    // Valida senha - Caractere especial
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password)) {
+      setError('Senha deve conter pelo menos um caractere especial (!@#$%...)');
+      return false;
+    }
+
+    // Verifica se as senhas coincidem
+    if (formData.password !== formData.confirmPassword) {
+      setError('As senhas não coincidem');
+      return false;
+    }
+
+    return true;
+  };
+
+  /**
+   * Submete o formulário de cadastro
+   * 
+   * Fluxo:
+   * 1. Valida os dados
+   * 2. Chama a API de cadastro
+   * 3. Salva o token no localStorage
+   * 4. Redireciona para a tela de upload (onboarding)
+   */
+  const handleSubmit = async (): Promise<void> => {
+    // Validação
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Chama a API de cadastro (sem confirmPassword)
+      const response = await authService.signUp({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phoneNumber: formData.phoneNumber,
+      });
+
+      // Salva o token no localStorage
+      localStorage.setItem('token', response.token);
+
+      // Redireciona para a tela de upload (onboarding)
+      navigate('/upload');
+    } catch (err: any) {
+      // Trata erros da API
+      console.error('Erro ao fazer cadastro:', err);
+      
+      // Extrai mensagem de erro do backend
+      let errorMessage = 'Erro ao criar conta. Tente novamente.';
+      
+      if (err.response?.data?.message) {
+        // Mensagem do backend NestJS
+        errorMessage = Array.isArray(err.response.data.message)
+          ? err.response.data.message.join(', ')
+          : err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    formData,
+    isLoading,
+    error,
+    handleChange,
+    handleSubmit,
+  };
+};

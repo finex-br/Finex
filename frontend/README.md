@@ -1,12 +1,25 @@
-# Welcome to your Lovable project
+# FinEx - Plataforma de Inteligência Financeira
 
-## Project info
+> **Transforme Dados Financeiros em Decisões Estratégicas**
 
-**URL**: https://lovable.dev/projects/1b393cc6-75fa-45b3-a37b-e5f54bc229d8
+Plataforma unificada de inteligência financeira, governança e valuation desenvolvida por Singular.
 
-## How can I edit this code?
+## 🚀 Funcionalidades Implementadas
 
-There are several ways of editing your application.
+### ✅ Módulo de Autenticação
+- Landing Page institucional (`/`)
+- Tela de Login (`/login`)
+- Área autenticada (`/upload`)
+- Sistema completo de autenticação JWT
+- Testes unitários (10/10 passando)
+
+### 🏗️ Arquitetura
+- **Padrão MVVM** (Model-View-ViewModel)
+- **TDD** (Test-Driven Development)
+- **Clean Code** e TypeScript strict
+- Componentes presentacionais
+
+## 📁 Estrutura do Projeto
 
 **Use Lovable**
 

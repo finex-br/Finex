@@ -117,8 +117,20 @@ import { EnvService } from '../../../shared/infra/env';
       provide: 'ITokenService',
       useClass: JwtTokenService,
     },
-    SignUpUseCase,
-    SignInUseCase,
+    {
+      provide: SignUpUseCase,
+      useFactory: (userRepository: UserRepository, tokenService: JwtTokenService) => {
+        return new SignUpUseCase(userRepository, tokenService);
+      },
+      inject: [UserRepository, JwtTokenService],
+    },
+    {
+      provide: SignInUseCase,
+      useFactory: (userRepository: UserRepository, tokenService: JwtTokenService) => {
+        return new SignInUseCase(userRepository, tokenService);
+      },
+      inject: [UserRepository, JwtTokenService],
+    },
     AuthenticateWithSocialUseCase,
     LinkSocialAccountUseCase,
     UnlinkSocialAccountUseCase,
