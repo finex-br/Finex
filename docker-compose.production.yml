@@ -8,19 +8,26 @@ services:
   # --- Database ---
   postgres:
     image: postgres:15-alpine
+    container_name: finex-prod-db
     environment:
-      POSTGRES_USER: ${DB_USER:-finex}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME:-finex}
+      POSTGRES_USER: finex
+      POSTGRES_PASSWORD: "SenhaForte123"    # Senha chumbada para garantir
+      POSTGRES_DB: finex
     volumes:
-      - postgres_data_prod_v4:/var/lib/postgresql/data  # Mudei para v4 (Reset de senha)
+      - postgres_data_prod_v5:/var/lib/postgresql/data  # Volume v5 (Novo banco)
     networks:
       - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finex"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
 
   # --- Cache ---
   redis:
     image: redis:alpine
+    container_name: finex-prod-redis
     command: redis-server --appendonly yes
     volumes:
       - redis_data_prod:/data
@@ -33,10 +40,12 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: finex-prod-backend
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgres://${DB_USER:-finex}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-finex}
+      # Usando a mesma senha chumbada acima
+      DATABASE_URL: postgres://finex:SenhaForte123@postgres:5432/finex
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: 7d
@@ -46,11 +55,13 @@ services:
       API_URL: ${API_URL}
       GOOGLE_CALLBACK_URL: ${API_URL}/auth/oauth/google/callback
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - default
-      - coolify   # Conecta no roteador (Resolve o 503 da API se tiver)
+      - coolify   # Conecta no roteador (Resolve o 503 da API)
     restart: always
 
   # --- Frontend ---
@@ -62,9 +73,10 @@ services:
         VITE_API_URL: ${API_URL}
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
         VITE_APP_URL: ${FRONTEND_URL}
+    container_name: finex-prod-frontend
     restart: always
     expose:
-      - "80"
+      - "80"      # Porta padrão web
     depends_on:
       - backend
     networks:
@@ -72,5 +84,5 @@ services:
       - coolify   # Conecta no roteador (Resolve o 503 do Site)
 
 volumes:
-  postgres_data_prod_v4:
+  postgres_data_prod_v5:
   redis_data_prod:
