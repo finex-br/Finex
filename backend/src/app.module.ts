@@ -1,7 +1,15 @@
-import { Module } from '@nestjs/common';
+import { Module, Controller, Get } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EnvModule, EnvService } from './shared/infra/env';
 import { AuthenticationModule } from './modules/authentication/infrastructure/authentication.module';
+
+@Controller()
+export class AppController {
+  @Get('health')
+  health() {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  }
+}
 
 @Module({
   imports: [
@@ -18,5 +26,6 @@ import { AuthenticationModule } from './modules/authentication/infrastructure/au
     }),
     AuthenticationModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

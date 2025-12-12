@@ -1,0 +1,39 @@
+# Environment files
+.env
+.env.local
+.env.production
+.env.*.local
+CREDENTIALS.txt
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+*.temp

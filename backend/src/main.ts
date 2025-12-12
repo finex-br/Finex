@@ -7,6 +7,10 @@ import { EnvService } from './shared/infra/env';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Get environment service
+  const envService = app.get(EnvService);
+  const port = envService.port;
+
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -16,8 +20,17 @@ async function bootstrap() {
     }),
   );
 
-  // Enable CORS
-  app.enableCors();
+  // Enable CORS with production configuration
+  const corsOrigins = envService.nodeEnv === 'production'
+    ? [envService.get('FRONTEND_URL'), envService.get('API_URL')]
+    : true;
+
+  app.enableCors({
+    origin: corsOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -47,10 +60,6 @@ async function bootstrap() {
       operationsSorter: 'alpha',
     },
   });
-
-  // Get environment service
-  const envService = app.get(EnvService);
-  const port = envService.port;
 
   await app.listen(port);
   console.log(`🚀 Application is running on: http://localhost:${port}`);
