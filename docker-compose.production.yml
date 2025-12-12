@@ -60,5 +60,5 @@ services:
       - backend
 
 volumes:
-  postgres_data:
+  postgres_data_prod_v3:
   redis_data:
