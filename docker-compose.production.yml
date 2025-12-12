@@ -1,39 +1,49 @@
 version: '3.8'
 
+networks:
+  coolify:
+    external: true
+
 services:
-  # 1. The Database
+  # --- Database ---
   postgres:
     image: postgres:15-alpine
+    container_name: finex-prod-db
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_USER: ${DB_USER:-finex}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME:-finex}
     volumes:
       - postgres_data_prod_v3:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-finex}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: always
 
-  # 2. Redis (Cache)
+  # --- Cache ---
   redis:
     image: redis:alpine
+    container_name: finex-prod-redis
     command: redis-server --appendonly yes
     volumes:
-      - redis_data:/data
+      - redis_data_prod:/data
+    restart: always
 
-  # 3. The Backend API
+  # --- Backend ---
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: finex-prod-backend
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgres://${DB_USER:-postgres}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-finex}
+      DATABASE_URL: postgres://${DB_USER:-finex}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-finex}
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 7d
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}
@@ -44,8 +54,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    networks:      # <--- CONEXÃO IMPORTANTE
+      - default
+      - coolify
+    restart: always
 
-  # 4. The Frontend
+  # --- Frontend ---
   frontend:
     build:
       context: ./frontend
@@ -54,7 +68,11 @@ services:
         VITE_API_URL: ${API_URL}
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
         VITE_APP_URL: ${FRONTEND_URL}
+    container_name: finex-prod-frontend
     restart: always
+    networks:      # <--- CONEXÃO IMPORTANTE
+      - default
+      - coolify
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.finex-frontend.rule=Host(`finexbr.astraflow.io`)"
@@ -63,6 +81,7 @@ services:
       - "traefik.http.services.finex-frontend.loadbalancer.server.port=80"
     depends_on:
       - backend
+
 volumes:
   postgres_data_prod_v3:
-  redis_data:
+  redis_data_prod:
