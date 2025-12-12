@@ -8,27 +8,24 @@ services:
   # --- Database ---
   postgres:
     image: postgres:15-alpine
-    container_name: finex-prod-db
     environment:
       POSTGRES_USER: ${DB_USER:-finex}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME:-finex}
     volumes:
-      - postgres_data_prod_v3:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-finex}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - postgres_data_prod_v4:/var/lib/postgresql/data  # Mudei para v4 (Reset de senha)
+    networks:
+      - default
     restart: always
 
   # --- Cache ---
   redis:
     image: redis:alpine
-    container_name: finex-prod-redis
     command: redis-server --appendonly yes
     volumes:
       - redis_data_prod:/data
+    networks:
+      - default
     restart: always
 
   # --- Backend ---
@@ -36,7 +33,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: finex-prod-backend
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -50,13 +46,11 @@ services:
       API_URL: ${API_URL}
       GOOGLE_CALLBACK_URL: ${API_URL}/auth/oauth/google/callback
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    networks:      # <--- CONEXÃO IMPORTANTE
+      - postgres
+      - redis
+    networks:
       - default
-      - coolify
+      - coolify   # Conecta no roteador (Resolve o 503 da API se tiver)
     restart: always
 
   # --- Frontend ---
@@ -68,20 +62,15 @@ services:
         VITE_API_URL: ${API_URL}
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
         VITE_APP_URL: ${FRONTEND_URL}
-    container_name: finex-prod-frontend
     restart: always
-    networks:      # <--- CONEXÃO IMPORTANTE
-      - default
-      - coolify
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.finex-frontend.rule=Host(`finexbr.astraflow.io`)"
-      - "traefik.http.routers.finex-frontend.entrypoints=websecure"
-      - "traefik.http.routers.finex-frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.finex-frontend.loadbalancer.server.port=80"
+    expose:
+      - "80"
     depends_on:
       - backend
+    networks:
+      - default
+      - coolify   # Conecta no roteador (Resolve o 503 do Site)
 
 volumes:
-  postgres_data_prod_v3:
+  postgres_data_prod_v4:
   redis_data_prod:
