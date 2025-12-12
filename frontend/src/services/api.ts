@@ -10,7 +10,8 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
  */
 
 // Configuração da BaseURL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Use /api/ para proxy reverso no Nginx, ou URL completa em desenvolvimento
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Criação da instância do Axios
 export const api = axios.create({
