@@ -11,10 +11,10 @@ services:
     container_name: finex-prod-db
     environment:
       POSTGRES_USER: finex
-      POSTGRES_PASSWORD: "SenhaForte123"    # Senha chumbada para garantir
+      POSTGRES_PASSWORD: "SenhaForte123"
       POSTGRES_DB: finex
     volumes:
-      - postgres_data_prod_v5:/var/lib/postgresql/data  # Volume v5 (Novo banco)
+      - postgres_data_prod_v6:/var/lib/postgresql/data  # <--- MUDEI PARA V6 PARA RESETAR A SENHA
     networks:
       - default
     healthcheck:
@@ -44,7 +44,6 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      # Usando a mesma senha chumbada acima
       DATABASE_URL: postgres://finex:SenhaForte123@postgres:5432/finex
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
@@ -61,7 +60,7 @@ services:
         condition: service_started
     networks:
       - default
-      - coolify   # Conecta no roteador (Resolve o 503 da API)
+      - coolify
     restart: always
 
   # --- Frontend ---
@@ -76,13 +75,16 @@ services:
     container_name: finex-prod-frontend
     restart: always
     expose:
-      - "80"      # Porta padrão web
+      - "80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80" # <--- ISSO RESOLVE O 503
     depends_on:
       - backend
     networks:
       - default
-      - coolify   # Conecta no roteador (Resolve o 503 do Site)
+      - coolify
 
 volumes:
-  postgres_data_prod_v5:
+  postgres_data_prod_v6: # <--- MUDEI AQUI TAMBÉM
   redis_data_prod:
