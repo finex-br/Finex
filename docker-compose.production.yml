@@ -57,6 +57,12 @@ services:
       - "8080"
     environment:
       - PORT=8080
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.finex-frontend.rule=Host(`finexbr.astraflow.io`)"
+      - "traefik.http.routers.finex-frontend.entrypoints=websecure"
+      - "traefik.http.routers.finex-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.finex-frontend.loadbalancer.server.port=8080"
     depends_on:
       - backend
 
