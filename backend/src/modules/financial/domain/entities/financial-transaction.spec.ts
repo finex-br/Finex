@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { FinancialTransaction } from './financial-transaction';
 import { Money } from '../value-objects/money';
 import { TransactionType } from '../value-objects/transaction-type';

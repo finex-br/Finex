@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { Category } from './category';
 
 describe('Category Value Object', () => {

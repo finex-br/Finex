@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { GetFinancialDataUseCase } from './get-financial-data.use-case';
 import { IFinancialRepository } from '../../domain/ports/financial-repository.interface';
 import {
