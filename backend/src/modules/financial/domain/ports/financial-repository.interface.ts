@@ -33,8 +33,17 @@ export interface IFinancialRepository {
 
   /**
    * Calcula agregações (SUM, AVG) para dashboard
+   * @param companyId - ID da empresa
+   * @param userId - ID do usuário
+   * @param startDate - Data inicial do filtro (opcional)
+   * @param endDate - Data final do filtro (opcional)
    */
-  calculateSummary(companyId: string): Promise<{
+  calculateSummary(
+    companyId: string,
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
     totalRevenue: number;
     totalExpense: number;
     profit: number;
@@ -42,10 +51,65 @@ export interface IFinancialRepository {
 
   /**
    * Agrupa transações por mês
+   * @param companyId - ID da empresa
+   * @param userId - ID do usuário
+   * @param startDate - Data inicial do filtro (opcional)
+   * @param endDate - Data final do filtro (opcional)
    */
-  getMonthlyData(companyId: string): Promise<Array<{
-    month: string;
-    revenue: number;
-    expense: number;
-  }>>;
+  getMonthlyData(
+    companyId: string,
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      month: string;
+      revenue: number;
+      expense: number;
+    }>
+  >;
+
+  /**
+   * Agrupa transações por categoria
+   * @param companyId - ID da empresa
+   * @param userId - ID do usuário
+   * @param startDate - Data inicial do filtro (opcional)
+   * @param endDate - Data final do filtro (opcional)
+   */
+  getCategoryData(
+    companyId: string,
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      category: string;
+      revenue: number;
+      expense: number;
+      total: number;
+    }>
+  >;
+
+  /**
+   * Retorna dados de tendência ao longo do tempo
+   * @param companyId - ID da empresa
+   * @param userId - ID do usuário
+   * @param startDate - Data inicial do filtro (opcional)
+   * @param endDate - Data final do filtro (opcional)
+   * @param granularity - Granularidade dos dados (day, week, month)
+   */
+  getTrendData(
+    companyId: string,
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+    granularity?: 'day' | 'week' | 'month',
+  ): Promise<
+    Array<{
+      date: string;
+      revenue: number;
+      expense: number;
+      profit: number;
+    }>
+  >;
 }

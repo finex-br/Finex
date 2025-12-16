@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IFinancialRepository } from '../../domain/ports/financial-repository.interface';
 import { FinancialTransaction } from '../../domain/entities/financial-transaction';
-import {
-  FinancialSummaryDTO,
-  MonthlyDataDTO,
-} from '../../application/dtos/financial.dto';
 
 /**
  * DuckDBFinancialRepository - Infrastructure Layer
@@ -26,59 +22,30 @@ export class DuckDBFinancialRepository implements IFinancialRepository {
 
   /**
    * Salva uma transação financeira
-   * 
-   * SQL Sugerido:
-   * INSERT INTO financial_transactions 
-   * (id, company_id, date, description, amount, currency, type, category, 
-   *  competence_date, payment_date, created_at, updated_at)
-   * VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
    */
   async save(transaction: FinancialTransaction): Promise<void> {
     // TODO: Implementar SQL INSERT
-    throw new Error('Not implemented');
+    throw new Error('Not implemented - DuckDB integration pending');
   }
 
   /**
    * Salva múltiplas transações em lote (bulk insert)
-   * 
-   * DuckDB é otimizado para bulk inserts.
-   * Use transações para garantir atomicidade.
-   * 
-   * SQL Sugerido:
-   * BEGIN TRANSACTION;
-   * INSERT INTO financial_transactions VALUES (...), (...), (...);
-   * COMMIT;
    */
   async saveBatch(transactions: FinancialTransaction[]): Promise<void> {
     // TODO: Implementar bulk insert
-    // Dica: DuckDB aceita arrays diretamente
-    throw new Error('Not implemented');
+    throw new Error('Not implemented - DuckDB integration pending');
   }
 
   /**
    * Busca todas as transações de uma empresa
-   * 
-   * SQL:
-   * SELECT * FROM financial_transactions 
-   * WHERE company_id = ? 
-   * ORDER BY date DESC
    */
   async findByCompanyId(companyId: string): Promise<FinancialTransaction[]> {
-    // TODO: 
-    // 1. Executar query
-    // 2. Mapear resultados para FinancialTransaction.create()
-    // 3. Retornar array de entidades
-    throw new Error('Not implemented');
+    // TODO: Implementar query
+    throw new Error('Not implemented - DuckDB integration pending');
   }
 
   /**
    * Busca transações por período
-   * 
-   * SQL:
-   * SELECT * FROM financial_transactions 
-   * WHERE company_id = ? 
-   *   AND date BETWEEN ? AND ?
-   * ORDER BY date DESC
    */
   async findByCompanyIdAndPeriod(
     companyId: string,
@@ -86,59 +53,137 @@ export class DuckDBFinancialRepository implements IFinancialRepository {
     endDate: Date,
   ): Promise<FinancialTransaction[]> {
     // TODO: Implementar query com range de datas
-    throw new Error('Not implemented');
+    throw new Error('Not implemented - DuckDB integration pending');
   }
 
   /**
    * Calcula agregações para o dashboard
-   * 
-   * SQL Sugerido (DuckDB tem funções agregadas poderosas):
-   * SELECT 
-   *   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE 0 END) as total_revenue,
-   *   SUM(CASE WHEN type = 'DESPESA' THEN amount ELSE 0 END) as total_expense,
-   *   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE -amount END) as profit
-   * FROM financial_transactions
-   * WHERE company_id = ?
+   * Com suporte a filtros de data opcionais
    */
-  async calculateSummary(companyId: string): Promise<FinancialSummaryDTO> {
-    // TODO: 
-    // 1. Executar query de agregação
-    // 2. Retornar DTO com resultados
-    throw new Error('Not implemented');
+  async calculateSummary(
+    companyId: string,
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
+    totalRevenue: number;
+    totalExpense: number;
+    profit: number;
+  }> {
+    // TODO: Implementar SQL com filtros opcionais
+    // SQL Exemplo:
+    // SELECT 
+    //   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE 0 END) as totalRevenue,
+    //   SUM(CASE WHEN type = 'DESPESA' THEN amount ELSE 0 END) as totalExpense,
+    //   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE -amount END) as profit
+    // FROM financial_transactions
+    // WHERE company_id = ? AND user_id = ?
+    //   AND (? IS NULL OR transaction_date >= ?)
+    //   AND (? IS NULL OR transaction_date <= ?)
+    throw new Error('Not implemented - DuckDB integration pending');
   }
 
   /**
    * Agrupa transações por mês
-   * 
-   * SQL Sugerido (DuckDB tem funções de data):
-   * SELECT 
-   *   strftime(competence_date, '%b/%Y') as month,
-   *   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE 0 END) as revenue,
-   *   SUM(CASE WHEN type = 'DESPESA' THEN amount ELSE 0 END) as expense
-   * FROM financial_transactions
-   * WHERE company_id = ?
-   * GROUP BY strftime(competence_date, '%b/%Y')
-   * ORDER BY competence_date
+   * Com suporte a filtros de data opcionais
    */
-  async getMonthlyData(companyId: string): Promise<MonthlyDataDTO[]> {
-    // TODO: 
-    // 1. Executar query com GROUP BY
-    // 2. Formatar mês em português ("Jan/2024")
-    // 3. Retornar array de DTOs
-    throw new Error('Not implemented');
+  async getMonthlyData(
+    companyId: string,
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      month: string;
+      revenue: number;
+      expense: number;
+    }>
+  > {
+    // TODO: Implementar SQL com GROUP BY
+    // SQL Exemplo:
+    // SELECT 
+    //   strftime('%Y-%m', transaction_date) as month,
+    //   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE 0 END) as revenue,
+    //   SUM(CASE WHEN type = 'DESPESA' THEN amount ELSE 0 END) as expense
+    // FROM financial_transactions
+    // WHERE company_id = ? AND user_id = ?
+    //   AND (? IS NULL OR transaction_date >= ?)
+    //   AND (? IS NULL OR transaction_date <= ?)
+    // GROUP BY month
+    // ORDER BY month ASC
+    throw new Error('Not implemented - DuckDB integration pending');
   }
 
   /**
-   * Helper: Converte row do DuckDB para FinancialTransaction entity
-   * 
-   * @param row - Resultado da query DuckDB
-   * @returns FinancialTransaction ou null se inválido
+   * Agrupa transações por categoria
+   * Com suporte a filtros de data opcionais
    */
-  private mapRowToEntity(row: any): FinancialTransaction | null {
-    // TODO: 
-    // 1. Criar Value Objects (Money, TransactionType, Category)
-    // 2. Chamar FinancialTransaction.create()
-    // 3. Retornar entidade
-    throw new Error('Not implemented');
+  async getCategoryData(
+    companyId: string,
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      category: string;
+      revenue: number;
+      expense: number;
+      total: number;
+    }>
+  > {
+    // TODO: Implementar SQL com GROUP BY categoria
+    // SQL Exemplo:
+    // SELECT 
+    //   category,
+    //   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE 0 END) as revenue,
+    //   SUM(CASE WHEN type = 'DESPESA' THEN amount ELSE 0 END) as expense,
+    //   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE -amount END) as total
+    // FROM financial_transactions
+    // WHERE company_id = ? AND user_id = ?
+    //   AND (? IS NULL OR transaction_date >= ?)
+    //   AND (? IS NULL OR transaction_date <= ?)
+    // GROUP BY category
+    // ORDER BY total DESC
+    throw new Error('Not implemented - DuckDB integration pending');
+  }
+
+  /**
+   * Retorna dados de tendência com granularidade configurável
+   * Com suporte a filtros de data opcionais
+   */
+  async getTrendData(
+    companyId: string,
+    userId: string,
+    startDate?: Date,
+    endDate?: Date,
+    granularity: 'day' | 'week' | 'month' = 'day',
+  ): Promise<
+    Array<{
+      date: string;
+      revenue: number;
+      expense: number;
+      profit: number;
+    }>
+  > {
+    // TODO: Implementar SQL com granularidade dinâmica
+    // SQL Exemplo (granularidade dinâmica):
+    // const dateFormat = {
+    //   day: '%Y-%m-%d',
+    //   week: '%Y-W%W',
+    //   month: '%Y-%m',
+    // }[granularity];
+    // 
+    // SELECT 
+    //   strftime('${dateFormat}', transaction_date) as date,
+    //   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE 0 END) as revenue,
+    //   SUM(CASE WHEN type = 'DESPESA' THEN amount ELSE 0 END) as expense,
+    //   SUM(CASE WHEN type = 'RECEITA' THEN amount ELSE -amount END) as profit
+    // FROM financial_transactions
+    // WHERE company_id = ? AND user_id = ?
+    //   AND (? IS NULL OR transaction_date >= ?)
+    //   AND (? IS NULL OR transaction_date <= ?)
+    // GROUP BY date
+    // ORDER BY date ASC
+    throw new Error('Not implemented - DuckDB integration pending');
   }
 }

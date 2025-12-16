@@ -4,6 +4,7 @@ import request from 'supertest';
 import { FinancialController } from './financial.controller';
 import { ProcessExcelUseCase } from '../../application/use-cases/process-excel.use-case';
 import { GetFinancialDataUseCase } from '../../application/use-cases/get-financial-data.use-case';
+import { PeriodType } from '../../application/dtos/financial.dto';
 
 describe('FinancialController (e2e)', () => {
   let app: INestApplication;
@@ -60,6 +61,24 @@ describe('FinancialController (e2e)', () => {
 
   afterEach(async () => {
     await app.close();
+  });
+
+  // Helper para criar mock de resposta válido
+  const createMockFinancialDataResponse = (overrides = {}) => ({
+    summary: {
+      totalRevenue: 1000,
+      totalExpense: 500,
+      profit: 500,
+    },
+    monthlyData: [],
+    categoryData: [],
+    trendData: [],
+    period: {
+      type: PeriodType.YEAR,
+      startDate: '2023-01-01',
+      endDate: '2024-01-01',
+    },
+    ...overrides,
   });
 
   describe('POST /financial/upload', () => {
@@ -184,7 +203,7 @@ describe('FinancialController (e2e)', () => {
 
   describe('GET /financial/data', () => {
     it('deve buscar dados financeiros com sucesso', async () => {
-      const mockResponse = {
+      const mockResponse = createMockFinancialDataResponse({
         summary: {
           totalRevenue: 10000,
           totalExpense: 5000,
@@ -194,7 +213,7 @@ describe('FinancialController (e2e)', () => {
           { month: 'Jan/2024', revenue: 5000, expense: 2500 },
           { month: 'Fev/2024', revenue: 5000, expense: 2500 },
         ],
-      };
+      });
 
       getFinancialDataUseCase.execute.mockResolvedValue(mockResponse);
 
@@ -210,14 +229,13 @@ describe('FinancialController (e2e)', () => {
     });
 
     it('deve usar companyId do JWT (user.currentCompanyId)', async () => {
-      const mockResponse = {
+      const mockResponse = createMockFinancialDataResponse({
         summary: {
           totalRevenue: 0,
           totalExpense: 0,
           profit: 0,
         },
-        monthlyData: [],
-      };
+      });
 
       getFinancialDataUseCase.execute.mockResolvedValue(mockResponse);
 
@@ -245,14 +263,13 @@ describe('FinancialController (e2e)', () => {
     });
 
     it('deve retornar dados vazios se não houver transações', async () => {
-      const mockResponse = {
+      const mockResponse = createMockFinancialDataResponse({
         summary: {
           totalRevenue: 0,
           totalExpense: 0,
           profit: 0,
         },
-        monthlyData: [],
-      };
+      });
 
       getFinancialDataUseCase.execute.mockResolvedValue(mockResponse);
 
@@ -267,7 +284,7 @@ describe('FinancialController (e2e)', () => {
     });
 
     it('deve retornar dados com múltiplos meses', async () => {
-      const mockResponse = {
+      const mockResponse = createMockFinancialDataResponse({
         summary: {
           totalRevenue: 60000,
           totalExpense: 36000,
@@ -278,7 +295,7 @@ describe('FinancialController (e2e)', () => {
           revenue: 5000,
           expense: 3000,
         })),
-      };
+      });
 
       getFinancialDataUseCase.execute.mockResolvedValue(mockResponse);
 
@@ -293,14 +310,7 @@ describe('FinancialController (e2e)', () => {
 
   describe('Autenticação JWT', () => {
     it('deve funcionar sem autenticação (usando defaults)', async () => {
-      const mockResponse = {
-        summary: {
-          totalRevenue: 1000,
-          totalExpense: 500,
-          profit: 500,
-        },
-        monthlyData: [],
-      };
+      const mockResponse = createMockFinancialDataResponse();
 
       getFinancialDataUseCase.execute.mockResolvedValue(mockResponse);
 
@@ -312,14 +322,7 @@ describe('FinancialController (e2e)', () => {
     });
 
     it('deve permitir requisições com valores padrão', async () => {
-      const mockResponse = {
-        summary: {
-          totalRevenue: 1000,
-          totalExpense: 500,
-          profit: 500,
-        },
-        monthlyData: [],
-      };
+      const mockResponse = createMockFinancialDataResponse();
 
       getFinancialDataUseCase.execute.mockResolvedValue(mockResponse);
 
@@ -328,6 +331,187 @@ describe('FinancialController (e2e)', () => {
         .expect(200);
 
       expect(getFinancialDataUseCase.execute).toHaveBeenCalled();
+    });
+
+    describe('com filtros de período (query params)', () => {
+      const mockBaseResponse = createMockFinancialDataResponse({
+        summary: {
+          totalRevenue: 5000,
+          totalExpense: 3000,
+          profit: 2000,
+        },
+      });
+
+      it('GET /data?period=WEEK deve funcionar', async () => {
+        getFinancialDataUseCase.execute.mockResolvedValue({
+          ...mockBaseResponse,
+          period: { type: PeriodType.WEEK, startDate: '2024-01-01', endDate: '2024-01-07' },
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/financial/data?period=WEEK')
+          .expect(200);
+
+        expect(response.body.period.type).toBe('WEEK');
+        expect(getFinancialDataUseCase.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            periodFilter: {
+              type: PeriodType.WEEK,
+              startDate: undefined,
+              endDate: undefined,
+            },
+          }),
+        );
+      });
+
+      it('GET /data?period=MONTH deve funcionar', async () => {
+        getFinancialDataUseCase.execute.mockResolvedValue({
+          ...mockBaseResponse,
+          period: { type: PeriodType.MONTH, startDate: '2023-12-01', endDate: '2024-01-01' },
+        });
+
+        await request(app.getHttpServer())
+          .get('/financial/data?period=MONTH')
+          .expect(200);
+
+        expect(getFinancialDataUseCase.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            periodFilter: {
+              type: PeriodType.MONTH,
+              startDate: undefined,
+              endDate: undefined,
+            },
+          }),
+        );
+      });
+
+      it('GET /data?period=QUARTER deve funcionar', async () => {
+        getFinancialDataUseCase.execute.mockResolvedValue({
+          ...mockBaseResponse,
+          period: { type: PeriodType.QUARTER, startDate: '2023-10-01', endDate: '2024-01-01' },
+        });
+
+        await request(app.getHttpServer())
+          .get('/financial/data?period=QUARTER')
+          .expect(200);
+      });
+
+      it('GET /data?period=SEMESTER deve funcionar', async () => {
+        getFinancialDataUseCase.execute.mockResolvedValue({
+          ...mockBaseResponse,
+          period: { type: PeriodType.SEMESTER, startDate: '2023-07-01', endDate: '2024-01-01' },
+        });
+
+        await request(app.getHttpServer())
+          .get('/financial/data?period=SEMESTER')
+          .expect(200);
+      });
+
+      it('GET /data?period=YEAR deve funcionar', async () => {
+        getFinancialDataUseCase.execute.mockResolvedValue(mockBaseResponse);
+
+        await request(app.getHttpServer())
+          .get('/financial/data?period=YEAR')
+          .expect(200);
+      });
+
+      it('GET /data?period=CUSTOM&startDate=...&endDate=... deve funcionar', async () => {
+        getFinancialDataUseCase.execute.mockResolvedValue({
+          ...mockBaseResponse,
+          period: { type: PeriodType.CUSTOM, startDate: '2024-01-01', endDate: '2024-12-31' },
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/financial/data?period=CUSTOM&startDate=2024-01-01&endDate=2024-12-31')
+          .expect(200);
+
+        expect(response.body.period.type).toBe('CUSTOM');
+        expect(getFinancialDataUseCase.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            periodFilter: {
+              type: PeriodType.CUSTOM,
+              startDate: '2024-01-01',
+              endDate: '2024-12-31',
+            },
+          }),
+        );
+      });
+
+      it('GET /data?period=CUSTOM sem startDate deve retornar 400', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/financial/data?period=CUSTOM&endDate=2024-12-31')
+          .expect(400);
+
+        expect(response.body.message).toContain('Período CUSTOM requer startDate e endDate');
+        expect(getFinancialDataUseCase.execute).not.toHaveBeenCalled();
+      });
+
+      it('GET /data?period=CUSTOM sem endDate deve retornar 400', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/financial/data?period=CUSTOM&startDate=2024-01-01')
+          .expect(400);
+
+        expect(response.body.message).toContain('Período CUSTOM requer startDate e endDate');
+        expect(getFinancialDataUseCase.execute).not.toHaveBeenCalled();
+      });
+
+      it('GET /data?period=INVALID deve retornar 400', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/financial/data?period=INVALID')
+          .expect(400);
+
+        expect(response.body.message).toContain('Período inválido');
+        expect(getFinancialDataUseCase.execute).not.toHaveBeenCalled();
+      });
+
+      it('deve retornar categoryData no response', async () => {
+        getFinancialDataUseCase.execute.mockResolvedValue({
+          ...mockBaseResponse,
+          categoryData: [
+            { category: 'Vendas', revenue: 5000, expense: 0, total: 5000 },
+            { category: 'Despesas', revenue: 0, expense: 3000, total: -3000 },
+          ],
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/financial/data')
+          .expect(200);
+
+        expect(response.body.categoryData).toBeDefined();
+        expect(response.body.categoryData).toHaveLength(2);
+        expect(response.body.categoryData[0].category).toBe('Vendas');
+      });
+
+      it('deve retornar trendData no response', async () => {
+        getFinancialDataUseCase.execute.mockResolvedValue({
+          ...mockBaseResponse,
+          trendData: [
+            { date: '2024-01-01', revenue: 1000, expense: 500, profit: 500 },
+            { date: '2024-01-02', revenue: 1500, expense: 800, profit: 700 },
+          ],
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/financial/data')
+          .expect(200);
+
+        expect(response.body.trendData).toBeDefined();
+        expect(response.body.trendData).toHaveLength(2);
+        expect(response.body.trendData[0].date).toBe('2024-01-01');
+      });
+
+      it('deve retornar metadados de período no response', async () => {
+        getFinancialDataUseCase.execute.mockResolvedValue(mockBaseResponse);
+
+        const response = await request(app.getHttpServer())
+          .get('/financial/data?period=MONTH')
+          .expect(200);
+
+        expect(response.body.period).toBeDefined();
+        expect(response.body.period.type).toBeDefined();
+        expect(response.body.period.startDate).toBeDefined();
+        expect(response.body.period.endDate).toBeDefined();
+      });
     });
   });
 });
