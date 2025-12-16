@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { FinancialProvider } from "./context/FinancialContext";
 import { LandingView } from "./views/LandingView";
 import { LoginView } from "./views/LoginView";
 import { SignUpView } from "./views/SignUpView";
@@ -41,50 +40,48 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
-      <FinancialProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Rota Pública - Landing Page */}
-              <Route path="/" element={<LandingView />} />
-              
-              {/* Rota Pública - Login */}
-              <Route path="/login" element={<LoginView />} />
-              
-              {/* Rota Pública - Cadastro */}
-              <Route path="/signup" element={<SignUpView />} />
-              
-              {/* Rota Pública - Google OAuth Callback */}
-              <Route path="/auth/google/callback" element={<GoogleCallbackView />} />
-              
-              {/* Rota Protegida - Upload */}
-              <Route 
-                path="/upload" 
-                element={
-                  <ProtectedRoute>
-                    <UploadView />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Rota Protegida - Dashboard */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardView />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Catch-all - Redireciona para a home */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </FinancialProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Rota Pública - Landing Page */}
+            <Route path="/" element={<LandingView />} />
+            
+            {/* Rota Pública - Login */}
+            <Route path="/login" element={<LoginView />} />
+            
+            {/* Rota Pública - Cadastro */}
+            <Route path="/signup" element={<SignUpView />} />
+            
+            {/* Rota Pública - Google OAuth Callback */}
+            <Route path="/auth/google/callback" element={<GoogleCallbackView />} />
+            
+            {/* Rota Protegida - Upload */}
+            <Route 
+              path="/upload" 
+              element={
+                <ProtectedRoute>
+                  <UploadView />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Rota Protegida - Dashboard */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <DashboardView />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Catch-all - Redireciona para a home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
 );

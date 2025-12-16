@@ -1,21 +1,39 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Upload, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useFinancialContext } from '@/context/FinancialContext';
+import { useFinancialData } from '@/hooks/useFinancialData';
+import { useAuthStore } from '@/store/authStore';
 
 /**
- * DashboardView - Painel de controle financeiro
+ * DashboardView - Componente Presentacional (Dumb Component)
  * 
- * Exibe:
- * - KPIs (Receita Total, Despesas Totais, Lucro)
- * - Gráfico de barras comparativo (Receita vs Despesas por mês)
- * - Estado vazio com botão para importar planilha
+ * Responsabilidades:
+ * - Renderizar KPIs e gráficos
+ * - Exibir feedback visual (loading, erro)
+ * 
+ * TODA lógica está no useFinancialData (ViewModel).
+ * Backend processa e agrega dados (frontend apenas exibe).
  */
 export function DashboardView() {
   const navigate = useNavigate();
-  const { cashFlow, summary, monthlyData } = useFinancialContext();
+  const { currentCompanyId } = useAuthStore();
+  const { 
+    summary, 
+    monthlyData, 
+    hasData, 
+    isLoading, 
+    fetchFinancialData 
+  } = useFinancialData();
+
+  // Busca dados ao montar o componente
+  useEffect(() => {
+    if (currentCompanyId) {
+      fetchFinancialData(currentCompanyId);
+    }
+  }, [currentCompanyId]);
 
   // Formata valores em Real Brasileiro
   const formatCurrency = (value: number): string => {
@@ -25,8 +43,17 @@ export function DashboardView() {
     }).format(value);
   };
 
+  // Estado de loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-lg text-slate-600">Carregando dados...</p>
+      </div>
+    );
+  }
+
   // Estado vazio - sem dados carregados
-  if (cashFlow.length === 0) {
+  if (!hasData) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-lg text-center shadow-lg">
@@ -204,7 +231,7 @@ export function DashboardView() {
         {/* Informações adicionais */}
         <div className="mt-6 text-center text-sm text-slate-500">
           <p>
-            Exibindo {cashFlow.length} {cashFlow.length === 1 ? 'transação' : 'transações'}
+            Dados financeiros carregados com sucesso
           </p>
         </div>
       </main>
