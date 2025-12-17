@@ -82,8 +82,8 @@ export const useLoginViewModel = (): UseLoginViewModelReturn => {
       // Salva os dados do usuário (opcional, mas útil)
       localStorage.setItem('user', JSON.stringify(response.user));
 
-      // Redireciona para a página de upload
-      navigate('/upload');
+      // Redireciona para o dashboard (não upload - já pode ter dados salvos)
+      navigate('/dashboard');
     } catch (err) {
       // Tratamento de erro com mensagem amigável
       const axiosError = err as AxiosError<{ message?: string }>;
