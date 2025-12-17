@@ -186,4 +186,15 @@ export class DuckDBFinancialRepository implements IFinancialRepository {
     // ORDER BY date ASC
     throw new Error('Not implemented - DuckDB integration pending');
   }
+
+  async getDateRange(companyId: string): Promise<{
+    earliestDate: Date | null;
+    latestDate: Date | null;
+  }> {
+    throw new Error('Not implemented - DuckDB integration pending');
+  }
+
+  async countAll(companyId: string): Promise<number> {
+    throw new Error('Not implemented - DuckDB integration pending');
+  }
 }

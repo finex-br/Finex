@@ -112,4 +112,27 @@ export interface IFinancialRepository {
       profit: number;
     }>
   >;
+
+  /**
+   * Retorna o range de datas disponíveis no sistema para uma empresa
+   * Usado para calcular filtros inteligentes e feedback ao usuário
+   * 
+   * @param companyId - ID da empresa
+   * @returns { earliestDate, latestDate } ou { null, null } se não há dados
+   */
+  getDateRange(
+    companyId: string,
+  ): Promise<{
+    earliestDate: Date | null;
+    latestDate: Date | null;
+  }>;
+
+  /**
+   * Conta total de transações no sistema (sem filtro)
+   * Usado para diferenciar "nunca fez upload" de "filtro vazio"
+   * 
+   * @param companyId - ID da empresa
+   * @returns Total de transações
+   */
+  countAll(companyId: string): Promise<number>;
 }

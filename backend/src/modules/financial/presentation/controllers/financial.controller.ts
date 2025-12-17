@@ -45,6 +45,13 @@ export class FinancialController {
     @Request() req: any,
   ) {
     try {
+      console.log('[FinancialController] Upload recebido:', {
+        hasFile: !!file,
+        filename: file?.originalname,
+        mimetype: file?.mimetype,
+        size: file?.size
+      });
+
       if (!file) {
         throw new HttpException('Arquivo não enviado', HttpStatus.BAD_REQUEST);
       }
@@ -66,6 +73,8 @@ export class FinancialController {
       const companyId = req.user?.currentCompanyId || req.body?.companyId || 'default-company';
       const userId = req.user?.id || req.body?.userId || 'default-user';
 
+      console.log('[FinancialController] Processando com:', { companyId, userId });
+
       // Executar Use Case
       const result = await this.processExcelUseCase.execute({
         companyId,
@@ -74,8 +83,11 @@ export class FinancialController {
         fileName: file.originalname,
       });
 
+      console.log('[FinancialController] Resultado:', result);
+
       return result;
     } catch (error) {
+      console.error('[FinancialController] Erro:', error);
       throw new HttpException(
         error.message || 'Erro ao processar Excel',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
@@ -110,8 +122,12 @@ export class FinancialController {
     @Query('endDate') endDate?: string,
   ) {
     try {
+      console.log('[FinancialController] GET /financial/data chamado:', { period, startDate, endDate });
+      
       const companyId = req.user?.currentCompanyId || req.query?.companyId || 'default-company';
       const userId = req.user?.id || req.query?.userId || 'default-user';
+
+      console.log('[FinancialController] CompanyId:', companyId, 'UserId:', userId);
 
       // Validar período CUSTOM
       if (period === PeriodType.CUSTOM) {
@@ -147,8 +163,16 @@ export class FinancialController {
         periodFilter,
       });
 
+      console.log('[FinancialController] Dados retornados:', {
+        summaryProfit: result.summary.profit,
+        monthlyDataCount: result.monthlyData.length,
+        categoryDataCount: result.categoryData.length,
+        trendDataCount: result.trendData.length,
+      });
+
       return result;
     } catch (error) {
+      console.error('[FinancialController] Erro ao buscar dados:', error);
       throw new HttpException(
         error.message || 'Erro ao buscar dados financeiros',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,

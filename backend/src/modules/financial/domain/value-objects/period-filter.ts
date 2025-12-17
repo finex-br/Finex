@@ -55,19 +55,35 @@ export class PeriodFilter extends ValueObject<PeriodFilterProps> {
   /**
    * Calcula datas reais com base no tipo de período
    * 
-   * Para tipos predefinidos, calcula a partir da data atual.
-   * Para CUSTOM, retorna as datas fornecidas.
+   * FILTROS INTELIGENTES:
+   * - Se dataRange fornecido: calcula períodos baseados nos dados reais (latestDate)
+   * - Se não fornecido: calcula baseado na data atual (comportamento padrão)
+   * 
+   * Exemplos:
+   * - MONTH com latestDate=2024-04-30 → últimos 30 dias dos dados (2024-04-01 a 2024-04-30)
+   * - MONTH sem dataRange → últimos 30 dias de hoje
+   * 
+   * @param dataRange - Range de datas disponíveis no sistema (opcional)
    */
-  public getDateRange(): { startDate: Date; endDate: Date } {
-    const now = new Date();
-    const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
+  public getDateRange(dataRange?: {
+    earliestDate: Date;
+    latestDate: Date;
+  }): { startDate: Date; endDate: Date } {
+    // Se CUSTOM, sempre retorna as datas fornecidas
     if (this.props.type === 'CUSTOM') {
       return {
         startDate: this.props.startDate!,
         endDate: this.props.endDate!,
       };
     }
+
+    // Determinar data de referência (dados reais ou hoje)
+    const referenceDate = dataRange?.latestDate || new Date();
+    const endDate = new Date(
+      referenceDate.getFullYear(),
+      referenceDate.getMonth(),
+      referenceDate.getDate()
+    );
 
     let startDate: Date;
 
@@ -95,6 +111,13 @@ export class PeriodFilter extends ValueObject<PeriodFilterProps> {
       default:
         throw new Error('Tipo de período inválido');
     }
+
+    console.log('[PeriodFilter] Calculado:', {
+      type: this.props.type,
+      referenceDate: dataRange ? 'DADOS' : 'HOJE',
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
+    });
 
     return { startDate, endDate };
   }

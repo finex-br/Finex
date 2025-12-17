@@ -55,7 +55,13 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
         // Extrair campos usando os índices mapeados
         const date = columnMap.data !== -1 
           ? this.parseDate(row.getCell(columnMap.data).value)
-          : new Date();
+          : null;
+        
+        // Pular linha se data inválida
+        if (!date) {
+          console.warn(`Linha ${rowNumber}: data inválida, pulando...`);
+          return;
+        }
         
         const description = columnMap.descricao !== -1
           ? (row.getCell(columnMap.descricao).value?.toString() || 'Sem descrição')
@@ -175,10 +181,11 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
 
   /**
    * Parseia datas em diferentes formatos (ExcelJS já converte datas seriais automaticamente)
+   * Retorna null se a data for inválida (para pular linha)
    */
-  private parseDate(dateValue: any): Date {
+  private parseDate(dateValue: any): Date | null {
     if (!dateValue) {
-      return new Date();
+      return null;
     }
 
     // Se já é uma Date (ExcelJS converte automaticamente)
@@ -202,6 +209,6 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
       return new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
     }
 
-    return new Date();
+    return null;
   }
 }

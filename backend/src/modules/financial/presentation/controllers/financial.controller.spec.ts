@@ -79,6 +79,17 @@ describe('FinancialController (e2e)', () => {
       startDate: '2023-01-01',
       endDate: '2024-01-01',
     },
+    metadata: {
+      totalTransactionsInSystem: 10,
+      totalTransactionsInPeriod: 10,
+      earliestDate: '2023-01-01',
+      latestDate: '2024-01-01',
+      periodApplied: {
+        type: PeriodType.YEAR,
+        startDate: '2023-01-01',
+        endDate: '2024-01-01',
+      },
+    },
     ...overrides,
   });
 

@@ -71,17 +71,46 @@ export interface TrendChartDataDTO {
 export interface GetFinancialDataRequestDTO {
   companyId: string;
   userId: string;
-  periodFilter?: PeriodFilterDTO; // NOVO
+  periodFilter?: PeriodFilterDTO;
+}
+
+/**
+ * Metadados para UX inteligente do Dashboard
+ * 
+ * - totalTransactionsInSystem: Total de transações sem filtro (para detectar se fez upload)
+ * - totalTransactionsInPeriod: Total de transações no período filtrado
+ * - earliestDate: Data mais antiga no sistema (para sugerir períodos)
+ * - latestDate: Data mais recente no sistema (para calcular filtros inteligentes)
+ * - periodApplied: Período que foi realmente aplicado (para feedback ao usuário)
+ */
+export interface FinancialDataMetadataDTO {
+  totalTransactionsInSystem: number;
+  totalTransactionsInPeriod: number;
+  earliestDate: string | null;  // ISO 8601 (YYYY-MM-DD) ou null se não há dados
+  latestDate: string | null;    // ISO 8601 (YYYY-MM-DD) ou null se não há dados
+  periodApplied: {
+    type: PeriodType | null;
+    startDate: string | null;
+    endDate: string | null;
+  };
 }
 
 export interface GetFinancialDataResponseDTO {
   summary: FinancialSummaryDTO;
   monthlyData: MonthlyDataDTO[];
-  categoryData: CategoryChartDataDTO[]; // NOVO
-  trendData: TrendChartDataDTO[];       // NOVO
-  period: {                              // NOVO - Metadados do período
+  categoryData: CategoryChartDataDTO[];
+  trendData: TrendChartDataDTO[];
+  
+  /** @deprecated Use metadata.periodApplied instead */
+  period: {
     type: PeriodType;
     startDate: string;
     endDate: string;
   };
+  
+  /**
+   * Metadados para UX inteligente
+   * Permite diferenciar "sem upload" de "filtro vazio"
+   */
+  metadata: FinancialDataMetadataDTO;
 }
