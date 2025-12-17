@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Calendar } from 'lucide-react';
 import {
   Select,
@@ -19,7 +20,7 @@ import { PeriodFilter, PeriodType } from '@/services/financialService';
 import { cn } from '@/lib/utils';
 
 interface DateFilterProps {
-  periodFilter: PeriodFilter;
+  periodFilter?: PeriodFilter;
   onPeriodChange: (filter: PeriodFilter) => void;
 }
 
@@ -29,33 +30,82 @@ interface DateFilterProps {
  * Permite ao usuário selecionar período de análise:
  * - MENSAL, TRIMESTRAL, SEMESTRAL, ANUAL (pré-definidos)
  * - CUSTOM (com date pickers para início e fim)
+ * 
+ * LOTE 4: Estado local para CUSTOM (só envia ao parent quando ambas datas selecionadas)
  */
 export const DateFilter = ({ periodFilter, onPeriodChange }: DateFilterProps) => {
+  // Estado local para controlar modo CUSTOM (antes de enviar ao backend)
+  const [localCustomMode, setLocalCustomMode] = useState(false);
+  const [localStartDate, setLocalStartDate] = useState<string | undefined>(undefined);
+  const [localEndDate, setLocalEndDate] = useState<string | undefined>(undefined);
+  
+  // Se não houver filtro, usar MONTH como padrão para a UI
+  const currentType = localCustomMode ? PeriodType.CUSTOM : (periodFilter?.type || PeriodType.MONTH);
+  
+  // Sincroniza estado local quando periodFilter muda externamente
+  useEffect(() => {
+    if (periodFilter?.type === PeriodType.CUSTOM) {
+      setLocalCustomMode(true);
+      setLocalStartDate(periodFilter.startDate);
+      setLocalEndDate(periodFilter.endDate);
+    } else {
+      setLocalCustomMode(false);
+      setLocalStartDate(undefined);
+      setLocalEndDate(undefined);
+    }
+  }, [periodFilter]);
+  
   const handlePeriodTypeChange = (value: string) => {
     const newType = value as PeriodType;
+    
+    // LOTE 4: Se CUSTOM, ativa modo local (mostra date pickers sem fazer request)
+    if (newType === PeriodType.CUSTOM) {
+      setLocalCustomMode(true);
+      setLocalStartDate(undefined);
+      setLocalEndDate(undefined);
+      return;
+    }
+    
+    // Período pré-definido: limpa modo local e notifica parent imediatamente
+    setLocalCustomMode(false);
+    setLocalStartDate(undefined);
+    setLocalEndDate(undefined);
     onPeriodChange({
       type: newType,
-      // Limpa datas customizadas se mudar para tipo pré-definido
-      startDate: newType === PeriodType.CUSTOM ? periodFilter.startDate : undefined,
-      endDate: newType === PeriodType.CUSTOM ? periodFilter.endDate : undefined,
+      startDate: undefined,
+      endDate: undefined,
     });
   };
 
   const handleStartDateChange = (date: Date | undefined) => {
     if (date) {
-      onPeriodChange({
-        ...periodFilter,
-        startDate: format(date, 'yyyy-MM-dd'),
-      });
+      const newStartDate = format(date, 'yyyy-MM-dd');
+      setLocalStartDate(newStartDate);
+      
+      // LOTE 4: Só notifica parent se AMBAS datas estiverem selecionadas
+      if (localEndDate) {
+        onPeriodChange({
+          type: PeriodType.CUSTOM,
+          startDate: newStartDate,
+          endDate: localEndDate,
+        });
+      }
     }
   };
 
   const handleEndDateChange = (date: Date | undefined) => {
     if (date) {
-      onPeriodChange({
-        ...periodFilter,
-        endDate: format(date, 'yyyy-MM-dd'),
-      });
+      const newEndDate = format(date, 'yyyy-MM-dd');
+      setLocalEndDate(newEndDate);
+      
+      // LOTE 4: Só notifica parent se AMBAS datas estiverem selecionadas
+      if (localStartDate) {
+        onPeriodChange({
+          type: PeriodType.CUSTOM,
+          startDate: localStartDate,
+          endDate: newEndDate,
+        });
+      }
     }
   };
 
@@ -64,22 +114,22 @@ export const DateFilter = ({ periodFilter, onPeriodChange }: DateFilterProps) =>
       {/* Select de Período */}
       <div className="flex items-center gap-2">
         <Calendar className="w-4 h-4 text-muted-foreground" />
-        <Select value={periodFilter.type} onValueChange={handlePeriodTypeChange}>
+        <Select value={currentType} onValueChange={handlePeriodTypeChange}>
           <SelectTrigger id="period-select" className="w-[180px]">
             <SelectValue placeholder="Selecione o período" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={PeriodType.MENSAL}>Mensal</SelectItem>
-            <SelectItem value={PeriodType.TRIMESTRAL}>Trimestral</SelectItem>
-            <SelectItem value={PeriodType.SEMESTRAL}>Semestral</SelectItem>
-            <SelectItem value={PeriodType.ANUAL}>Anual</SelectItem>
+            <SelectItem value={PeriodType.MONTH}>Mensal</SelectItem>
+            <SelectItem value={PeriodType.QUARTER}>Trimestral</SelectItem>
+            <SelectItem value={PeriodType.SEMESTER}>Semestral</SelectItem>
+            <SelectItem value={PeriodType.YEAR}>Anual</SelectItem>
             <SelectItem value={PeriodType.CUSTOM}>Personalizado</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Date Pickers (apenas para CUSTOM) */}
-      {periodFilter.type === PeriodType.CUSTOM && (
+      {currentType === PeriodType.CUSTOM && (
         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
           {/* Data Início */}
           <Popover>
@@ -88,12 +138,12 @@ export const DateFilter = ({ periodFilter, onPeriodChange }: DateFilterProps) =>
                 variant="outline"
                 className={cn(
                   'w-[180px] justify-start text-left font-normal',
-                  !periodFilter.startDate && 'text-muted-foreground'
+                  !localStartDate && 'text-muted-foreground'
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                {periodFilter.startDate ? (
-                  format(new Date(periodFilter.startDate), 'dd/MM/yyyy', { locale: ptBR })
+                {localStartDate ? (
+                  format(new Date(localStartDate), 'dd/MM/yyyy', { locale: ptBR })
                 ) : (
                   <span>Data inicial</span>
                 )}
@@ -102,7 +152,7 @@ export const DateFilter = ({ periodFilter, onPeriodChange }: DateFilterProps) =>
             <PopoverContent className="w-auto p-0">
               <CalendarComponent
                 mode="single"
-                selected={periodFilter.startDate ? new Date(periodFilter.startDate) : undefined}
+                selected={localStartDate ? new Date(localStartDate) : undefined}
                 onSelect={handleStartDateChange}
                 initialFocus
                 locale={ptBR}
@@ -117,12 +167,12 @@ export const DateFilter = ({ periodFilter, onPeriodChange }: DateFilterProps) =>
                 variant="outline"
                 className={cn(
                   'w-[180px] justify-start text-left font-normal',
-                  !periodFilter.endDate && 'text-muted-foreground'
+                  !localEndDate && 'text-muted-foreground'
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                {periodFilter.endDate ? (
-                  format(new Date(periodFilter.endDate), 'dd/MM/yyyy', { locale: ptBR })
+                {localEndDate ? (
+                  format(new Date(localEndDate), 'dd/MM/yyyy', { locale: ptBR })
                 ) : (
                   <span>Data final</span>
                 )}
@@ -131,12 +181,12 @@ export const DateFilter = ({ periodFilter, onPeriodChange }: DateFilterProps) =>
             <PopoverContent className="w-auto p-0">
               <CalendarComponent
                 mode="single"
-                selected={periodFilter.endDate ? new Date(periodFilter.endDate) : undefined}
+                selected={localEndDate ? new Date(localEndDate) : undefined}
                 onSelect={handleEndDateChange}
                 initialFocus
                 locale={ptBR}
                 disabled={(date) =>
-                  periodFilter.startDate ? date < new Date(periodFilter.startDate) : false
+                  localStartDate ? date < new Date(localStartDate) : false
                 }
               />
             </PopoverContent>

@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { FinancialController } from './presentation/controllers/financial.controller';
 import { ProcessExcelUseCase } from './application/use-cases/process-excel.use-case';
 import { GetFinancialDataUseCase } from './application/use-cases/get-financial-data.use-case';
 import { ExcelProcessorAdapter } from './infrastructure/adapters/excel-processor.adapter';
-import { InMemoryFinancialRepository } from './infrastructure/repositories/in-memory-financial.repository';
+import { TypeORMFinancialRepository } from './infrastructure/persistence/typeorm/typeorm-financial.repository';
+import { FinancialTransactionSchema } from './infrastructure/persistence/typeorm/financial-transaction.schema';
 
 /**
  * FinancialModule - Módulo de Transações Financeiras
@@ -11,12 +13,13 @@ import { InMemoryFinancialRepository } from './infrastructure/repositories/in-me
  * Agrupa todos os recursos do módulo financeiro seguindo Clean Architecture:
  * - Controllers (Presentation Layer) - Recebem requests HTTP
  * - Use Cases (Application Layer) - Orquestram regras de negócio
- * - Repositories (Infrastructure Layer) - Persistência de dados
+ * - Repositories (Infrastructure Layer) - Persistência de dados (PostgreSQL via TypeORM)
  * - Adapters (Infrastructure Layer) - Processamento de Excel
- * 
- * NOTA: Usando InMemoryRepository temporariamente até DuckDB/Postgres.
  */
 @Module({
+  imports: [
+    TypeOrmModule.forFeature([FinancialTransactionSchema]),
+  ],
   controllers: [
     FinancialController,
   ],
@@ -27,10 +30,10 @@ import { InMemoryFinancialRepository } from './infrastructure/repositories/in-me
       useClass: ExcelProcessorAdapter,
     },
     
-    // Repositories (In-Memory para dev)
+    // Repositories (PostgreSQL via TypeORM)
     {
       provide: 'IFinancialRepository',
-      useClass: InMemoryFinancialRepository,
+      useClass: TypeORMFinancialRepository,
     },
     
     // Use Cases

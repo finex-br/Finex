@@ -4,10 +4,11 @@ import { api } from './api';
  * Enums e tipos alinhados com o backend
  */
 export enum PeriodType {
-  MENSAL = 'MENSAL',
-  TRIMESTRAL = 'TRIMESTRAL',
-  SEMESTRAL = 'SEMESTRAL',
-  ANUAL = 'ANUAL',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+  QUARTER = 'QUARTER',
+  SEMESTER = 'SEMESTER',
+  YEAR = 'YEAR',
   CUSTOM = 'CUSTOM',
 }
 
@@ -43,11 +44,28 @@ export interface TrendData {
   amount: number;
 }
 
+/**
+ * Metadados retornados pelo backend (Lote 1)
+ * Permite diferenciar estados: NO_UPLOAD, EMPTY_PERIOD, HAS_DATA
+ */
+export interface FinancialDataMetadata {
+  totalTransactionsInSystem: number;  // Total de transações sem filtro (detecta "nunca fez upload")
+  totalTransactionsInPeriod: number;   // Total de transações após aplicar filtro
+  earliestDate: string | null;         // Data mais antiga nos dados (para sugestões ao usuário)
+  latestDate: string | null;           // Data mais recente (para calcular filtros inteligentes)
+  periodApplied: {
+    type: PeriodType;
+    startDate: string;
+    endDate: string;
+  };
+}
+
 export interface FinancialDataResponse {
   summary: FinancialSummary;
   monthlyData: MonthlyData[];
   categoryData: CategoryData[];
   trendData: TrendData[];
+  metadata: FinancialDataMetadata;  // NOVO: metadados para UX inteligente
 }
 
 export interface UploadExcelResponse {

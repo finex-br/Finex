@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, DollarSign, Upload, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useFinancialData } from '@/hooks/useFinancialData';
+import { useFinancialData, DashboardState } from '@/hooks/useFinancialData';
 import { useAuthStore } from '@/store/authStore';
 import { DateFilter } from '@/components/DateFilter';
 import { FinancialCharts } from '@/components/FinancialCharts';
+import { EmptyPeriodBanner } from '@/components/EmptyPeriodBanner';
 
 /**
  * DashboardView - Componente Presentacional (Dumb Component)
@@ -14,6 +15,7 @@ import { FinancialCharts } from '@/components/FinancialCharts';
  * Responsabilidades:
  * - Renderizar KPIs e gráficos
  * - Exibir feedback visual (loading, erro)
+ * - LOTE 4: Usar dashboardState para NUNCA desaparecer quando filtro vazio
  * 
  * TODA lógica está no useFinancialData (ViewModel).
  * Backend processa e agrega dados (frontend apenas exibe).
@@ -26,7 +28,8 @@ export function DashboardView() {
     monthlyData,
     categoryData,
     trendData,
-    hasData, 
+    metadata,
+    dashboardState,
     isLoading,
     error,
     periodFilter,
@@ -36,9 +39,7 @@ export function DashboardView() {
 
   // Busca dados ao montar o componente ou quando periodFilter mudar
   useEffect(() => {
-    if (currentCompanyId) {
-      fetchFinancialData(currentCompanyId);
-    }
+    fetchFinancialData(currentCompanyId);
   }, [currentCompanyId, periodFilter]);
 
   // Formata valores em Real Brasileiro
@@ -84,8 +85,8 @@ export function DashboardView() {
     );
   }
 
-  // Estado vazio - sem dados carregados
-  if (!hasData) {
+  // LOTE 4: Estado vazio - NUNCA FEZ UPLOAD (totalTransactionsInSystem === 0)
+  if (dashboardState === DashboardState.NO_UPLOAD) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-lg text-center shadow-lg">
@@ -151,7 +152,16 @@ export function DashboardView() {
           />
         </div>
 
-        {/* KPIs */}
+        {/* LOTE 4: Banner quando filtro retorna vazio (EMPTY_PERIOD) */}
+        {dashboardState === DashboardState.EMPTY_PERIOD && metadata && (
+          <EmptyPeriodBanner
+            earliestDate={metadata.earliestDate}
+            latestDate={metadata.latestDate}
+            onViewAllData={() => setPeriodFilter(undefined)}
+          />
+        )}
+
+        {/* KPIs - Sempre visível quando tem dados no sistema */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Receita Total */}
           <Card className="shadow-md hover:shadow-lg transition-shadow">
