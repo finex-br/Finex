@@ -10,13 +10,13 @@ import { IsString } from 'class-validator';
  */
 export class UnlinkSocialRequestDto {
   /**
-   * OAuth provider name to unlink (GOOGLE, GITHUB, APPLE, FACEBOOK)
+   * OAuth provider name to unlink (GOOGLE, GITHUB, FACEBOOK)
    * @example "GOOGLE"
    */
   @ApiProperty({
     description: 'OAuth provider name to unlink',
     example: 'GOOGLE',
-    enum: ['GOOGLE', 'GITHUB', 'APPLE', 'FACEBOOK'],
+    enum: ['GOOGLE', 'GITHUB', 'FACEBOOK'],
     required: true,
   })
   @IsString()

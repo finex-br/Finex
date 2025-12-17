@@ -16,13 +16,6 @@ describe('SocialProvider Value Object', () => {
       expect(providerOrError.getValue().value).toBe('GITHUB');
     });
 
-    it('should create a valid APPLE provider', () => {
-      const providerOrError = SocialProvider.create('APPLE');
-      
-      expect(providerOrError.isSuccess).toBe(true);
-      expect(providerOrError.getValue().value).toBe('APPLE');
-    });
-
     it('should create a valid FACEBOOK provider', () => {
       const providerOrError = SocialProvider.create('FACEBOOK');
       
@@ -86,7 +79,6 @@ describe('SocialProvider Value Object', () => {
       
       expect(provider.isGoogle()).toBe(true);
       expect(provider.isGitHub()).toBe(false);
-      expect(provider.isApple()).toBe(false);
     });
 
     it('should identify GITHUB provider with isGitHub()', () => {
@@ -94,7 +86,6 @@ describe('SocialProvider Value Object', () => {
       
       expect(provider.isGoogle()).toBe(false);
       expect(provider.isGitHub()).toBe(true);
-      expect(provider.isApple()).toBe(false);
     });
 
     it('should identify APPLE provider with isApple()', () => {

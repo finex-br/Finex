@@ -2,6 +2,7 @@ import { Module, Controller, Get } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EnvModule, EnvService } from './shared/infra/env';
 import { AuthenticationModule } from './modules/authentication/infrastructure/authentication.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Controller()
 export class AppController {
@@ -25,6 +26,7 @@ export class AppController {
       }),
     }),
     AuthenticationModule,
+    PaymentModule,
   ],
   controllers: [AppController],
 })

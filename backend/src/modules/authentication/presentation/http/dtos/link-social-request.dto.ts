@@ -12,13 +12,13 @@ import { IsString, IsOptional } from 'class-validator';
  */
 export class LinkSocialRequestDto {
   /**
-   * OAuth provider name (GOOGLE, GITHUB, APPLE, FACEBOOK)
+   * OAuth provider name (GOOGLE, GITHUB, FACEBOOK)
    * @example "GOOGLE"
    */
   @ApiProperty({
     description: 'OAuth provider name',
     example: 'GOOGLE',
-    enum: ['GOOGLE', 'GITHUB', 'APPLE', 'FACEBOOK'],
+    enum: ['GOOGLE', 'GITHUB', 'FACEBOOK'],
     required: true,
   })
   @IsString()

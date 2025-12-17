@@ -20,11 +20,6 @@ describe('SocialAccountController', () => {
     exchangeCodeForProfile: jest.fn(),
   };
 
-  const mockAppleProvider = {
-    getProvider: jest.fn().mockReturnValue('APPLE'),
-    exchangeCodeForProfile: jest.fn(),
-  };
-
   const mockFacebookProvider = {
     getProvider: jest.fn().mockReturnValue('FACEBOOK'),
     exchangeCodeForProfile: jest.fn(),
@@ -57,10 +52,6 @@ describe('SocialAccountController', () => {
         {
           provide: 'GITHUB_OAUTH_PROVIDER',
           useValue: mockGitHubProvider,
-        },
-        {
-          provide: 'APPLE_OAUTH_PROVIDER',
-          useValue: mockAppleProvider,
         },
         {
           provide: 'FACEBOOK_OAUTH_PROVIDER',

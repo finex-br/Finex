@@ -18,7 +18,7 @@ export interface OAuthResponse {
 /**
  * Tipos de provedores OAuth suportados
  */
-export type OAuthProvider = 'google' | 'github' | 'apple' | 'facebook';
+export type OAuthProvider = 'google' | 'github' | 'facebook';
 
 /**
  * Configuração OAuth do Google
