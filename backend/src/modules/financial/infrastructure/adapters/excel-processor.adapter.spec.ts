@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { ExcelProcessorAdapter } from './excel-processor.adapter';
 import { FinancialTransaction } from '../../domain/entities/financial-transaction';
 
@@ -10,12 +10,25 @@ describe('ExcelProcessorAdapter', () => {
     adapter = new ExcelProcessorAdapter();
   });
 
-  // Helper para criar um buffer de Excel a partir de dados
-  const createExcelBuffer = (data: any[]): Buffer => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+  // Helper para criar um buffer de Excel a partir de dados usando ExcelJS
+  const createExcelBuffer = async (data: any[]): Promise<Buffer> => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sheet1');
+    
+    // Adicionar cabeçalhos
+    if (data.length > 0) {
+      const headers = Object.keys(data[0]);
+      worksheet.addRow(headers);
+      
+      // Adicionar dados
+      data.forEach(row => {
+        const values = headers.map(header => row[header]);
+        worksheet.addRow(values);
+      });
+    }
+    
+    const buffer = await workbook.xlsx.writeBuffer();
+    return Buffer.from(buffer);
   };
 
   describe('processExcelFile', () => {
@@ -44,7 +57,7 @@ describe('ExcelProcessorAdapter', () => {
         },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const companyId = 'company-123';
 
       const transactions = await adapter.processExcelFile(buffer, companyId);
@@ -78,7 +91,7 @@ describe('ExcelProcessorAdapter', () => {
         { Data: '2024-01-15', Descrição: 'Teste 4', Categoria: 'Vendas', Valor: 100, Tipo: 'Receitas' },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(4);
@@ -95,7 +108,7 @@ describe('ExcelProcessorAdapter', () => {
         { Data: '2024-01-15', Descrição: 'Teste 4', Categoria: 'Compras', Valor: 100, Tipo: 'Despesas' },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(4);
@@ -111,7 +124,7 @@ describe('ExcelProcessorAdapter', () => {
         { Data: '2024-01-15', Descrição: 'Zero', Categoria: 'Outros', Valor: 0 },        // Zero = RECEITA
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(3);
@@ -125,7 +138,7 @@ describe('ExcelProcessorAdapter', () => {
         { Data: '2024-01-15', Descrição: 'Despesa', Categoria: 'Compras', Valor: -500.75, Tipo: 'DESPESA' },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(1);
@@ -158,7 +171,7 @@ describe('ExcelProcessorAdapter', () => {
         },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(3);
@@ -178,7 +191,7 @@ describe('ExcelProcessorAdapter', () => {
         },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(1);
@@ -193,7 +206,7 @@ describe('ExcelProcessorAdapter', () => {
         { Data: '2024-01-17', Descrição: 'Válida 2', Categoria: 'Compras', Valor: 200, Tipo: 'DESPESA' },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       // Deve processar apenas as 2 válidas
@@ -207,7 +220,7 @@ describe('ExcelProcessorAdapter', () => {
         { Data: '2024-01-15', Descrição: 'Teste', Categoria: 'Vendas', Valor: 100, Tipo: 'RECEITA' },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(1);
@@ -223,7 +236,7 @@ describe('ExcelProcessorAdapter', () => {
         { Data: 45308, Descrição: 'Teste serial', Categoria: 'Vendas', Valor: 100, Tipo: 'RECEITA' },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(1);
@@ -238,7 +251,7 @@ describe('ExcelProcessorAdapter', () => {
         { Data: dateObject, Descrição: 'Teste Date', Categoria: 'Vendas', Valor: 100, Tipo: 'RECEITA' },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(1);
@@ -252,7 +265,7 @@ describe('ExcelProcessorAdapter', () => {
         { Descrição: 'Sem data', Categoria: 'Vendas', Valor: 100, Tipo: 'RECEITA' },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const before = new Date();
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
       const after = new Date();
@@ -268,7 +281,7 @@ describe('ExcelProcessorAdapter', () => {
         { Data: '2024-01-15', Descrição: 'Teste', Categoria: 'Vendas', Valor: 100, Tipo: 'RECEITA' },
       ];
 
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(1);
@@ -278,18 +291,19 @@ describe('ExcelProcessorAdapter', () => {
 
     it('deve processar arquivo Excel vazio retornando array vazio', async () => {
       const excelData: any[] = [];
-      const buffer = createExcelBuffer(excelData);
+      const buffer = await createExcelBuffer(excelData);
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 
       expect(transactions).toHaveLength(0);
     });
 
     it('deve processar planilha com apenas cabeçalhos (sem dados)', async () => {
-      // JSON vazio = apenas cabeçalhos na planilha
-      const worksheet = XLSX.utils.aoa_to_sheet([['Data', 'Descrição', 'Categoria', 'Valor', 'Tipo']]);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      // Planilha com apenas cabeçalhos (sem linhas de dados)
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Sheet1');
+      worksheet.addRow(['Data', 'Descrição', 'Categoria', 'Valor', 'Tipo']);
+      const bufferData = await workbook.xlsx.writeBuffer();
+      const buffer = Buffer.from(bufferData);
 
       const transactions = await adapter.processExcelFile(buffer, 'company-123');
 

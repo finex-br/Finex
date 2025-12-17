@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { Injectable } from '@nestjs/common';
 import { IExcelProcessor } from '../../domain/ports/excel-processor.interface';
 import { FinancialTransaction } from '../../domain/entities/financial-transaction';
@@ -9,7 +9,7 @@ import { Category } from '../../domain/value-objects/category';
 /**
  * ExcelProcessorAdapter - Infrastructure Layer
  * 
- * Implementa o processamento de arquivos Excel.
+ * Implementa o processamento de arquivos Excel usando ExcelJS (seguro, sem vulnerabilidades).
  * Extrai dados brutos e converte em Entidades de Domínio.
  */
 @Injectable()
@@ -18,57 +18,56 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
     fileBuffer: Buffer,
     companyId: string,
   ): Promise<FinancialTransaction[]> {
-    // 1. Ler o arquivo Excel
-    const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
+    // 1. Ler o arquivo Excel com ExcelJS
+    const workbook = new ExcelJS.Workbook();
+    // ExcelJS aceita ArrayBuffer ou Buffer
+    await workbook.xlsx.load(fileBuffer as any);
+    
+    const worksheet = workbook.worksheets[0]; // Primeira planilha
+    if (!worksheet) {
+      throw new Error('Planilha vazia ou inválida');
+    }
 
-    // 2. Converter para JSON
-    const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+    // 2. Extrair cabeçalhos (primeira linha)
+    const headerRow = worksheet.getRow(1);
+    const headers: string[] = [];
+    headerRow.eachCell((cell, colNumber) => {
+      headers[colNumber] = cell.value?.toString().toLowerCase() || '';
+    });
+
+    // Mapear índices de colunas (case-insensitive)
+    const columnMap = {
+      data: this.findColumnIndex(headers, ['data', 'date']),
+      descricao: this.findColumnIndex(headers, ['descrição', 'descricao', 'description']),
+      categoria: this.findColumnIndex(headers, ['categoria', 'category']),
+      valor: this.findColumnIndex(headers, ['valor', 'amount', 'value']),
+      tipo: this.findColumnIndex(headers, ['tipo', 'type']),
+    };
 
     // 3. Processar cada linha e criar entidades de domínio
     const transactions: FinancialTransaction[] = [];
 
-    for (const row of jsonData) {
+    worksheet.eachRow((row, rowNumber) => {
+      // Pular cabeçalho
+      if (rowNumber === 1) return;
+
       try {
-        // Extrair campos (flexível para diferentes formatos)
-        const date = this.parseDate(
-          row['Data'] || row['data'] || row['DATE'] || row['date'],
-        );
+        // Extrair campos usando os índices mapeados
+        const date = this.parseDate(row.getCell(columnMap.data).value);
         
-        const description =
-          row['Descrição'] ||
-          row['descricao'] ||
-          row['DESCRIPTION'] ||
-          row['description'] ||
-          row['Descricao'] ||
-          'Sem descrição';
+        const description = row.getCell(columnMap.descricao).value?.toString() || 'Sem descrição';
 
-        const categoryValue =
-          row['Categoria'] ||
-          row['categoria'] ||
-          row['CATEGORY'] ||
-          row['category'] ||
-          'Sem categoria';
+        const categoryValue = row.getCell(columnMap.categoria).value?.toString() || 'Sem categoria';
 
-        const amount = parseFloat(
-          row['Valor'] ||
-            row['valor'] ||
-            row['AMOUNT'] ||
-            row['amount'] ||
-            row['Value'] ||
-            row['value'] ||
-            0,
-        );
+        const amount = this.parseNumber(row.getCell(columnMap.valor).value) || 0;
 
-        const typeValue =
-          row['Tipo'] || row['tipo'] || row['TYPE'] || row['type'] || '';
+        const typeValue = row.getCell(columnMap.tipo).value?.toString() || '';
 
         // Criar Value Objects
         const moneyOrError = Money.create(Math.abs(amount));
         if (moneyOrError.isFailure) {
           console.warn(`Valor inválido: ${amount}`, moneyOrError.error);
-          continue;
+          return; // continue
         }
 
         const categoryOrError = Category.create(categoryValue);
@@ -77,7 +76,7 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
             `Categoria inválida: ${categoryValue}`,
             categoryOrError.error,
           );
-          continue;
+          return; // continue
         }
 
         // Determinar tipo (receita/despesa)
@@ -119,36 +118,67 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
         console.warn('Erro ao processar linha do Excel:', error.message);
         // Continua processando as outras linhas
       }
-    }
+    });
 
     return transactions;
   }
 
   /**
-   * Parseia datas em diferentes formatos
+   * Encontra o índice da coluna baseado em possíveis nomes (case-insensitive)
+   */
+  private findColumnIndex(headers: string[], possibleNames: string[]): number {
+    for (let i = 1; i < headers.length; i++) {
+      const header = (headers[i] || '').toLowerCase();
+      if (possibleNames.some(name => header.includes(name.toLowerCase()))) {
+        return i;
+      }
+    }
+    // Se não encontrou, retorna 1 (primeira coluna) como fallback
+    return 1;
+  }
+
+  /**
+   * Converte valor de célula para número
+   */
+  private parseNumber(value: any): number {
+    if (typeof value === 'number') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return parseFloat(value.replace(',', '.'));
+    }
+    return 0;
+  }
+
+  /**
+   * Parseia datas em diferentes formatos (ExcelJS já converte datas seriais automaticamente)
    */
   private parseDate(dateValue: any): Date {
     if (!dateValue) {
       return new Date();
     }
 
-    // Se já é uma Date
+    // Se já é uma Date (ExcelJS converte automaticamente)
     if (dateValue instanceof Date) {
       return dateValue;
     }
 
-    // Se é um número (serial do Excel)
-    if (typeof dateValue === 'number') {
-      const parsedDate = XLSX.SSF.parse_date_code(dateValue);
-      return new Date(parsedDate.y, parsedDate.m - 1, parsedDate.d); // m-1 porque Date usa 0-indexed months
-    }
-
     // Se é string, tentar parsear
-    const parsed = new Date(dateValue);
-    if (isNaN(parsed.getTime())) {
-      return new Date();
+    if (typeof dateValue === 'string') {
+      const parsed = new Date(dateValue);
+      if (!isNaN(parsed.getTime())) {
+        return parsed;
+      }
     }
 
-    return parsed;
+    // Se é número serial do Excel (fallback)
+    if (typeof dateValue === 'number') {
+      // Excel serial date: dias desde 1/1/1900
+      const excelEpoch = new Date(1900, 0, 1);
+      const days = dateValue - 2; // -2 para corrigir bug do Excel (1900 não é bissexto)
+      return new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
+    }
+
+    return new Date();
   }
 }
