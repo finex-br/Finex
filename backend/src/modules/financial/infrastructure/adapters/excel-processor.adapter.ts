@@ -32,7 +32,7 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
     const headerRow = worksheet.getRow(1);
     const headers: string[] = [];
     headerRow.eachCell((cell, colNumber) => {
-      headers[colNumber] = cell.value?.toString().toLowerCase() || '';
+      headers[colNumber] = cell.value?.toString() || '';
     });
 
     // Mapear índices de colunas (case-insensitive)
@@ -53,15 +53,30 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
 
       try {
         // Extrair campos usando os índices mapeados
-        const date = this.parseDate(row.getCell(columnMap.data).value);
+        const date = columnMap.data !== -1 
+          ? this.parseDate(row.getCell(columnMap.data).value)
+          : new Date();
         
-        const description = row.getCell(columnMap.descricao).value?.toString() || 'Sem descrição';
+        const description = columnMap.descricao !== -1
+          ? (row.getCell(columnMap.descricao).value?.toString() || 'Sem descrição')
+          : 'Sem descrição';
 
-        const categoryValue = row.getCell(columnMap.categoria).value?.toString() || 'Sem categoria';
+        const categoryValue = columnMap.categoria !== -1
+          ? (row.getCell(columnMap.categoria).value?.toString() || 'Sem categoria')
+          : 'Sem categoria';
 
-        const amount = this.parseNumber(row.getCell(columnMap.valor).value) || 0;
+        const amount = this.parseNumber(
+          columnMap.valor !== -1 ? row.getCell(columnMap.valor).value : null
+        );
 
-        const typeValue = row.getCell(columnMap.tipo).value?.toString() || '';
+        // Pular linha se valor for inválido (null)
+        if (amount === null) {
+          return; // continue
+        }
+
+        const typeValue = columnMap.tipo !== -1
+          ? (row.getCell(columnMap.tipo).value?.toString() || '')
+          : '';
 
         // Criar Value Objects
         const moneyOrError = Money.create(Math.abs(amount));
@@ -133,21 +148,29 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
         return i;
       }
     }
-    // Se não encontrou, retorna 1 (primeira coluna) como fallback
-    return 1;
+    // Se não encontrou, retorna -1 (coluna não existe)
+    return -1;
   }
 
   /**
    * Converte valor de célula para número
+   * Retorna null se o valor for inválido (para pular linha)
    */
-  private parseNumber(value: any): number {
+  private parseNumber(value: any): number | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    
     if (typeof value === 'number') {
       return value;
     }
+    
     if (typeof value === 'string') {
-      return parseFloat(value.replace(',', '.'));
+      const parsed = parseFloat(value.replace(',', '.'));
+      return isNaN(parsed) ? null : parsed;
     }
-    return 0;
+    
+    return null;
   }
 
   /**

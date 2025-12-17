@@ -147,7 +147,8 @@ describe('ExcelProcessorAdapter', () => {
     });
 
     it('deve aceitar nomes de colunas em diferentes cases (case-insensitive)', async () => {
-      const excelData = [
+      // Criar 3 buffers separados com headers em cases diferentes
+      const excelData1 = [
         {
           data: '2024-01-15',
           descricao: 'Teste minúsculo',
@@ -155,6 +156,9 @@ describe('ExcelProcessorAdapter', () => {
           valor: 100,
           tipo: 'receita',
         },
+      ];
+
+      const excelData2 = [
         {
           DATA: '2024-01-16',
           DESCRIPTION: 'Teste maiúsculo',
@@ -162,6 +166,9 @@ describe('ExcelProcessorAdapter', () => {
           AMOUNT: 200,
           TYPE: 'DESPESA',
         },
+      ];
+
+      const excelData3 = [
         {
           date: '2024-01-17',
           description: 'Teste inglês',
@@ -171,13 +178,28 @@ describe('ExcelProcessorAdapter', () => {
         },
       ];
 
-      const buffer = await createExcelBuffer(excelData);
-      const transactions = await adapter.processExcelFile(buffer, 'company-123');
+      // Processar cada Excel separadamente
+      const buffer1 = await createExcelBuffer(excelData1);
+      const transactions1 = await adapter.processExcelFile(buffer1, 'company-123');
 
-      expect(transactions).toHaveLength(3);
-      expect(transactions[0].description).toBe('Teste minúsculo');
-      expect(transactions[1].description).toBe('Teste maiúsculo');
-      expect(transactions[2].description).toBe('Teste inglês');
+      const buffer2 = await createExcelBuffer(excelData2);
+      const transactions2 = await adapter.processExcelFile(buffer2, 'company-123');
+
+      const buffer3 = await createExcelBuffer(excelData3);
+      const transactions3 = await adapter.processExcelFile(buffer3, 'company-123');
+
+      // Verificar que cada Excel foi processado corretamente
+      expect(transactions1).toHaveLength(1);
+      expect(transactions1[0].description).toBe('Teste minúsculo');
+      expect(transactions1[0].amount.amount).toBe(100);
+
+      expect(transactions2).toHaveLength(1);
+      expect(transactions2[0].description).toBe('Teste maiúsculo');
+      expect(transactions2[0].amount.amount).toBe(200);
+
+      expect(transactions3).toHaveLength(1);
+      expect(transactions3[0].description).toBe('Teste inglês');
+      expect(transactions3[0].amount.amount).toBe(300);
     });
 
     it('deve usar valores padrão quando descrição ou categoria estiverem ausentes', async () => {
