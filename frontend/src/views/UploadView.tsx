@@ -21,7 +21,7 @@ import { useAuthStore } from '@/store/authStore';
 export function UploadView() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { clearAuth, currentCompanyId } = useAuthStore();
+  const { clearAuth, user } = useAuthStore();
   const { uploadExcel, isUploading, uploadError, uploadSuccess } = useFinancialData();
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -57,8 +57,9 @@ export function UploadView() {
       return;
     }
 
-    // TEMPORÁRIO: Usa 'default-company' até implementar sistema de múltiplas empresas
-    const companyId = currentCompanyId || 'default-company';
+    // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
+    // Isso isola dados por usuário (cada user vê apenas seus próprios dados)
+    const companyId = user?.id || 'default-user';
     
     // Chama o ViewModel (que chama o service, que chama o backend)
     const success = await uploadExcel(selectedFile, companyId);

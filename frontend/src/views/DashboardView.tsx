@@ -22,7 +22,7 @@ import { EmptyPeriodBanner } from '@/components/EmptyPeriodBanner';
  */
 export function DashboardView() {
   const navigate = useNavigate();
-  const { currentCompanyId } = useAuthStore();
+  const { user } = useAuthStore();
   const { 
     summary, 
     monthlyData,
@@ -39,10 +39,10 @@ export function DashboardView() {
 
   // Busca dados ao montar o componente ou quando periodFilter mudar
   useEffect(() => {
-    // TEMPORÁRIO: Usa 'default-company' até implementar sistema de múltiplas empresas
-    const companyId = currentCompanyId || 'default-company';
+    // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
+    const companyId = user?.id || 'default-user';
     fetchFinancialData(companyId);
-  }, [currentCompanyId, periodFilter]);
+  }, [user?.id, periodFilter]);
 
   // Formata valores em Real Brasileiro
   const formatCurrency = (value: number): string => {
@@ -76,7 +76,7 @@ export function DashboardView() {
           </CardHeader>
           <CardContent>
             <Button
-              onClick={() => fetchFinancialData(currentCompanyId || 'default-company')}
+              onClick={() => fetchFinancialData(user?.id || 'default-user')}
               variant="outline"
             >
               Tentar novamente

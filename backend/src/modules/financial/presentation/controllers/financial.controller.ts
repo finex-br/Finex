@@ -69,9 +69,10 @@ export class FinancialController {
         );
       }
 
-      // Pegar companyId do JWT, body ou usar default para testes
-      const companyId = req.user?.currentCompanyId || req.body?.companyId || 'default-company';
+      // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
+      // Isso isola dados por usuário (cada user vê apenas seus próprios dados)
       const userId = req.user?.id || req.body?.userId || 'default-user';
+      const companyId = userId; // userId = companyId temporariamente
 
       console.log('[FinancialController] Processando com:', { companyId, userId });
 
