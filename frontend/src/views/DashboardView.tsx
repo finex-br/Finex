@@ -39,7 +39,9 @@ export function DashboardView() {
 
   // Busca dados ao montar o componente ou quando periodFilter mudar
   useEffect(() => {
-    fetchFinancialData(currentCompanyId);
+    // TEMPORÁRIO: Usa 'default-company' até implementar sistema de múltiplas empresas
+    const companyId = currentCompanyId || 'default-company';
+    fetchFinancialData(companyId);
   }, [currentCompanyId, periodFilter]);
 
   // Formata valores em Real Brasileiro
@@ -74,7 +76,7 @@ export function DashboardView() {
           </CardHeader>
           <CardContent>
             <Button
-              onClick={() => fetchFinancialData(currentCompanyId)}
+              onClick={() => fetchFinancialData(currentCompanyId || 'default-company')}
               variant="outline"
             >
               Tentar novamente

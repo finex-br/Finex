@@ -24,7 +24,17 @@ export class FinancialTransactionSchema {
   description: string;
 
   // Money Value Object - Armazena como numeric para precisão
-  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'amount_value' })
+  // Transformer garante que PostgreSQL decimal seja convertido para number
+  @Column({ 
+    type: 'decimal', 
+    precision: 10, 
+    scale: 2, 
+    name: 'amount_value',
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value)
+    }
+  })
   amountValue: number;
 
   @Column({ type: 'varchar', length: 3, name: 'amount_currency', default: 'BRL' })

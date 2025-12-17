@@ -20,8 +20,13 @@ export class FinancialTransactionMapper {
    * Converte TypeORM Schema para Domain Entity
    */
   public static toDomain(schema: FinancialTransactionSchema): FinancialTransaction | null {
+    // PostgreSQL decimal retorna string! Precisa converter para number
+    const amountValue = typeof schema.amountValue === 'string' 
+      ? parseFloat(schema.amountValue) 
+      : schema.amountValue;
+    
     // Reconstrói Value Objects
-    const moneyOrError = Money.create(schema.amountValue, schema.amountCurrency);
+    const moneyOrError = Money.create(amountValue, schema.amountCurrency);
     const typeOrError = TransactionType.create(schema.type);
     const categoryOrError = Category.create(schema.categoryName);
 
@@ -31,6 +36,8 @@ export class FinancialTransactionMapper {
         money: moneyOrError.isFailure ? moneyOrError.error : 'OK',
         type: typeOrError.isFailure ? typeOrError.error : 'OK',
         category: categoryOrError.isFailure ? categoryOrError.error : 'OK',
+        amountValue: schema.amountValue,
+        amountValueType: typeof schema.amountValue,
       });
       return null;
     }

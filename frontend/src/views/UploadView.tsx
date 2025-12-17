@@ -57,8 +57,11 @@ export function UploadView() {
       return;
     }
 
+    // TEMPORÁRIO: Usa 'default-company' até implementar sistema de múltiplas empresas
+    const companyId = currentCompanyId || 'default-company';
+    
     // Chama o ViewModel (que chama o service, que chama o backend)
-    const success = await uploadExcel(selectedFile, currentCompanyId || undefined);
+    const success = await uploadExcel(selectedFile, companyId);
     
     if (success) {
       // Redirecionar para o dashboard após 1.5 segundos
