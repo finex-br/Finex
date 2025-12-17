@@ -41,7 +41,7 @@ export class FinancialController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadExcel(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Request() req: any,
   ) {
     try {
