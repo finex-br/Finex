@@ -1,6 +1,23 @@
 import { api } from './api';
 
 /**
+ * Enums e tipos alinhados com o backend
+ */
+export enum PeriodType {
+  MENSAL = 'MENSAL',
+  TRIMESTRAL = 'TRIMESTRAL',
+  SEMESTRAL = 'SEMESTRAL',
+  ANUAL = 'ANUAL',
+  CUSTOM = 'CUSTOM',
+}
+
+export interface PeriodFilter {
+  type: PeriodType;
+  startDate?: string;
+  endDate?: string;
+}
+
+/**
  * DTOs alinhados com o backend
  */
 export interface FinancialSummary {
@@ -15,9 +32,22 @@ export interface MonthlyData {
   expense: number;
 }
 
+export interface CategoryData {
+  category: string;
+  amount: number;
+  percentage: number;
+}
+
+export interface TrendData {
+  date: string;
+  amount: number;
+}
+
 export interface FinancialDataResponse {
   summary: FinancialSummary;
   monthlyData: MonthlyData[];
+  categoryData: CategoryData[];
+  trendData: TrendData[];
 }
 
 export interface UploadExcelResponse {
@@ -65,13 +95,34 @@ export const financialService = {
   },
 
   /**
-   * Busca dados financeiros processados (summary + monthly data)
+   * Busca dados financeiros processados (summary + monthly data + category data + trend data)
    * 
    * @param companyId - ID da empresa (opcional, pode vir do JWT)
+   * @param periodFilter - Filtro de período (MENSAL, TRIMESTRAL, ANUAL, CUSTOM)
    * @returns Promise com dados agregados
    */
-  getFinancialData: async (companyId?: string): Promise<FinancialDataResponse> => {
-    const params = companyId ? { companyId } : {};
+  getFinancialData: async (
+    companyId?: string,
+    periodFilter?: PeriodFilter
+  ): Promise<FinancialDataResponse> => {
+    const params: Record<string, any> = {};
+    
+    if (companyId) {
+      params.companyId = companyId;
+    }
+    
+    if (periodFilter) {
+      params.period = periodFilter.type;
+      
+      if (periodFilter.type === PeriodType.CUSTOM) {
+        if (periodFilter.startDate) {
+          params.startDate = periodFilter.startDate;
+        }
+        if (periodFilter.endDate) {
+          params.endDate = periodFilter.endDate;
+        }
+      }
+    }
     
     const response = await api.get<FinancialDataResponse>(
       '/financial/data',

@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Upload, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useFinancialData } from '@/hooks/useFinancialData';
 import { useAuthStore } from '@/store/authStore';
+import { DateFilter } from '@/components/DateFilter';
+import { FinancialCharts } from '@/components/FinancialCharts';
 
 /**
  * DashboardView - Componente Presentacional (Dumb Component)
@@ -22,18 +23,23 @@ export function DashboardView() {
   const { currentCompanyId } = useAuthStore();
   const { 
     summary, 
-    monthlyData, 
+    monthlyData,
+    categoryData,
+    trendData,
     hasData, 
-    isLoading, 
+    isLoading,
+    error,
+    periodFilter,
+    setPeriodFilter,
     fetchFinancialData 
   } = useFinancialData();
 
-  // Busca dados ao montar o componente
+  // Busca dados ao montar o componente ou quando periodFilter mudar
   useEffect(() => {
     if (currentCompanyId) {
       fetchFinancialData(currentCompanyId);
     }
-  }, [currentCompanyId]);
+  }, [currentCompanyId, periodFilter]);
 
   // Formata valores em Real Brasileiro
   const formatCurrency = (value: number): string => {
@@ -48,6 +54,32 @@ export function DashboardView() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <p className="text-lg text-slate-600">Carregando dados...</p>
+      </div>
+    );
+  }
+
+  // Estado de erro
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg text-center shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-red-600">
+              Erro ao carregar dados
+            </CardTitle>
+            <CardDescription className="text-base mt-2">
+              {error}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => fetchFinancialData(currentCompanyId)}
+              variant="outline"
+            >
+              Tentar novamente
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -111,6 +143,14 @@ export function DashboardView() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Filtro de Período */}
+        <div className="mb-6">
+          <DateFilter 
+            periodFilter={periodFilter} 
+            onPeriodChange={setPeriodFilter} 
+          />
+        </div>
+
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Receita Total */}
@@ -168,65 +208,12 @@ export function DashboardView() {
           </Card>
         </div>
 
-        {/* Gráfico de Barras */}
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold text-slate-800">
-              Receitas vs Despesas por Mês
-            </CardTitle>
-            <CardDescription>
-              Comparativo mensal do fluxo de caixa
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[400px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={monthlyData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#64748b"
-                    style={{ fontSize: '12px' }}
-                  />
-                  <YAxis 
-                    stroke="#64748b"
-                    style={{ fontSize: '12px' }}
-                    tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    }}
-                    formatter={(value: number) => formatCurrency(value)}
-                    labelStyle={{ fontWeight: 'bold', color: '#334155' }}
-                  />
-                  <Legend 
-                    wrapperStyle={{ paddingTop: '20px' }}
-                    iconType="circle"
-                  />
-                  <Bar 
-                    dataKey="receita" 
-                    fill="#16a34a" 
-                    name="Receitas"
-                    radius={[8, 8, 0, 0]}
-                  />
-                  <Bar 
-                    dataKey="despesa" 
-                    fill="#dc2626" 
-                    name="Despesas"
-                    radius={[8, 8, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Gráficos Financeiros */}
+        <FinancialCharts 
+          categoryData={categoryData}
+          trendData={trendData}
+          monthlyData={monthlyData}
+        />
 
         {/* Informações adicionais */}
         <div className="mt-6 text-center text-sm text-slate-500">

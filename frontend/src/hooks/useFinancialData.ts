@@ -3,6 +3,10 @@ import {
   financialService,
   FinancialSummary,
   MonthlyData,
+  CategoryData,
+  TrendData,
+  PeriodFilter,
+  PeriodType,
 } from '@/services/financialService';
 import { AxiosError } from 'axios';
 
@@ -32,6 +36,13 @@ export const useFinancialData = () => {
     profit: 0,
   });
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
+  const [trendData, setTrendData] = useState<TrendData[]>([]);
+
+  // Estado para filtro de período
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>({
+    type: PeriodType.MENSAL,
+  });
 
   /**
    * Faz upload do Excel (delega para o backend)
@@ -67,10 +78,12 @@ export const useFinancialData = () => {
     setError(null);
 
     try {
-      const data = await financialService.getFinancialData(companyId);
+      const data = await financialService.getFinancialData(companyId, periodFilter);
       
       setSummary(data.summary);
       setMonthlyData(data.monthlyData);
+      setCategoryData(data.categoryData);
+      setTrendData(data.trendData);
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
       const errorMessage =
@@ -93,6 +106,8 @@ export const useFinancialData = () => {
       profit: 0,
     });
     setMonthlyData([]);
+    setCategoryData([]);
+    setTrendData([]);
     setError(null);
     setUploadError(null);
     setUploadSuccess(false);
@@ -110,8 +125,14 @@ export const useFinancialData = () => {
     error,
     summary,
     monthlyData,
+    categoryData,
+    trendData,
     fetchFinancialData,
     clearData,
+
+    // Period filter
+    periodFilter,
+    setPeriodFilter,
 
     // Helper para verificar se há dados
     hasData: monthlyData.length > 0,
