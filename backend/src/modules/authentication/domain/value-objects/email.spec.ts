@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Email } from './email';
 
 describe('Email Value Object', () => {

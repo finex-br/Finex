@@ -2,8 +2,8 @@ import { Controller, Post, Get, Body, Param, UseGuards, Req } from '@nestjs/comm
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCheckoutUseCase } from '../application/use-cases/create-checkout.use-case';
 import { CreateCheckoutRequestDto } from './dtos/create-checkout-request.dto';
-import { CheckoutResponseDto } from '../application/dtos/checkout-response.dto';
-import { JwtAuthGuard } from '../../authentication/presentation/guards/jwt-auth.guard';
+import { CheckoutResponseDTO } from '../application/dtos/checkout-response.dto';
+import { JwtAuthGuard } from '../../authentication/presentation/http/guards/jwt-auth.guard';
 
 @ApiTags('payment')
 @Controller('payment')
@@ -19,20 +19,25 @@ export class PaymentController {
   @ApiResponse({ 
     status: 201, 
     description: 'Checkout created successfully',
-    type: CheckoutResponseDto 
+    type: CheckoutResponseDTO 
   })
   @ApiResponse({ status: 400, description: 'Invalid request data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createCheckout(
     @Body() dto: CreateCheckoutRequestDto,
     @Req() req: any,
-  ): Promise<CheckoutResponseDto> {
-    const userId = req.user.id;
+  ): Promise<CheckoutResponseDTO> {
+    const userId = req.user.sub || req.user.id;
+    const userName = req.user.name || 'User';
+    const userEmail = req.user.email;
 
     const result = await this.createCheckoutUseCase.execute({
       userId,
       amount: dto.amount,
       description: dto.description,
+      customerName: userName,
+      customerEmail: userEmail,
+      customerCpfCnpj: req.user.cpf || '00000000000',
       maxInstallments: dto.maxInstallments,
     });
 
@@ -48,11 +53,11 @@ export class PaymentController {
   @ApiResponse({ 
     status: 200, 
     description: 'Checkout found',
-    type: CheckoutResponseDto 
+    type: CheckoutResponseDTO 
   })
   @ApiResponse({ status: 404, description: 'Checkout not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getCheckout(@Param('id') id: string): Promise<CheckoutResponseDto> {
+  async getCheckout(@Param('id') id: string): Promise<CheckoutResponseDTO> {
     // TODO: Implement GetCheckoutUseCase
     throw new Error('Not implemented yet');
   }

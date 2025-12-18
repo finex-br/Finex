@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OAuthController } from './oauth.controller';
 import { AuthenticateWithSocialUseCase } from '../../../application/use-cases/authenticate-with-social.use-case';

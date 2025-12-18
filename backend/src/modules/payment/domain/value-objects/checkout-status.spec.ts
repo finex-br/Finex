@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { CheckoutStatus, CheckoutStatusEnum } from './checkout-status';
 
 describe('CheckoutStatus Value Object', () => {

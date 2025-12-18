@@ -1,4 +1,5 @@
 import { FacebookOAuthProvider } from './facebook-oauth.provider';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SocialProfileDto } from '../../application/dtos/social-profile.dto';
 
 describe('FacebookOAuthProvider', () => {

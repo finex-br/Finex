@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { AuthenticateWithSocialUseCase } from './authenticate-with-social.use-case';
 import { IUserRepository } from '../../domain/ports/user-repository.interface';
 import { ISocialAccountRepository } from '../ports/social-account.repository.interface';

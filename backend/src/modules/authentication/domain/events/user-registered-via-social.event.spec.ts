@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { UserRegisteredViaSocialEvent } from './user-registered-via-social.event';
 import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 

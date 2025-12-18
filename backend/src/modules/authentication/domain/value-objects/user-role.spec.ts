@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { UserRole, UserRoleEnum } from './user-role';
 
 describe('UserRole Value Object', () => {

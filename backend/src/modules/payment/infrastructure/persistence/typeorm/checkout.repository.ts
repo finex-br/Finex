@@ -46,4 +46,13 @@ export class CheckoutRepository implements ICheckoutRepository {
 
     return schemas.map(schema => CheckoutMapper.toDomain(schema));
   }
+
+  async update(checkout: Checkout): Promise<void> {
+    const schema = CheckoutMapper.toPersistence(checkout);
+    await this.repository.save(schema);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.repository.delete(id);
+  }
 }

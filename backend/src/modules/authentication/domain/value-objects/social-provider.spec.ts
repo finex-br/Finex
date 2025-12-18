@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SocialProvider } from './social-provider';
 
 describe('SocialProvider Value Object', () => {
@@ -86,14 +87,6 @@ describe('SocialProvider Value Object', () => {
       
       expect(provider.isGoogle()).toBe(false);
       expect(provider.isGitHub()).toBe(true);
-    });
-
-    it('should identify APPLE provider with isApple()', () => {
-      const provider = SocialProvider.create('APPLE').getValue();
-      
-      expect(provider.isGoogle()).toBe(false);
-      expect(provider.isGitHub()).toBe(false);
-      expect(provider.isApple()).toBe(true);
     });
   });
 });

@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { Checkout } from './checkout';
 import { Amount } from '../value-objects/amount';
 import { CheckoutStatus } from '../value-objects/checkout-status';
