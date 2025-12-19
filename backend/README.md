@@ -6,7 +6,7 @@ Backend do sistema FinEx construído com Clean Architecture, Domain-Driven Desig
 
 **📊 Fases Implementadas:**
 - ✅ **Fase 1**: Autenticação Local (88 testes) - Email, Password, PhoneNumber
-- 🔄 **Fase 2**: OAuth Social (80 testes) - Google, GitHub, Apple, Facebook
+- 🔄 **Fase 2**: OAuth Social (80 testes) - Google, GitHub, Facebook
 
 ## 🚀 Início Rápido
 
@@ -44,7 +44,7 @@ npm run start:dev
 - **Banco de Dados**: PostgreSQL (migrar para DuckDB futuramente)
 - **Cache**: Redis
 - **ORM**: TypeORM
-- **Autenticação**: JWT + OAuth 2.0 (Google, GitHub, Apple, Facebook)
+- **Autenticação**: JWT + OAuth 2.0 (Google, GitHub, Facebook)
 - **Testes**: Jest (TDD) - 168 testes
 - **Validação**: class-validator
 
@@ -235,7 +235,7 @@ Content-Type: application/json
 #### Fase 2: Autenticação Social 🔜
 - [ ] Login com Google OAuth 2.0
 - [ ] Login com GitHub OAuth 2.0
-- [ ] Login com Apple Sign In
+- [ ] Login com GitHub OAuth
 - [ ] Vincular múltiplas contas sociais
 
 **Detalhes**: Ver [Plano de Autenticação](./docs/authentication-plan.md)

@@ -53,7 +53,7 @@ Planejamento completo da autenticação social (Phase 2).
 **Conteúdo:**
 - Estratégia OAuth 2.0
 - Sprints de implementação
-- Providers (Google, GitHub, Apple)
+- Providers (Google, GitHub, Facebook)
 - Endpoints da API
 - Fluxo de autenticação
 - Account linking
@@ -236,7 +236,7 @@ modules/authentication/
 ### 🔄 Fase 2: OAuth Social (Planejada)
 - [ ] Google OAuth
 - [ ] GitHub OAuth
-- [ ] Apple OAuth
+- [ ] GitHub OAuth
 - [ ] Account linking
 
 ### 📋 Fase 3: Features Futuras

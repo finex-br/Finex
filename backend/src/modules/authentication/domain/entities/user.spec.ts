@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { User } from './user';
 import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';

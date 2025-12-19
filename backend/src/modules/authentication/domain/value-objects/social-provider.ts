@@ -4,7 +4,6 @@ import { ValueObject } from '../../../../shared/core/value-object';
 export enum SocialProviderEnum {
   GOOGLE = 'GOOGLE',
   GITHUB = 'GITHUB',
-  APPLE = 'APPLE',
   FACEBOOK = 'FACEBOOK',
 }
 
@@ -45,10 +44,6 @@ export class SocialProvider extends ValueObject<SocialProviderProps> {
 
   public isGitHub(): boolean {
     return this.props.value === SocialProviderEnum.GITHUB;
-  }
-
-  public isApple(): boolean {
-    return this.props.value === SocialProviderEnum.APPLE;
   }
 
   public isFacebook(): boolean {

@@ -426,7 +426,7 @@ Login de usuário existente.
 ### Sprint 5: OAuth Social Authentication (Phase 2)
 - [ ] Google OAuth Strategy
 - [ ] GitHub OAuth Strategy
-- [ ] Apple OAuth Strategy
+- [ ] GitHub OAuth Strategy
 - [ ] Social account linking
 
 ### Sprint 6: Testing
@@ -475,9 +475,9 @@ Login de usuário existente.
 
 #### Value Objects (24 testes)
 - **SocialProvider** (14 testes)
-  - Enum: GOOGLE, GITHUB, APPLE, FACEBOOK
+  - Enum: GOOGLE, GITHUB, FACEBOOK
   - Validação case-insensitive
-  - Métodos: isGoogle(), isGitHub(), isApple(), isFacebook()
+  - Métodos: isGoogle(), isGitHub(), isFacebook()
 
 - **SocialAccountId** (10 testes)
   - ID do provider (string)
@@ -560,7 +560,7 @@ Login de usuário existente.
   - Suporte a redirectUri
 
 - **GitHubOAuthProvider** (padrão similar)
-- **AppleOAuthProvider** (padrão similar)  
+- **FacebookOAuthProvider** (padrão similar)
 - **FacebookOAuthProvider** (padrão similar)
 
 ---

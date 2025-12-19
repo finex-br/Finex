@@ -6,7 +6,7 @@ Sistema completo de gestão financeira, análise de maturidade de negócios e va
 
 ### ✅ Backend (200 testes passando)
 - **Autenticação completa** com JWT
-- **OAuth social** (Google, GitHub, Apple, Facebook)
+- **OAuth social** (Google, GitHub, Facebook)
 - **DDD + Clean Architecture**
 - **TDD rigoroso** (Red-Green-Refactor)
 

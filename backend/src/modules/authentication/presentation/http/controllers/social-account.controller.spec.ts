@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SocialAccountController } from './social-account.controller';
 import { LinkSocialAccountUseCase } from '../../../application/use-cases/link-social-account.use-case';
@@ -17,11 +18,6 @@ describe('SocialAccountController', () => {
 
   const mockGitHubProvider = {
     getProvider: jest.fn().mockReturnValue('GITHUB'),
-    exchangeCodeForProfile: jest.fn(),
-  };
-
-  const mockAppleProvider = {
-    getProvider: jest.fn().mockReturnValue('APPLE'),
     exchangeCodeForProfile: jest.fn(),
   };
 
@@ -57,10 +53,6 @@ describe('SocialAccountController', () => {
         {
           provide: 'GITHUB_OAUTH_PROVIDER',
           useValue: mockGitHubProvider,
-        },
-        {
-          provide: 'APPLE_OAUTH_PROVIDER',
-          useValue: mockAppleProvider,
         },
         {
           provide: 'FACEBOOK_OAUTH_PROVIDER',

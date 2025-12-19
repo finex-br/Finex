@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SocialAccountLinkedEvent } from './social-account-linked.event';
 import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 

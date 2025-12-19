@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SocialAccount } from './social-account';
 import { SocialProvider } from '../value-objects/social-provider';
 import { SocialAccountId } from '../value-objects/social-account-id';
