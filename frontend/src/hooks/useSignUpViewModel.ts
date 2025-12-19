@@ -112,7 +112,8 @@ export const useSignUpViewModel = () => {
     }
 
     // Valida senha - Caractere especial
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password)) {
+    // eslint-disable-next-line no-useless-escape
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]/.test(formData.password)) {
       setError('Senha deve conter pelo menos um caractere especial (!@#$%...)');
       return false;
     }
@@ -158,20 +159,22 @@ export const useSignUpViewModel = () => {
 
       // Redireciona para a tela de upload (onboarding)
       navigate('/upload');
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Trata erros da API
       console.error('Erro ao fazer cadastro:', err);
+      
+      const error = err as { response?: { data?: { message?: string | string[] } } };
       
       // Extrai mensagem de erro do backend
       let errorMessage = 'Erro ao criar conta. Tente novamente.';
       
-      if (err.response?.data?.message) {
+      if (error.response?.data?.message) {
         // Mensagem do backend NestJS
-        errorMessage = Array.isArray(err.response.data.message)
-          ? err.response.data.message.join(', ')
-          : err.response.data.message;
-      } else if (err.message) {
-        errorMessage = err.message;
+        errorMessage = Array.isArray(error.response.data.message)
+          ? error.response.data.message.join(', ')
+          : error.response.data.message;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
       }
       
       setError(errorMessage);

@@ -123,7 +123,7 @@ export const financialService = {
     companyId?: string,
     periodFilter?: PeriodFilter
   ): Promise<FinancialDataResponse> => {
-    const params: Record<string, any> = {};
+    const params: Record<string, string> = {};
     
     if (companyId) {
       params.companyId = companyId;
