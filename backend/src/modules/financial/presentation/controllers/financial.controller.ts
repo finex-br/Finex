@@ -3,7 +3,6 @@ import {
   Post,
   Get,
   Query,
-  // UseGuards,
   UseInterceptors,
   UploadedFile,
   Request,
@@ -11,7 +10,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-// import { JwtAuthGuard } from '../../../authentication/presentation/guards/jwt-auth.guard';
 import { ProcessExcelUseCase } from '../../application/use-cases/process-excel.use-case';
 import { GetFinancialDataUseCase } from '../../application/use-cases/get-financial-data.use-case';
 import { PeriodType } from '../../application/dtos/financial.dto';
@@ -21,9 +19,10 @@ import { PeriodType } from '../../application/dtos/financial.dto';
  * 
  * Endpoints HTTP para operações financeiras.
  * Delega toda lógica para Use Cases.
+ * 
+ * TODO: Adicionar @UseGuards(JwtAuthGuard) após merge com branch de autenticação
  */
 @Controller('financial')
-// @UseGuards(JwtAuthGuard) // TODO: Descomentar quando implementar autenticação
 export class FinancialController {
   constructor(
     private readonly processExcelUseCase: ProcessExcelUseCase,
@@ -125,8 +124,9 @@ export class FinancialController {
     try {
       console.log('[FinancialController] GET /financial/data chamado:', { period, startDate, endDate });
       
-      const companyId = req.user?.currentCompanyId || req.query?.companyId || 'default-company';
-      const userId = req.user?.id || req.query?.userId || 'default-user';
+      // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
+      const userId = req.user?.id || 'default-user';
+      const companyId = userId; // userId = companyId temporariamente
 
       console.log('[FinancialController] CompanyId:', companyId, 'UserId:', userId);
 

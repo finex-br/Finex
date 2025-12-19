@@ -61,6 +61,13 @@ export function UploadView() {
     // Isso isola dados por usuário (cada user vê apenas seus próprios dados)
     const companyId = user?.id || 'default-user';
     
+    console.log('[UploadView] Fazendo upload com:', { 
+      userId: user?.id, 
+      userName: user?.name,
+      companyId,
+      fileName: selectedFile.name 
+    });
+    
     // Chama o ViewModel (que chama o service, que chama o backend)
     const success = await uploadExcel(selectedFile, companyId);
     

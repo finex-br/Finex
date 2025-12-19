@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService, LoginCredentials } from '@/services/authService';
+import { useAuthStore } from '@/store/authStore';
 import { AxiosError } from 'axios';
 
 /**
@@ -39,6 +40,9 @@ export const useLoginViewModel = (): UseLoginViewModelReturn => {
   // Hook de navegação do React Router
   const navigate = useNavigate();
 
+  // Zustand store para autenticação
+  const { setAuth } = useAuthStore();
+
   /**
    * Handler do submit do formulário de login
    * 
@@ -76,11 +80,8 @@ export const useLoginViewModel = (): UseLoginViewModelReturn => {
       // Chama o serviço de autenticação
       const response = await authService.signIn(credentials);
 
-      // Salva o token no localStorage
-      localStorage.setItem('access_token', response.token);
-
-      // Salva os dados do usuário (opcional, mas útil)
-      localStorage.setItem('user', JSON.stringify(response.user));
+      // Salva autenticação no store (localStorage + Zustand)
+      setAuth(response.token, response.user);
 
       // Redireciona para o dashboard (não upload - já pode ter dados salvos)
       navigate('/dashboard');

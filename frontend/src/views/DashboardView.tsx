@@ -41,6 +41,12 @@ export function DashboardView() {
   useEffect(() => {
     // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
     const companyId = user?.id || 'default-user';
+    console.log('[DashboardView] useEffect triggered:', { 
+      userId: user?.id, 
+      userName: user?.name,
+      companyId, 
+      periodFilter 
+    });
     fetchFinancialData(companyId);
   }, [user?.id, periodFilter]);
 
@@ -89,6 +95,12 @@ export function DashboardView() {
 
   // LOTE 4: Estado vazio - NUNCA FEZ UPLOAD (totalTransactionsInSystem === 0)
   if (dashboardState === DashboardState.NO_UPLOAD) {
+    console.log('[DashboardView] NO_UPLOAD state:', { 
+      dashboardState, 
+      metadata, 
+      userId: user?.id,
+      isLoading 
+    });
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-lg text-center shadow-lg">
