@@ -55,11 +55,12 @@ export const useOAuthLogin = () => {
 
       // Redireciona para o dashboard
       navigate('/dashboard');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro no OAuth:', err);
       
-      const errorMessage = err.response?.data?.message 
-        || err.message 
+      const error = err as { response?: { data?: { message?: string } }, message?: string };
+      const errorMessage = error.response?.data?.message 
+        || error.message 
         || 'Erro ao fazer login com Google';
       
       setError(errorMessage);

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OAuthController } from './oauth.controller';
 import { AuthenticateWithSocialUseCase } from '../../../application/use-cases/authenticate-with-social.use-case';
@@ -15,11 +16,6 @@ describe('OAuthController', () => {
 
   const mockGitHubProvider = {
     getProvider: jest.fn().mockReturnValue('GITHUB'),
-    exchangeCodeForProfile: jest.fn(),
-  };
-
-  const mockAppleProvider = {
-    getProvider: jest.fn().mockReturnValue('APPLE'),
     exchangeCodeForProfile: jest.fn(),
   };
 
@@ -47,10 +43,6 @@ describe('OAuthController', () => {
         {
           provide: 'GITHUB_OAUTH_PROVIDER',
           useValue: mockGitHubProvider,
-        },
-        {
-          provide: 'APPLE_OAUTH_PROVIDER',
-          useValue: mockAppleProvider,
         },
         {
           provide: 'FACEBOOK_OAUTH_PROVIDER',
@@ -120,29 +112,6 @@ describe('OAuthController', () => {
         code: 'github-code',
         redirectUri: undefined,
       });
-    });
-
-    it('should authenticate with Apple', async () => {
-      const callbackDto: OAuthCallbackDto = {
-        code: 'apple-code',
-      };
-
-      const mockResult = {
-        accessToken: 'jwt-token-3',
-        refreshToken: 'refresh-token-3',
-        userId: 'user-id-3',
-      };
-
-      authenticateWithSocialUseCase.execute.mockResolvedValue({
-        isSuccess: true,
-        isFailure: false,
-        getValue: () => mockResult,
-        error: null,
-      } as any);
-
-      const result = await controller.callback('apple', callbackDto);
-
-      expect(result.accessToken).toBe('jwt-token-3');
     });
 
     it('should authenticate with Facebook', async () => {

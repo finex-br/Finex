@@ -11,15 +11,12 @@ export class OAuthProviderFactory {
     googleProvider: IOAuthProvider,
     @Inject('GITHUB_OAUTH_PROVIDER')
     githubProvider: IOAuthProvider,
-    @Inject('APPLE_OAUTH_PROVIDER')
-    appleProvider: IOAuthProvider,
     @Inject('FACEBOOK_OAUTH_PROVIDER')
     facebookProvider: IOAuthProvider,
   ) {
     this.providers = new Map([
       ['GOOGLE', googleProvider],
       ['GITHUB', githubProvider],
-      ['APPLE', appleProvider],
       ['FACEBOOK', facebookProvider],
     ]);
   }

@@ -18,7 +18,6 @@ import { OAuthController } from '../presentation/http/controllers/oauth.controll
 import { SocialAccountController } from '../presentation/http/controllers/social-account.controller';
 import { GoogleOAuthProvider } from './oauth/google-oauth.provider';
 import { GitHubOAuthProvider } from './oauth/github-oauth.provider';
-import { AppleOAuthProvider } from './oauth/apple-oauth.provider';
 import { FacebookOAuthProvider } from './oauth/facebook-oauth.provider';
 import { OAuthProviderFactory } from './oauth/oauth-provider.factory';
 import { EnvService } from '../../../shared/infra/env';
@@ -68,23 +67,6 @@ import { EnvService } from '../../../shared/infra/env';
           httpClient,
           envService.get('GITHUB_CLIENT_ID') || '',
           envService.get('GITHUB_CLIENT_SECRET') || '',
-        );
-      },
-      inject: [EnvService],
-    },
-    {
-      provide: 'APPLE_OAUTH_PROVIDER',
-      useFactory: (envService: EnvService) => {
-        const httpClient = {
-          post: async (url: string, data: any) => axios.post(url, data),
-          get: async (url: string, config?: any) => axios.get(url, config),
-        };
-        return new AppleOAuthProvider(
-          httpClient,
-          envService.get('APPLE_CLIENT_ID') || '',
-          envService.get('APPLE_TEAM_ID') || '',
-          envService.get('APPLE_KEY_ID') || '',
-          envService.get('APPLE_PRIVATE_KEY') || '',
         );
       },
       inject: [EnvService],

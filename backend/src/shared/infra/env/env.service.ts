@@ -45,4 +45,17 @@ export class EnvService {
   get redisUrl(): string {
     return this.get('REDIS_URL');
   }
+
+  // Payment Gateway Configuration
+  get asaasApiKey(): string {
+    return this.get('ASAAS_API_KEY');
+  }
+
+  get asaasEnvironment(): string {
+    return this.get('ASAAS_ENVIRONMENT') || 'sandbox';
+  }
+
+  get asaasWebhookSecret(): string {
+    return this.get('ASAAS_WEBHOOK_SECRET');
+  }
 }

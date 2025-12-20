@@ -2,7 +2,7 @@
 
 ## 🌐 Visão Geral
 
-OAuth 2.0 permite que usuários façam login usando suas contas existentes em serviços como Google, GitHub e Apple, sem criar nova senha.
+OAuth 2.0 permite que usuários façam login usando suas contas existentes em serviços como Google, GitHub e Facebook, sem criar nova senha.
 
 ## 📋 Configuração dos Providers (Fase 2 - FUTURO)
 
@@ -116,64 +116,6 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
 
 ---
 
-### 3. Apple Sign In
-
-#### Obter Credenciais:
-1. Acesse [Apple Developer Portal](https://developer.apple.com/)
-2. Vá para "Certificates, Identifiers & Profiles"
-3. Crie um "Services ID" para seu app
-4. Configure "Sign In with Apple"
-5. Baixe a chave privada (.p8)
-
-#### Variáveis de Ambiente:
-```env
-APPLE_CLIENT_ID=com.finex.service
-APPLE_TEAM_ID=ABCD123456
-APPLE_KEY_ID=KEY123ABC
-APPLE_CALLBACK_URL=https://seudominio.com/api/auth/apple/callback
-APPLE_PRIVATE_KEY_PATH=./keys/apple-private-key.p8
-```
-
-#### Passport Strategy:
-```typescript
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-apple';
-import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
-
-@Injectable()
-export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
-  constructor() {
-    super({
-      clientID: process.env.APPLE_CLIENT_ID,
-      teamID: process.env.APPLE_TEAM_ID,
-      keyID: process.env.APPLE_KEY_ID,
-      callbackURL: process.env.APPLE_CALLBACK_URL,
-      privateKeyString: fs.readFileSync(process.env.APPLE_PRIVATE_KEY_PATH, 'utf8'),
-      scope: ['name', 'email'],
-    });
-  }
-
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: any,
-  ): Promise<any> {
-    const { email, name } = profile;
-    const user = {
-      email,
-      firstName: name?.firstName,
-      lastName: name?.lastName,
-      accessToken,
-    };
-    done(null, user);
-  }
-}
-```
-
----
-
 ## 🏗️ Estrutura de Implementação
 
 ### Entidade: SocialAccount
@@ -182,7 +124,7 @@ export class AppleStrategy extends PassportStrategy(Strategy, 'apple') {
 // domain/entities/social-account.ts
 interface SocialAccountProps {
   userId: UniqueEntityID;
-  provider: SocialProvider; // GOOGLE | GITHUB | APPLE
+  provider: SocialProvider; // GOOGLE | GITHUB | FACEBOOK
   providerId: string;
   email: string;
   accessToken?: string;

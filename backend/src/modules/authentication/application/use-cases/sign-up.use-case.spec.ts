@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SignUpUseCase } from './sign-up.use-case';
 import { IUserRepository } from '../../domain/ports/user-repository.interface';
 import { ITokenService } from '../../domain/ports/token-service.interface';

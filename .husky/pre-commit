@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+cd backend
+
+# Type check
+echo "🔍 Running TypeScript type check..."
+npm run type-check || exit 1
+
+# Lint check
+echo "🔍 Running ESLint..."
+npm run lint:check || exit 1
+
+# Run tests
+echo "🧪 Running tests..."
+npm test || exit 1
+
+echo "✅ All checks passed!"

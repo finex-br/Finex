@@ -44,15 +44,12 @@ export class SocialAccountController {
     private readonly googleProvider: IOAuthProvider,
     @Inject('GITHUB_OAUTH_PROVIDER')
     private readonly githubProvider: IOAuthProvider,
-    @Inject('APPLE_OAUTH_PROVIDER')
-    private readonly appleProvider: IOAuthProvider,
     @Inject('FACEBOOK_OAUTH_PROVIDER')
     private readonly facebookProvider: IOAuthProvider,
   ) {
     this.providers = new Map([
       ['google', this.googleProvider],
       ['github', this.githubProvider],
-      ['apple', this.appleProvider],
       ['facebook', this.facebookProvider],
     ]);
   }

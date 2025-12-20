@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SocialProvider } from './social-provider';
 
 describe('SocialProvider Value Object', () => {
@@ -14,13 +15,6 @@ describe('SocialProvider Value Object', () => {
       
       expect(providerOrError.isSuccess).toBe(true);
       expect(providerOrError.getValue().value).toBe('GITHUB');
-    });
-
-    it('should create a valid APPLE provider', () => {
-      const providerOrError = SocialProvider.create('APPLE');
-      
-      expect(providerOrError.isSuccess).toBe(true);
-      expect(providerOrError.getValue().value).toBe('APPLE');
     });
 
     it('should create a valid FACEBOOK provider', () => {
@@ -86,7 +80,6 @@ describe('SocialProvider Value Object', () => {
       
       expect(provider.isGoogle()).toBe(true);
       expect(provider.isGitHub()).toBe(false);
-      expect(provider.isApple()).toBe(false);
     });
 
     it('should identify GITHUB provider with isGitHub()', () => {
@@ -94,15 +87,6 @@ describe('SocialProvider Value Object', () => {
       
       expect(provider.isGoogle()).toBe(false);
       expect(provider.isGitHub()).toBe(true);
-      expect(provider.isApple()).toBe(false);
-    });
-
-    it('should identify APPLE provider with isApple()', () => {
-      const provider = SocialProvider.create('APPLE').getValue();
-      
-      expect(provider.isGoogle()).toBe(false);
-      expect(provider.isGitHub()).toBe(false);
-      expect(provider.isApple()).toBe(true);
     });
   });
 });

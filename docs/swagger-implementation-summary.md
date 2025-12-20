@@ -120,7 +120,7 @@ SwaggerModule.setup('api/docs', app, document, {
 
 **Path Parameters:**
 - `provider` - OAuth provider name
-  - Enum: `google`, `github`, `apple`, `facebook`
+  - Enum: `google`, `github`, `facebook`
   - Example: `google`
 
 **Request Body:**
@@ -169,7 +169,7 @@ Authorization: Bearer <jwt_token>
 **Request Body:**
 ```typescript
 {
-  provider: string;      // GOOGLE, GITHUB, APPLE, FACEBOOK
+  provider: string;      // GOOGLE, GITHUB, FACEBOOK
   code: string;          // Authorization code from OAuth provider
   redirectUri?: string;  // Optional redirect URI
 }
@@ -203,7 +203,7 @@ Authorization: Bearer <jwt_token>
 **Request Body:**
 ```typescript
 {
-  provider: string;  // GOOGLE, GITHUB, APPLE, FACEBOOK
+  provider: string;  // GOOGLE, GITHUB, FACEBOOK
 }
 ```
 
@@ -241,7 +241,7 @@ Authorization: Bearer <jwt_token>
 
 #### 3. LinkSocialRequestDto
 ```typescript
-@ApiProperty({ enum: ['GOOGLE', 'GITHUB', 'APPLE', 'FACEBOOK'] })
+@ApiProperty({ enum: ['GOOGLE', 'GITHUB', 'FACEBOOK'] })
 provider: string;
 
 @ApiProperty() code: string;
@@ -250,7 +250,7 @@ provider: string;
 
 #### 4. UnlinkSocialRequestDto
 ```typescript
-@ApiProperty({ enum: ['GOOGLE', 'GITHUB', 'APPLE', 'FACEBOOK'] })
+@ApiProperty({ enum: ['GOOGLE', 'GITHUB', 'FACEBOOK'] })
 provider: string;
 ```
 
@@ -355,8 +355,8 @@ provider: string;
 - ✅ `401 Unauthorized` - Token JWT inválido/ausente
 
 ### Enum Types
-- ✅ Provider parameter: `google`, `github`, `apple`, `facebook`
-- ✅ Provider DTO: `GOOGLE`, `GITHUB`, `APPLE`, `FACEBOOK`
+- ✅ Provider parameter: `google`, `github`, `facebook`
+- ✅ Provider DTO: `GOOGLE`, `GITHUB`, `FACEBOOK`
 
 ### Validation Decorators
 - ✅ `@IsEmail()` - Email validation
