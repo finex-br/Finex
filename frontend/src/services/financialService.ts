@@ -35,13 +35,32 @@ export interface MonthlyData {
 
 export interface CategoryData {
   category: string;
-  amount: number;
-  percentage: number;
+  revenue: number;
+  expense: number;
+  total: number;
 }
 
 export interface TrendData {
   date: string;
-  amount: number;
+  revenue: number;
+  expense: number;
+  profit: number;
+}
+
+/**
+ * NOVO (Lote 5): Graph-specific filter types
+ * Permite filtros independentes para cada gráfico
+ */
+export enum GraphType {
+  TREND = 'TREND',
+  CATEGORY = 'CATEGORY',
+  MONTHLY = 'MONTHLY',
+}
+
+export interface GraphFilters {
+  trend?: PeriodFilter;
+  category?: PeriodFilter;
+  monthly?: PeriodFilter;
 }
 
 /**

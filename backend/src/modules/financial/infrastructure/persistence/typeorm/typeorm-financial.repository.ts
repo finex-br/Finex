@@ -143,17 +143,45 @@ export class TypeORMFinancialRepository implements IFinancialRepository {
       ? await this.findByCompanyIdAndPeriod(companyId, startDate, endDate)
       : await this.findByCompanyId(companyId);
 
-    const monthlyMap = new Map<string, { revenue: number; expense: number }>();
+    // Determinar granularidade baseada no período
+    const daysDiff = startDate && endDate 
+      ? Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+      : 365;
+
+    // LOTE 5: Granularidade dinâmica
+    // - Até 31 dias (WEEK/MONTH): agregar por dia
+    // - 32-180 dias (QUARTER): agregar por semana  
+    // - Mais de 180 dias (SEMESTER/YEAR): agregar por mês
+    const groupByMonth = daysDiff > 180;
+    const groupByWeek = daysDiff > 31 && daysDiff <= 180;
+
+    const dataMap = new Map<string, { revenue: number; expense: number }>();
 
     transactions.forEach(t => {
-      const month = t.date.toISOString().substring(0, 7);
-      if (!monthlyMap.has(month)) monthlyMap.set(month, { revenue: 0, expense: 0 });
-      const data = monthlyMap.get(month)!;
+      let key: string;
+      
+      if (groupByMonth) {
+        // Agrupar por mês (YYYY-MM)
+        key = t.date.toISOString().substring(0, 7);
+      } else if (groupByWeek) {
+        // Agrupar por semana (aproximado: YYYY-MM-DD do início da semana)
+        const date = new Date(t.date);
+        const dayOfWeek = date.getDay();
+        const startOfWeek = new Date(date);
+        startOfWeek.setDate(date.getDate() - dayOfWeek);
+        key = startOfWeek.toISOString().substring(0, 10);
+      } else {
+        // Agrupar por dia (YYYY-MM-DD)
+        key = t.date.toISOString().substring(0, 10);
+      }
+
+      if (!dataMap.has(key)) dataMap.set(key, { revenue: 0, expense: 0 });
+      const data = dataMap.get(key)!;
       if (t.type.isRevenue()) data.revenue += t.amount.amount;
       else data.expense += t.amount.amount;
     });
 
-    return Array.from(monthlyMap.entries())
+    return Array.from(dataMap.entries())
       .map(([month, data]) => ({ month, ...data }))
       .sort((a, b) => a.month.localeCompare(b.month));
   }

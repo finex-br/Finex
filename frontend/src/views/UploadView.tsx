@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, LogOut, FileSpreadsheet, Loader2, CheckCircle2 } from 'lucide-react';
 import { useFinancialData } from '@/hooks/useFinancialData';
 import { useAuthStore } from '@/store/authStore';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 /**
  * UploadView - Componente Presentacional (Dumb Component)
@@ -84,23 +85,26 @@ export function UploadView() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header com botão de logout */}
-      <header className="bg-white border-b shadow-sm">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <FileSpreadsheet className="w-6 h-6 text-orange-600" />
-            <h1 className="text-xl font-bold text-slate-900">Importar Planilha</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Importar Planilha</h1>
           </div>
           
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className="border-red-200 text-red-600 hover:bg-red-50"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 

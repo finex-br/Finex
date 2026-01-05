@@ -8,6 +8,8 @@ import {
   PeriodFilter,
   PeriodType,
   FinancialDataMetadata,
+  GraphFilters,
+  GraphType,
 } from '@/services/financialService';
 import { AxiosError } from 'axios';
 
@@ -56,6 +58,39 @@ export const useFinancialData = () => {
 
   // Estado para filtro de período
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter | undefined>(undefined);
+
+  // NOVO (Lote 5): Filtros individuais por gráfico
+  const [graphFilters, setGraphFilters] = useState<GraphFilters>({});
+
+  /**
+   * NOVO (Lote 5): Define filtro para um gráfico específico
+   */
+  const setGraphFilter = (graphType: GraphType, filter: PeriodFilter | undefined) => {
+    setGraphFilters(prev => ({
+      ...prev,
+      [graphType.toLowerCase()]: filter,
+    }));
+  };
+
+  /**
+   * NOVO (Lote 5): Reseta filtro de um gráfico para usar o filtro global
+   */
+  const resetGraphFilter = (graphType: GraphType) => {
+    setGraphFilters(prev => {
+      const updated = { ...prev };
+      delete updated[graphType.toLowerCase() as keyof GraphFilters];
+      return updated;
+    });
+  };
+
+  /**
+   * NOVO (Lote 5): Retorna o filtro efetivo para um gráfico
+   * (filtro individual ou global)
+   */
+  const getEffectiveFilter = (graphType: GraphType): PeriodFilter | undefined => {
+    const graphFilterKey = graphType.toLowerCase() as keyof GraphFilters;
+    return graphFilters[graphFilterKey] || periodFilter;
+  };
 
   /**
    * Estado do Dashboard calculado baseado em metadata (Lote 3)
@@ -149,6 +184,38 @@ export const useFinancialData = () => {
   };
 
   /**
+   * NOVO (Lote 5): Busca dados para um gráfico específico com filtro individual
+   */
+  const fetchGraphData = async (
+    graphType: GraphType,
+    companyId?: string,
+    filter?: PeriodFilter
+  ): Promise<void> => {
+    try {
+      console.log('[useFinancialData] Buscando dados para gráfico:', { graphType, filter });
+      const data = await financialService.getFinancialData(companyId, filter);
+      
+      // Atualizar apenas os dados do gráfico específico
+      switch (graphType) {
+        case GraphType.TREND:
+          setTrendData(data.trendData);
+          break;
+        case GraphType.CATEGORY:
+          setCategoryData(data.categoryData);
+          break;
+        case GraphType.MONTHLY:
+          setMonthlyData(data.monthlyData);
+          break;
+      }
+      
+      console.log('[useFinancialData] Dados do gráfico atualizados:', graphType);
+    } catch (err) {
+      console.error('[useFinancialData] Erro ao buscar dados do gráfico:', err);
+      // Não definimos erro global aqui para não afetar todo o dashboard
+    }
+  };
+
+  /**
    * Limpa todos os dados (útil para logout ou troca de empresa)
    */
   const clearData = () => {
@@ -189,5 +256,12 @@ export const useFinancialData = () => {
     // NOVO (Lote 3): Metadata e estado inteligente
     metadata,
     dashboardState,  // Use ESTE em vez de hasData!
+
+    // NOVO (Lote 5): Filtros individuais por gráfico
+    graphFilters,
+    setGraphFilter,
+    resetGraphFilter,
+    getEffectiveFilter,
+    fetchGraphData,
   };
 };

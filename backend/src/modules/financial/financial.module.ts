@@ -33,7 +33,7 @@ import { FinancialTransactionSchema } from './infrastructure/persistence/typeorm
     // Repositories (PostgreSQL via TypeORM)
     {
       provide: 'IFinancialRepository',
-      useClass: TypeORMFinancialRepository,
+      useClass: TypeORMFinancialRepository,                                                    
     },
     
     // Use Cases

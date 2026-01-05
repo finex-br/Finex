@@ -6,8 +6,12 @@ import { Button } from '@/components/ui/button';
 import { useFinancialData, DashboardState } from '@/hooks/useFinancialData';
 import { useAuthStore } from '@/store/authStore';
 import { DateFilter } from '@/components/DateFilter';
-import { FinancialCharts } from '@/components/FinancialCharts';
+import { TrendChart } from '@/components/charts/TrendChart';
+import { CategoryChart } from '@/components/charts/CategoryChart';
+import { MonthlyChart } from '@/components/charts/MonthlyChart';
 import { EmptyPeriodBanner } from '@/components/EmptyPeriodBanner';
+import { GraphType } from '@/services/financialService';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 /**
  * DashboardView - Componente Presentacional (Dumb Component)
@@ -34,7 +38,13 @@ export function DashboardView() {
     error,
     periodFilter,
     setPeriodFilter,
-    fetchFinancialData 
+    fetchFinancialData,
+    // NOVO (Lote 5): Funções para filtros individuais
+    graphFilters,
+    setGraphFilter,
+    resetGraphFilter,
+    getEffectiveFilter,
+    fetchGraphData,
   } = useFinancialData();
 
   // Busca dados ao montar o componente ou quando periodFilter mudar
@@ -49,6 +59,28 @@ export function DashboardView() {
     });
     fetchFinancialData(companyId);
   }, [user?.id, periodFilter]);
+
+  /**
+   * NOVO (Lote 5): Handler para mudança de filtro individual de gráfico
+   */
+  const handleGraphFilterChange = async (graphType: GraphType, filter: any) => {
+    const companyId = user?.id || 'default-user';
+    setGraphFilter(graphType, filter);
+    
+    // Busca dados apenas para o gráfico específico
+    await fetchGraphData(graphType, companyId, filter);
+  };
+
+  /**
+   * NOVO (Lote 5): Handler para resetar filtro de gráfico para o global
+   */
+  const handleResetGraphFilter = async (graphType: GraphType) => {
+    const companyId = user?.id || 'default-user';
+    resetGraphFilter(graphType);
+    
+    // Busca dados com filtro global
+    await fetchGraphData(graphType, companyId, periodFilter);
+  };
 
   // Formata valores em Real Brasileiro
   const formatCurrency = (value: number): string => {
@@ -135,23 +167,26 @@ export function DashboardView() {
 
   // Dashboard com dados
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 shadow-sm">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-orange-600">FinEx</h1>
-              <p className="text-sm text-slate-600 mt-1">Dashboard Financeiro</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Dashboard Financeiro</p>
             </div>
-            <Button
-              onClick={() => navigate('/upload')}
-              variant="outline"
-              className="border-orange-600 text-orange-600 hover:bg-orange-50"
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Nova Importação
-            </Button>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <Button
+                onClick={() => navigate('/upload')}
+                variant="outline"
+                className="border-orange-600 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Nova Importação
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -232,12 +267,38 @@ export function DashboardView() {
           </Card>
         </div>
 
-        {/* Gráficos Financeiros */}
-        <FinancialCharts 
-          categoryData={categoryData}
-          trendData={trendData}
-          monthlyData={monthlyData}
-        />
+        {/* Gráficos Financeiros - LOTE 5: Individualizados com filtros próprios */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Gráfico de Tendência (Largura Total) */}
+          <TrendChart
+            trendData={trendData}
+            currentFilter={getEffectiveFilter(GraphType.TREND)}
+            globalFilter={periodFilter}
+            onFilterChange={handleGraphFilterChange}
+            onResetFilter={handleResetGraphFilter}
+            companyId={user?.id || 'default-user'}
+          />
+
+          {/* Gráfico de Categorias */}
+          <CategoryChart
+            categoryData={categoryData}
+            currentFilter={getEffectiveFilter(GraphType.CATEGORY)}
+            globalFilter={periodFilter}
+            onFilterChange={handleGraphFilterChange}
+            onResetFilter={handleResetGraphFilter}
+            companyId={user?.id || 'default-user'}
+          />
+
+          {/* Gráfico Mensal */}
+          <MonthlyChart
+            monthlyData={monthlyData}
+            currentFilter={getEffectiveFilter(GraphType.MONTHLY)}
+            globalFilter={periodFilter}
+            onFilterChange={handleGraphFilterChange}
+            onResetFilter={handleResetGraphFilter}
+            companyId={user?.id || 'default-user'}
+          />
+        </div>
 
         {/* Informações adicionais */}
         <div className="mt-6 text-center text-sm text-slate-500">
