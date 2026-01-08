@@ -25,7 +25,7 @@ export class QuestionSchema {
   @Column('varchar')
   type: string;
 
-  @Column('jsonb', { nullable: true })
+  @Column('jsonb', { name: 'options_json', nullable: true })
   options: string[] | null;
 
   @Column('int', { name: 'order_index' })

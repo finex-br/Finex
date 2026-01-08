@@ -11,6 +11,8 @@ import { SignUpView } from "./views/SignUpView";
 import { UploadView } from "./views/UploadView";
 import { DashboardView } from "./views/DashboardView";
 import { GoogleCallbackView } from "./views/GoogleCallbackView";
+import { SurveysListView } from "./views/SurveysListView";
+import { SurveyQuestionnaireView } from "./views/SurveyQuestionnaireView";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +77,26 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <DashboardView />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Rota Protegida - Lista de Surveys */}
+              <Route 
+                path="/surveys" 
+                element={
+                  <ProtectedRoute>
+                    <SurveysListView />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Rota Protegida - Questionário */}
+              <Route 
+                path="/surveys/:assessmentId" 
+                element={
+                  <ProtectedRoute>
+                    <SurveyQuestionnaireView />
                   </ProtectedRoute>
                 } 
               />

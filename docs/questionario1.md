@@ -1,0 +1,23 @@
+1 - Hoje qual cargo você ocupa em sua empresa? - Dropdown com opção de seleção de apenas 1 alternativa - 4 opções: "Sócio", "Diretor", "Gerente ou Head", "Analista ou outro cargo operacional"
+2 - Qual o nome do seu negócio? - Texto comum
+3 - Qual o CNPJ do seu negócio? - Texto específico para CNPJ
+4 - Hoje se você, ou algum de seus sócios, deixa de trabalhar por 30 dias ou mais, o que acontece? - Dropdown com opção de seleção de apenas 1 alternativa - 5 opções: "Nada, meu negócio já funciona bem sem minha participação ativa", "Voltarei com a empresa um pouco bagunçada, mas nada demais", "Voltarei com meus funcionários ou sócios desesperados por terem assumido minhas tarefas", "Receberei alguma ligação ou mensagem de alguém da minha equipe pedindo ajuda, não consigo ficar 30 dias fora sem alguém precisar de mim", "Não posso ficar 30 dias ou mais longe do meu negócio, sem meu esforço não operamos"
+5 - Já fez seu planejamento para a reforma tributária? - Dropdown com opção de seleção de apenas 1 alternativa - 2 opções: "Sim", "Não"
+6 - Sua empresa vende produtos físicos, produtos digitais (SaaS ou aplicativo) ou presta serviços? - Dropdown com opção de seleção de apenas 1 alternativa - 6 opções: "Produtos físicos", "Produtos Digitais", "Serviços", "Produtos físicos e Serviços", "Produtos digitais e Serviços", "Todos"
+7 - Qual a sua média de faturamento atual (faturamento mensal)? - Dropdown com opção de seleção de apenas 1 alternativa - 7 opções: "Menos de R$ 10.000,00", "Entre R$ 10.000,00 e 50.000,00", "Entre R$ 50.000,00 e R$ 100.000,00", "Entre R$ 100.000,00 e 300.000,00", "Entre R$ 300.000,00 e 500.000,00", "Entre R$ 500.000,00 e R$ 1.000.000,00", "Mais de R$ 1.000.000,00"
+8 - Quantas pessoas trabalham na sua empresa atualmente, contando com os sócios? - Apenas número
+9 - Há quanto tempo sua empresa está em funcionamento? - Apenas número
+10 - Você possui controle atualizado de Contas a Pagar e Receber? - Dropdown com opção de seleção de apenas 1 alternativa - 2 opções: "Sim", "Não"
+11 - Onde você registra seus dados financeiros? - Dropdown com opção de seleção de apenas 1 alternativa - 5 opções: "Não registro meus dados financeiros", "Registro em papel", "Registro em planilha", "Registro no meu ERP", "Não sei dizer, apenas passo para a equipe do financeiro"
+Página 3:
+12 - Sua empresa possui processos documentados? - Dropdown com opção de seleção de apenas 1 alternativa - 4 opções: "Não tenho", "Possuo alguns processos mapeados", "Maioria dos meus processos estão mapeados", "Praticamente todos os meus processos estão mapeados"
+13 - Hoje quem toma as decisões no seu negócio? - Dropdown com opção de seleção de apenas 1 alternativa - 4 opções: "Eu decido tudo", "Eu e meus sócios", "As decisões são tomadas sempre em equipe", "Preciso tomar decisões raramente" 
+14 - Você diria que os acordos com fornecedores, parceiros e funcionários estão bem claros para ambas as partes? - Dropdown com opção de seleção de apenas 1 alternativa - 4 opções: "Sim, todos os combinados estão claros e todos sabem o que devem entregar", "Diria que a maioria, mas não todos, os comentários estão bem claros", "Poucos combinados estão firmados e bem claros para todos", "No momento não tenho combinados bem claros para todos os lados"
+15 - Você possui algum endividamento relevante hoje? - Dropdown com opção de seleção de apenas 1 alternativa - 2 opções: "Sim", "Não"
+16 - Com que frequência você revisa indicadores ou relatórios financeiros? - Dropdown com opção de seleção de apenas 1 alternativa - 7 opções: "Anualmente", "Semestralmente", "Trimestralmente", "Mensalmente", "Semanalmente", "Diariamente", "Nunca"
+17 - Você já tem planejamento estratégico e orçamentário? - Dropdown com opção de seleção de apenas 1 alternativa - 5 opções: "Não possuo nenhum atualmente", "Possuo um planejamento estratégico feito por mim e/ou por minha equipe", "Possuo planejamento estratégico feito por uma consultoria", "Possuo plano orçamentário feito por mim e/ou por minha equipe", "Possuo plano orçamentário feito por uma consultoria", "Possuo ambos"
+18 - Qual é sua maior prioridade agora? - Texto Comum
+19 - O que você espera ver imediatamente dentro da FinEx? - Texto Comum
+20 - Você deseja falar com um especialista para acelerar evolução do seu negócio? - Dropdown com opção de seleção de apenas 1 alternativa - 2 opções: "Sim", "Não"
+21 - Você enxerga oportunidades de novos negócios dentro do seu negócio? Quais seriam elas? - Texto Comum 
+22 - Para Finalizar, envie sua planilha de histórico de Contas a Pagar e Contas a Receber. Caso prefira, pode encaminhar somente sua planilha de Fluxo de Caixa. - Campo para upload de múltiplos arquivos

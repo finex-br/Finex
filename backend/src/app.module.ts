@@ -22,7 +22,7 @@ export class AppController {
         type: 'postgres',
         url: envService.databaseUrl,
         entities: [__dirname + '/**/*.schema{.ts,.js}'],
-        synchronize: envService.nodeEnv === 'development',
+        synchronize: false, // Desabilitado - usamos migrations ou SQL scripts
         logging: envService.nodeEnv === 'development',
       }),
     }),

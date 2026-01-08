@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Param, Query, Body, UseGuards, Headers, UnauthorizedException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { StartAssessmentUseCase } from '../../application/use-cases/start-assessment/start-assessment.use-case';
 import { GetQuestionsUseCase } from '../../application/use-cases/get-questions/get-questions.use-case';
@@ -7,6 +7,7 @@ import { CompleteAssessmentUseCase } from '../../application/use-cases/complete-
 import { GetPendingAssessmentsUseCase } from '../../application/use-cases/get-pending-assessments/get-pending-assessments.use-case';
 import { StartAssessmentDto } from '../dto/start-assessment.dto';
 import { SubmitAnswersDto } from '../dto/submit-answers.dto';
+import { DataSource } from 'typeorm';
 
 @ApiTags('User - Surveys')
 @ApiBearerAuth()
@@ -18,11 +19,46 @@ export class UserSurveyController {
     private readonly submitAnswersUseCase: SubmitAnswersUseCase,
     private readonly completeAssessmentUseCase: CompleteAssessmentUseCase,
     private readonly getPendingAssessmentsUseCase: GetPendingAssessmentsUseCase,
+    private readonly dataSource: DataSource,
   ) {}
+
+  private extractUserIdFromToken(authorization: string): string {
+    if (!authorization || !authorization.startsWith('Bearer ')) {
+      throw new UnauthorizedException('No token provided');
+    }
+
+    const token = authorization.substring(7);
+    try {
+      // Decode JWT without verification (temporary solution)
+      const base64Payload = token.split('.')[1];
+      const payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString());
+      // JWT usa 'sub' (subject) como campo padrao para userId
+      const userId = payload.sub || payload.userId;
+      return userId;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+
+  private async getCompanyIdForUser(userId: string): Promise<string> {
+    const result = await this.dataSource.query(
+      'SELECT company_id FROM company_members WHERE user_id = $1 AND is_active = true LIMIT 1',
+      [userId]
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error('User is not associated with any company');
+    }
+
+    return result[0].company_id;
+  }
 
   @Get('pending')
   @ApiOperation({ summary: 'Get pending surveys for company' })
-  async getPendingAssessments(@Query('companyId') companyId: string) {
+  async getPendingAssessments(@Headers('authorization') authorization: string) {
+    const userId = this.extractUserIdFromToken(authorization);
+    const companyId = await this.getCompanyIdForUser(userId);
+
     const result = await this.getPendingAssessmentsUseCase.execute({ companyId });
 
     if (result.isFailure) {
@@ -36,10 +72,13 @@ export class UserSurveyController {
   @ApiOperation({ summary: 'Start or resume assessment' })
   async startAssessment(
     @Param('surveyId') surveyId: string,
-    @Body() dto: StartAssessmentDto,
+    @Headers('authorization') authorization: string,
   ) {
+    const userId = this.extractUserIdFromToken(authorization);
+    const companyId = await this.getCompanyIdForUser(userId);
+
     const result = await this.startAssessmentUseCase.execute({
-      companyId: dto.companyId,
+      companyId,
       surveyId,
     });
 

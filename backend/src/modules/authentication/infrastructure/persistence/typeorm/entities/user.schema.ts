@@ -12,24 +12,18 @@ export class UserSchema {
   @Column({ unique: true })
   email: string;
 
-  @Column()
-  password: string;
+  @Column({ name: 'password_hash' })
+  passwordHash: string;
 
-  @Column()
-  name: string;
+  @Column({ name: 'full_name', nullable: true })
+  fullName: string;
 
-  @Column()
-  phoneNumber: string;
-
-  @Column()
+  @Column({ default: 'USER' })
   role: string;
 
-  @Column({ default: true })
-  isActive: boolean;
-
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
