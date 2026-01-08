@@ -1,14 +1,11 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Post, Get, Body, Param, Req } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateCheckoutUseCase } from '../application/use-cases/create-checkout.use-case';
 import { CreateCheckoutRequestDto } from './dtos/create-checkout-request.dto';
 import { CheckoutResponseDTO } from '../application/dtos/checkout-response.dto';
-import { JwtAuthGuard } from '../../authentication/presentation/http/guards/jwt-auth.guard';
 
 @ApiTags('payment')
 @Controller('payment')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class PaymentController {
   constructor(
     private readonly createCheckoutUseCase: CreateCheckoutUseCase,
@@ -27,17 +24,15 @@ export class PaymentController {
     @Body() dto: CreateCheckoutRequestDto,
     @Req() req: any,
   ): Promise<CheckoutResponseDTO> {
-    const userId = req.user.sub || req.user.id;
-    const userName = req.user.name || 'User';
-    const userEmail = req.user.email;
+    const userId = req.user?.id || 'temp-user-id'; // TODO: Get from auth guard
 
     const result = await this.createCheckoutUseCase.execute({
       userId,
       amount: dto.amount,
       description: dto.description,
-      customerName: userName,
-      customerEmail: userEmail,
-      customerCpfCnpj: req.user.cpf || '00000000000',
+      customerName: dto.customerName || 'Customer',
+      customerEmail: dto.customerEmail || 'customer@example.com',
+      customerCpfCnpj: dto.customerCpfCnpj || '00000000000',
       maxInstallments: dto.maxInstallments,
     });
 

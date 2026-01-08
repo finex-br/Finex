@@ -31,4 +31,31 @@ export class CreateCheckoutRequestDto {
   @Min(1, { message: 'Installments must be at least 1' })
   @Max(12, { message: 'Installments cannot exceed 12' })
   maxInstallments?: number;
+
+  @ApiProperty({
+    description: 'Customer name',
+    example: 'João Silva',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  customerName?: string;
+
+  @ApiProperty({
+    description: 'Customer email',
+    example: 'joao@example.com',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  customerEmail?: string;
+
+  @ApiProperty({
+    description: 'Customer CPF or CNPJ',
+    example: '12345678901',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  customerCpfCnpj?: string;
 }

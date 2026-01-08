@@ -4,6 +4,7 @@ import { EnvModule, EnvService } from './shared/infra/env';
 import { AuthenticationModule } from './modules/authentication/infrastructure/authentication.module';
 import { FinancialModule } from './modules/financial/financial.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { SurveyModule } from './modules/survey/survey.module';
 
 @Controller()
 export class AppController {
@@ -22,13 +23,14 @@ export class AppController {
         type: 'postgres',
         url: envService.databaseUrl,
         entities: [__dirname + '/**/*.schema{.ts,.js}'],
-        synchronize: envService.nodeEnv === 'development',
+        synchronize: false, // Desabilitado - usamos migrations ou SQL scripts
         logging: envService.nodeEnv === 'development',
       }),
     }),
     AuthenticationModule,
     FinancialModule,
     PaymentModule,
+    SurveyModule,
   ],
   controllers: [AppController],
 })

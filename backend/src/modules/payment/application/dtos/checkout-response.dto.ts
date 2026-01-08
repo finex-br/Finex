@@ -4,21 +4,21 @@ import { ApiProperty } from '@nestjs/swagger';
  * Response DTO for checkout operations
  */
 export class CheckoutResponseDTO {
-  @ApiProperty({ description: 'Unique checkout identifier' })
+  @ApiProperty()
   checkoutId: string;
 
-  @ApiProperty({ description: 'URL for completing the checkout' })
+  @ApiProperty()
   checkoutUrl: string;
 
-  @ApiProperty({ description: 'Amount in BRL' })
+  @ApiProperty()
   amount: number;
 
-  @ApiProperty({ description: 'Payment description' })
+  @ApiProperty()
   description: string;
 
-  @ApiProperty({ description: 'Current checkout status' })
+  @ApiProperty()
   status: string;
 
-  @ApiProperty({ description: 'Checkout expiration date', required: false })
+  @ApiProperty({ required: false })
   expiresAt?: Date;
 }

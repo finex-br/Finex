@@ -43,7 +43,7 @@ export class SignInUseCase implements IUseCase<SignInDTO, Result<AuthResponseDTO
         id: user.id.toString(),
         email: user.email.value,
         name: user.name,
-        phoneNumber: user.phoneNumber.value,
+        phoneNumber: user.phoneNumber?.value || '',
         role: user.role.value,
         isActive: user.isActive,
         createdAt: user.createdAt,

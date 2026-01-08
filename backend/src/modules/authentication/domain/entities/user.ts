@@ -12,7 +12,7 @@ interface UserProps {
   email: Email;
   password: Password;
   name: string;
-  phoneNumber: PhoneNumber;
+  phoneNumber?: PhoneNumber;
   role?: UserRole;
   isActive: boolean;
   createdAt: Date;
@@ -41,7 +41,7 @@ export class User extends Entity<UserProps> {
     return this.props.name;
   }
 
-  get phoneNumber(): PhoneNumber {
+  get phoneNumber(): PhoneNumber | undefined {
     return this.props.phoneNumber;
   }
 
@@ -135,11 +135,6 @@ export class User extends Entity<UserProps> {
 
     if (props.name.trim().length < 2) {
       return Result.fail<User>('User name must have at least 2 characters');
-    }
-
-    // Validate phoneNumber
-    if (!props.phoneNumber) {
-      return Result.fail<User>('User phoneNumber is required');
     }
 
     // Default role to ENTREPRENEUR
