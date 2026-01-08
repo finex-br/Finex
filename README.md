@@ -12,11 +12,16 @@ Sistema completo de gestão financeira, análise de maturidade de negócios e va
 
 ## 📚 Documentação Rápida
 
+### Desenvolvimento
 - **[Quick Start](./docs/QUICKSTART.md)** - Rode o backend em 3 passos
 - **[Resumo Técnico](./docs/PROJECT-SUMMARY.md)** - Arquitetura e componentes implementados
 - **[Backend README](./backend/README.md)** - Guia completo do backend
 - **[TDD Workflow](./docs/getting-started.md)** - Como desenvolvemos com TDD
 - **[OAuth Guide](./docs/oauth-reference.md)** - Autenticação social (Phase 2)
+
+### Deploy
+- **[🚀 Deploy Rápido](./docs/DEPLOY-QUICKSTART.md)** - Deploy em 5 minutos
+- **[📖 Guia Completo de Deploy](./docs/DEPLOY-GUIDE.md)** - Documentação detalhada
 
 ## 📁 Estrutura do Projeto
 

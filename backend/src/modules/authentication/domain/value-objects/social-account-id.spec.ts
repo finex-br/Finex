@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SocialAccountId } from './social-account-id';
 
 describe('SocialAccountId Value Object', () => {

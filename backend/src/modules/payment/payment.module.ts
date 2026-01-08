@@ -1,19 +1,31 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { CheckoutSchema } from './infrastructure/persistence/typeorm/schemas/checkout.schema';
 import { CheckoutRepository } from './infrastructure/persistence/typeorm/checkout.repository';
 import { AsaasPaymentProvider } from './infrastructure/providers/asaas-payment.provider';
 import { CreateCheckoutUseCase } from './application/use-cases/create-checkout.use-case';
 import { PaymentController } from './presentation/payment.controller';
+import { AsaasWebhookController } from './presentation/asaas-webhook.controller';
+import { JwtAuthGuard } from '../authentication/presentation/http/guards/jwt-auth.guard';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([CheckoutSchema]),
     ConfigModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '24h' },
+      }),
+    }),
   ],
-  controllers: [PaymentController],
+  controllers: [PaymentController, AsaasWebhookController],
   providers: [
+    JwtAuthGuard,
     CheckoutRepository,
     {
       provide: 'ICheckoutRepository',

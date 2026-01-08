@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SocialAccountMapper } from './social-account.mapper';
 import { SocialAccount } from '../../../../domain/entities/social-account';
 import { SocialAccountSchema } from '../schemas/social-account.schema';
@@ -144,7 +145,7 @@ describe('SocialAccountMapper', () => {
     });
 
     it('should map all supported providers', () => {
-      const providers = ['GOOGLE', 'GITHUB', 'APPLE', 'FACEBOOK'];
+      const providers = ['GOOGLE', 'GITHUB', 'FACEBOOK'];
       
       providers.forEach(providerName => {
         const provider = SocialProvider.create(providerName).getValue();

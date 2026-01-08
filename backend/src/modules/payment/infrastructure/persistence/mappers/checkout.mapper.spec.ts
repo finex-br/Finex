@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { CheckoutMapper } from './checkout.mapper';
 import { Checkout } from '../../../domain/entities/checkout';
 import { CheckoutSchema } from '../typeorm/schemas/checkout.schema';

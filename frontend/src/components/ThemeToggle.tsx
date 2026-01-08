@@ -1,33 +1,36 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 interface ThemeToggleProps {
-  isCollapsed?: boolean;
+  variant?: "default" | "outline" | "ghost";
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
-export function ThemeToggle({ isCollapsed = false }: ThemeToggleProps) {
+/**
+ * ThemeToggle Component
+ * 
+ * Toggle entre modo claro e escuro
+ * Funciona com next-themes para persistir preferência do usuário
+ */
+export function ThemeToggle({ variant = "outline", size = "icon" }: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
 
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   return (
-    <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className={cn(
-        "w-full sidebar-item",
-        isCollapsed && "justify-center"
-      )}
+    <Button
+      variant={variant}
+      size={size}
+      onClick={toggleTheme}
+      className="relative"
+      title={theme === "dark" ? "Mudar para modo claro" : "Mudar para modo escuro"}
     >
-      {theme === "dark" ? (
-        <Sun className="w-5 h-5 flex-shrink-0" />
-      ) : (
-        <Moon className="w-5 h-5 flex-shrink-0" />
-      )}
-      {!isCollapsed && (
-        <span className="font-medium">
-          {theme === "dark" ? "Modo Claro" : "Modo Escuro"}
-        </span>
-      )}
-    </button>
+      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <span className="sr-only">Toggle theme</span>
+    </Button>
   );
 }

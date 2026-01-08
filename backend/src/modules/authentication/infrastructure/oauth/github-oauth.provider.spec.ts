@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { GitHubOAuthProvider } from './github-oauth.provider';
 import { SocialProfileDto } from '../../application/dtos/social-profile.dto';
 

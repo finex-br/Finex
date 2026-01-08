@@ -4,31 +4,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, LogOut, FileSpreadsheet, Loader2, CheckCircle2 } from 'lucide-react';
-import { useFinancialContext } from '@/context/FinancialContext';
+import { useFinancialData } from '@/hooks/useFinancialData';
+import { useAuthStore } from '@/store/authStore';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 /**
- * UploadView - Página de Upload de Planilha Financeira
+ * UploadView - Componente Presentacional (Dumb Component)
  * 
- * Permite o upload e processamento de arquivos Excel com dados financeiros.
- * Após o processamento bem-sucedido, redireciona para o Dashboard.
+ * Responsabilidades:
+ * - Renderizar interface de upload
+ * - Capturar arquivo do usuário
+ * - Exibir feedback visual
+ * 
+ * TODA lógica está no useFinancialData (ViewModel).
+ * Backend processa o Excel (processamento removido do frontend).
  */
 export function UploadView() {
   const navigate = useNavigate();
-  const { processExcel, isLoading } = useFinancialContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { clearAuth, user } = useAuthStore();
+  const { uploadExcel, isUploading, uploadError, uploadSuccess } = useFinancialData();
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleLogout = () => {
-    // Limpa todos os dados de autenticação do localStorage
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    
-    // Redireciona para a página de login
+    clearAuth();
     navigate('/login');
   };
 
@@ -44,34 +44,39 @@ export function UploadView() {
     ];
     
     if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
-      setError('Por favor, selecione um arquivo Excel válido (.xlsx ou .xls)');
+      alert('Por favor, selecione um arquivo Excel válido (.xlsx ou .xls)');
       setSelectedFile(null);
       return;
     }
 
     setSelectedFile(file);
-    setError(null);
-    setSuccess(false);
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError('Por favor, selecione um arquivo');
+      alert('Por favor, selecione um arquivo');
       return;
     }
 
-    try {
-      setError(null);
-      await processExcel(selectedFile);
-      setSuccess(true);
-      
+    // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
+    // Isso isola dados por usuário (cada user vê apenas seus próprios dados)
+    const companyId = user?.id || 'default-user';
+    
+    console.log('[UploadView] Fazendo upload com:', { 
+      userId: user?.id, 
+      userName: user?.name,
+      companyId,
+      fileName: selectedFile.name 
+    });
+    
+    // Chama o ViewModel (que chama o service, que chama o backend)
+    const success = await uploadExcel(selectedFile, companyId);
+    
+    if (success) {
       // Redirecionar para o dashboard após 1.5 segundos
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao processar arquivo');
-      setSuccess(false);
     }
   };
 
@@ -80,23 +85,26 @@ export function UploadView() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header com botão de logout */}
-      <header className="bg-white border-b shadow-sm">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <FileSpreadsheet className="w-6 h-6 text-orange-600" />
-            <h1 className="text-xl font-bold text-slate-900">Importar Planilha</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Importar Planilha</h1>
           </div>
           
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className="border-red-200 text-red-600 hover:bg-red-50"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -127,7 +135,7 @@ export function UploadView() {
                 accept=".xlsx,.xls"
                 onChange={handleFileSelect}
                 className="hidden"
-                disabled={isLoading}
+                disabled={isUploading}
               />
               
               <div className="text-center">
@@ -142,7 +150,7 @@ export function UploadView() {
             </div>
 
             {/* Mensagem de Sucesso */}
-            {success && (
+            {uploadSuccess && (
               <Alert className="bg-green-50 border-green-200">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
@@ -152,20 +160,20 @@ export function UploadView() {
             )}
 
             {/* Mensagem de Erro */}
-            {error && (
+            {uploadError && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{uploadError}</AlertDescription>
               </Alert>
             )}
 
             {/* Botão de Upload */}
             <Button
               onClick={handleUpload}
-              disabled={!selectedFile || isLoading || success}
+              disabled={!selectedFile || isUploading || uploadSuccess}
               className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium"
               size="lg"
             >
-              {isLoading ? (
+              {isUploading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Processando...

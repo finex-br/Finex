@@ -1,21 +1,86 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Upload, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useFinancialContext } from '@/context/FinancialContext';
+import { useFinancialData, DashboardState } from '@/hooks/useFinancialData';
+import { useAuthStore } from '@/store/authStore';
+import { DateFilter } from '@/components/DateFilter';
+import { TrendChart } from '@/components/charts/TrendChart';
+import { CategoryChart } from '@/components/charts/CategoryChart';
+import { MonthlyChart } from '@/components/charts/MonthlyChart';
+import { EmptyPeriodBanner } from '@/components/EmptyPeriodBanner';
+import { GraphType } from '@/services/financialService';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 /**
- * DashboardView - Painel de controle financeiro
+ * DashboardView - Componente Presentacional (Dumb Component)
  * 
- * Exibe:
- * - KPIs (Receita Total, Despesas Totais, Lucro)
- * - Gráfico de barras comparativo (Receita vs Despesas por mês)
- * - Estado vazio com botão para importar planilha
+ * Responsabilidades:
+ * - Renderizar KPIs e gráficos
+ * - Exibir feedback visual (loading, erro)
+ * - LOTE 4: Usar dashboardState para NUNCA desaparecer quando filtro vazio
+ * 
+ * TODA lógica está no useFinancialData (ViewModel).
+ * Backend processa e agrega dados (frontend apenas exibe).
  */
 export function DashboardView() {
   const navigate = useNavigate();
-  const { cashFlow, summary, monthlyData } = useFinancialContext();
+  const { user } = useAuthStore();
+  const { 
+    summary, 
+    monthlyData,
+    categoryData,
+    trendData,
+    metadata,
+    dashboardState,
+    isLoading,
+    error,
+    periodFilter,
+    setPeriodFilter,
+    fetchFinancialData,
+    // NOVO (Lote 5): Funções para filtros individuais
+    graphFilters,
+    setGraphFilter,
+    resetGraphFilter,
+    getEffectiveFilter,
+    fetchGraphData,
+  } = useFinancialData();
+
+  // Busca dados ao montar o componente ou quando periodFilter mudar
+  useEffect(() => {
+    // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
+    const companyId = user?.id || 'default-user';
+    console.log('[DashboardView] useEffect triggered:', { 
+      userId: user?.id, 
+      userName: user?.name,
+      companyId, 
+      periodFilter 
+    });
+    fetchFinancialData(companyId);
+  }, [user?.id, periodFilter]);
+
+  /**
+   * NOVO (Lote 5): Handler para mudança de filtro individual de gráfico
+   */
+  const handleGraphFilterChange = async (graphType: GraphType, filter: any) => {
+    const companyId = user?.id || 'default-user';
+    setGraphFilter(graphType, filter);
+    
+    // Busca dados apenas para o gráfico específico
+    await fetchGraphData(graphType, companyId, filter);
+  };
+
+  /**
+   * NOVO (Lote 5): Handler para resetar filtro de gráfico para o global
+   */
+  const handleResetGraphFilter = async (graphType: GraphType) => {
+    const companyId = user?.id || 'default-user';
+    resetGraphFilter(graphType);
+    
+    // Busca dados com filtro global
+    await fetchGraphData(graphType, companyId, periodFilter);
+  };
 
   // Formata valores em Real Brasileiro
   const formatCurrency = (value: number): string => {
@@ -25,8 +90,49 @@ export function DashboardView() {
     }).format(value);
   };
 
-  // Estado vazio - sem dados carregados
-  if (cashFlow.length === 0) {
+  // Estado de loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-lg text-slate-600">Carregando dados...</p>
+      </div>
+    );
+  }
+
+  // Estado de erro
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg text-center shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-red-600">
+              Erro ao carregar dados
+            </CardTitle>
+            <CardDescription className="text-base mt-2">
+              {error}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => fetchFinancialData(user?.id || 'default-user')}
+              variant="outline"
+            >
+              Tentar novamente
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // LOTE 4: Estado vazio - NUNCA FEZ UPLOAD (totalTransactionsInSystem === 0)
+  if (dashboardState === DashboardState.NO_UPLOAD) {
+    console.log('[DashboardView] NO_UPLOAD state:', { 
+      dashboardState, 
+      metadata, 
+      userId: user?.id,
+      isLoading 
+    });
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-lg text-center shadow-lg">
@@ -61,30 +167,50 @@ export function DashboardView() {
 
   // Dashboard com dados
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 shadow-sm">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-orange-600">FinEx</h1>
-              <p className="text-sm text-slate-600 mt-1">Dashboard Financeiro</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Dashboard Financeiro</p>
             </div>
-            <Button
-              onClick={() => navigate('/upload')}
-              variant="outline"
-              className="border-orange-600 text-orange-600 hover:bg-orange-50"
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Nova Importação
-            </Button>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <Button
+                onClick={() => navigate('/upload')}
+                variant="outline"
+                className="border-orange-600 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Nova Importação
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* KPIs */}
+        {/* Filtro de Período */}
+        <div className="mb-6">
+          <DateFilter 
+            periodFilter={periodFilter} 
+            onPeriodChange={setPeriodFilter} 
+          />
+        </div>
+
+        {/* LOTE 4: Banner quando filtro retorna vazio (EMPTY_PERIOD) */}
+        {dashboardState === DashboardState.EMPTY_PERIOD && metadata && (
+          <EmptyPeriodBanner
+            earliestDate={metadata.earliestDate}
+            latestDate={metadata.latestDate}
+            onViewAllData={() => setPeriodFilter(undefined)}
+          />
+        )}
+
+        {/* KPIs - Sempre visível quando tem dados no sistema */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Receita Total */}
           <Card className="shadow-md hover:shadow-lg transition-shadow">
@@ -141,70 +267,43 @@ export function DashboardView() {
           </Card>
         </div>
 
-        {/* Gráfico de Barras */}
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold text-slate-800">
-              Receitas vs Despesas por Mês
-            </CardTitle>
-            <CardDescription>
-              Comparativo mensal do fluxo de caixa
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[400px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={monthlyData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#64748b"
-                    style={{ fontSize: '12px' }}
-                  />
-                  <YAxis 
-                    stroke="#64748b"
-                    style={{ fontSize: '12px' }}
-                    tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    }}
-                    formatter={(value: number) => formatCurrency(value)}
-                    labelStyle={{ fontWeight: 'bold', color: '#334155' }}
-                  />
-                  <Legend 
-                    wrapperStyle={{ paddingTop: '20px' }}
-                    iconType="circle"
-                  />
-                  <Bar 
-                    dataKey="receita" 
-                    fill="#16a34a" 
-                    name="Receitas"
-                    radius={[8, 8, 0, 0]}
-                  />
-                  <Bar 
-                    dataKey="despesa" 
-                    fill="#dc2626" 
-                    name="Despesas"
-                    radius={[8, 8, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Gráficos Financeiros - LOTE 5: Individualizados com filtros próprios */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Gráfico de Tendência (Largura Total) */}
+          <TrendChart
+            trendData={trendData}
+            currentFilter={getEffectiveFilter(GraphType.TREND)}
+            globalFilter={periodFilter}
+            onFilterChange={handleGraphFilterChange}
+            onResetFilter={handleResetGraphFilter}
+            companyId={user?.id || 'default-user'}
+          />
+
+          {/* Gráfico de Categorias */}
+          <CategoryChart
+            categoryData={categoryData}
+            currentFilter={getEffectiveFilter(GraphType.CATEGORY)}
+            globalFilter={periodFilter}
+            onFilterChange={handleGraphFilterChange}
+            onResetFilter={handleResetGraphFilter}
+            companyId={user?.id || 'default-user'}
+          />
+
+          {/* Gráfico Mensal */}
+          <MonthlyChart
+            monthlyData={monthlyData}
+            currentFilter={getEffectiveFilter(GraphType.MONTHLY)}
+            globalFilter={periodFilter}
+            onFilterChange={handleGraphFilterChange}
+            onResetFilter={handleResetGraphFilter}
+            companyId={user?.id || 'default-user'}
+          />
+        </div>
 
         {/* Informações adicionais */}
         <div className="mt-6 text-center text-sm text-slate-500">
           <p>
-            Exibindo {cashFlow.length} {cashFlow.length === 1 ? 'transação' : 'transações'}
+            Dados financeiros carregados com sucesso
           </p>
         </div>
       </main>

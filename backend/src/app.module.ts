@@ -2,6 +2,7 @@ import { Module, Controller, Get } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EnvModule, EnvService } from './shared/infra/env';
 import { AuthenticationModule } from './modules/authentication/infrastructure/authentication.module';
+import { FinancialModule } from './modules/financial/financial.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { SurveyModule } from './modules/survey/survey.module';
 
@@ -27,6 +28,7 @@ export class AppController {
       }),
     }),
     AuthenticationModule,
+    FinancialModule,
     PaymentModule,
     SurveyModule,
   ],
