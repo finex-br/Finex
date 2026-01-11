@@ -2,6 +2,43 @@
 
 Índice completo da documentação do projeto.
 
+---
+
+## 🎯 DOCUMENTAÇÃO PARA APRESENTAÇÃO EXECUTIVA
+
+> **Novo!** Material completo para demonstrar o sistema a investidores/empresários não-técnicos
+
+### [📖 Índice de Apresentação](./INDICE-APRESENTACAO.md)
+**Hub central** de todos os documentos de apresentação executiva.
+
+**Use quando:** Preparar apresentação para investidor/empresário não-técnico
+
+### [📋 Guia de Apresentação Executiva](./APRESENTACAO-EXECUTIVA.md)
+Roteiro completo da apresentação (20 min) com o que dizer, como traduzir jargões e frases de impacto.
+
+### [🎬 Script de Demonstração](./SCRIPT-DEMO-EXECUTIVA.md)
+Passo a passo prático: comandos exatos, arquivos para mostrar, transições entre tópicos.
+
+### [📄 Cheat Sheet](./CHEATSHEET-APRESENTACAO.md)
+Cola de 1 página: números chave, tradutor de jargões, frases prontas. **Imprima e tenha ao lado!**
+
+### [❓ FAQ para Investidor](./FAQ-INVESTIDOR.md)
+Respostas preparadas para perguntas sobre custo, segurança, escalabilidade, ROI, tecnologias.
+
+### [🎨 Slides Visuais ASCII](./SLIDES-VISUAIS-ASCII.md)
+Diagramas visuais: arquitetura, segurança, qualidade, pipeline, ROI. Use em tela cheia!
+
+### [✅ Checklist Pré-Reunião](./CHECKLIST-PRE-REUNIAO.md)
+30 minutos antes: setup técnico, arquivos preparados, métricas decoradas, mindset correto.
+
+### [📧 Email Follow-Up](./EMAIL-FOLLOW-UP.md)
+Modelo de email pós-reunião com resumo executivo e próximos passos.
+
+### [📊 Resumo Executivo 1 Página](./RESUMO-EXECUTIVO-1PAGINA.md)
+Visão geral rápida: segurança, arquitetura, qualidade, escalabilidade, ROI. Formato compacto.
+
+---
+
 ## 🚀 Para Começar
 
 ### [Quick Start](./QUICKSTART.md)

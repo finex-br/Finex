@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, DollarSign, Upload, FileSpreadsheet } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useFinancialData, DashboardState } from '@/hooks/useFinancialData';
@@ -11,7 +11,7 @@ import { CategoryChart } from '@/components/charts/CategoryChart';
 import { MonthlyChart } from '@/components/charts/MonthlyChart';
 import { EmptyPeriodBanner } from '@/components/EmptyPeriodBanner';
 import { GraphType } from '@/services/financialService';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { AppLayout } from '@/components/AppLayout';
 
 /**
  * DashboardView - Componente Presentacional (Dumb Component)
@@ -134,67 +134,44 @@ export function DashboardView() {
       isLoading 
     });
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg text-center shadow-lg">
-          <CardHeader>
-            <div className="flex justify-center mb-4">
-              <FileSpreadsheet className="h-16 w-16 text-orange-500" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-slate-800">
-              Bem-vindo ao Dashboard
-            </CardTitle>
-            <CardDescription className="text-base mt-2">
-              Importe sua planilha financeira para visualizar seus dados
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              onClick={() => navigate('/upload')}
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium"
-              size="lg"
-            >
-              <Upload className="mr-2 h-5 w-5" />
-              Importar Planilha
-            </Button>
-            <p className="text-sm text-slate-500 mt-4">
-              Suportamos arquivos Excel (.xlsx, .xls)
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <AppLayout>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+          <Card className="w-full max-w-lg text-center shadow-lg">
+            <CardHeader>
+              <div className="flex justify-center mb-4">
+                <FileSpreadsheet className="h-16 w-16 text-orange-500" />
+              </div>
+              <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                Bem-vindo ao Dashboard
+              </CardTitle>
+              <CardDescription className="text-base mt-2">
+                Importe sua planilha financeira para visualizar seus dados
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => navigate('/upload')}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium"
+                size="lg"
+              >
+                Importar Planilha
+              </Button>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
+                Suportamos arquivos Excel (.xlsx, .xls)
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
     );
   }
 
   // Dashboard com dados
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-orange-600">FinEx</h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Dashboard Financeiro</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <Button
-                onClick={() => navigate('/upload')}
-                variant="outline"
-                className="border-orange-600 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Nova Importação
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <AppLayout>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
         {/* Filtro de Período */}
-        <div className="mb-6">
+        <div className="max-w-7xl mx-auto mb-6">
           <DateFilter 
             periodFilter={periodFilter} 
             onPeriodChange={setPeriodFilter} 
@@ -203,15 +180,17 @@ export function DashboardView() {
 
         {/* LOTE 4: Banner quando filtro retorna vazio (EMPTY_PERIOD) */}
         {dashboardState === DashboardState.EMPTY_PERIOD && metadata && (
-          <EmptyPeriodBanner
-            earliestDate={metadata.earliestDate}
-            latestDate={metadata.latestDate}
-            onViewAllData={() => setPeriodFilter(undefined)}
-          />
+          <div className="max-w-7xl mx-auto mb-6">
+            <EmptyPeriodBanner
+              earliestDate={metadata.earliestDate}
+              latestDate={metadata.latestDate}
+              onViewAllData={() => setPeriodFilter(undefined)}
+            />
+          </div>
         )}
 
         {/* KPIs - Sempre visível quando tem dados no sistema */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Receita Total */}
           <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -268,7 +247,7 @@ export function DashboardView() {
         </div>
 
         {/* Gráficos Financeiros - LOTE 5: Individualizados com filtros próprios */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="max-w-7xl mx-auto grid gap-6 md:grid-cols-2">
           {/* Gráfico de Tendência (Largura Total) */}
           <TrendChart
             trendData={trendData}
@@ -301,12 +280,12 @@ export function DashboardView() {
         </div>
 
         {/* Informações adicionais */}
-        <div className="mt-6 text-center text-sm text-slate-500">
+        <div className="max-w-7xl mx-auto mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
           <p>
             Dados financeiros carregados com sucesso
           </p>
         </div>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

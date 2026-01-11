@@ -42,70 +42,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
-      <FinancialProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Rota Pública - Landing Page */}
-              <Route path="/" element={<LandingView />} />
-              
-              {/* Rota Pública - Login */}
-              <Route path="/login" element={<LoginView />} />
-              
-              {/* Rota Pública - Cadastro */}
-              <Route path="/signup" element={<SignUpView />} />
-              
-              {/* Rota Pública - Google OAuth Callback */}
-              <Route path="/auth/google/callback" element={<GoogleCallbackView />} />
-              
-              {/* Rota Protegida - Upload */}
-              <Route 
-                path="/upload" 
-                element={
-                  <ProtectedRoute>
-                    <UploadView />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Rota Protegida - Dashboard */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardView />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Rota Protegida - Lista de Surveys */}
-              <Route 
-                path="/surveys" 
-                element={
-                  <ProtectedRoute>
-                    <SurveysListView />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Rota Protegida - Questionário */}
-              <Route 
-                path="/surveys/:assessmentId" 
-                element={
-                  <ProtectedRoute>
-                    <SurveyQuestionnaireView />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Catch-all - Redireciona para a home */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </FinancialProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -139,6 +75,26 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DashboardView />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Rota Protegida - Lista de Surveys */}
+            <Route 
+              path="/surveys" 
+              element={
+                <ProtectedRoute>
+                  <SurveysListView />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Rota Protegida - Questionário */}
+            <Route 
+              path="/surveys/:assessmentId" 
+              element={
+                <ProtectedRoute>
+                  <SurveyQuestionnaireView />
                 </ProtectedRoute>
               } 
             />

@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, LogOut, FileSpreadsheet, Loader2, CheckCircle2 } from 'lucide-react';
+import { Upload, FileSpreadsheet, Loader2, CheckCircle2 } from 'lucide-react';
 import { useFinancialData } from '@/hooks/useFinancialData';
 import { useAuthStore } from '@/store/authStore';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { AppLayout } from '@/components/AppLayout';
 
 /**
  * UploadView - Componente Presentacional (Dumb Component)
@@ -22,15 +22,10 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 export function UploadView() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { clearAuth, user } = useAuthStore();
+  const { user } = useAuthStore();
   const { uploadExcel, isUploading, uploadError, uploadSuccess } = useFinancialData();
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  const handleLogout = () => {
-    clearAuth();
-    navigate('/login');
-  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -85,40 +80,19 @@ export function UploadView() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header com botão de logout */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <FileSpreadsheet className="w-6 h-6 text-orange-600" />
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Importar Planilha</h1>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Conteúdo principal */}
-      <main className="container mx-auto px-4 py-12">
-        <Card className="max-w-2xl mx-auto shadow-lg">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
-              <Upload className="w-8 h-8 text-orange-600" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-slate-900">
-              Upload de Planilha Financeira
-            </CardTitle>
-            <CardDescription className="text-base">
+    <AppLayout>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        {/* Conteúdo principal */}
+        <div className="max-w-2xl mx-auto">
+          <Card className="shadow-lg">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
+                <Upload className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+              </div>
+              <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                Upload de Planilha Financeira
+              </CardTitle>
+              <CardDescription className="text-base">
               Envie seu arquivo Excel para visualizar os dados no dashboard
             </CardDescription>
           </CardHeader>
@@ -187,11 +161,11 @@ export function UploadView() {
             </Button>
 
             {/* Informações */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
+            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
                 <strong>ℹ️ Formato esperado:</strong>
               </p>
-              <ul className="text-sm text-blue-700 mt-2 ml-4 space-y-1 list-disc">
+              <ul className="text-sm text-blue-700 dark:text-blue-400 mt-2 ml-4 space-y-1 list-disc">
                 <li>Colunas: Data, Descrição, Categoria, Valor, Tipo</li>
                 <li>Tipo: "Receita" ou "Despesa"</li>
                 <li>Valores numéricos (use ponto ou vírgula)</li>
@@ -199,7 +173,8 @@ export function UploadView() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+        </div>
+      </div>
+    </AppLayout>
   );
 }
