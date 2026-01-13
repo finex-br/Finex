@@ -113,7 +113,7 @@ describe('FinancialController (e2e)', () => {
 
       expect(response.body).toEqual(mockResponse);
       expect(processExcelUseCase.execute).toHaveBeenCalledWith({
-        companyId: 'default-company', // Sem JWT, usa default
+        companyId: 'default-user', // userId = companyId temporariamente
         userId: 'default-user',
         fileBuffer: expect.any(Buffer),
         fileName: 'test.xlsx',
@@ -184,10 +184,10 @@ describe('FinancialController (e2e)', () => {
         .attach('file', fakeExcelBuffer, 'test.xlsx')
         .expect(201);
 
-      // Verificar que usou o companyId default (sem JWT)
+      // Verificar que usou userId como companyId
       expect(processExcelUseCase.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          companyId: 'default-company',
+          companyId: 'default-user',
           userId: 'default-user',
         }),
       );
@@ -235,7 +235,7 @@ describe('FinancialController (e2e)', () => {
 
       expect(response.body).toEqual(mockResponse);
       expect(getFinancialDataUseCase.execute).toHaveBeenCalledWith({
-        companyId: 'default-company',
+        companyId: 'default-user',
         userId: 'default-user',
       });
     });
@@ -255,9 +255,9 @@ describe('FinancialController (e2e)', () => {
         .get('/financial/data')
         .expect(200);
 
-      // Verificar que usou o companyId default (sem JWT)
+      // Verificar que usou userId como companyId
       expect(getFinancialDataUseCase.execute).toHaveBeenCalledWith({
-        companyId: 'default-company',
+        companyId: 'default-user',
         userId: 'default-user',
       });
     });

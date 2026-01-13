@@ -16,6 +16,16 @@ export class UserMapper {
     const passwordOrError = await Password.create(raw.passwordHash, true);
     const roleOrError = UserRole.create(raw.role);
 
+    // PhoneNumber é opcional
+    let phoneNumber: PhoneNumber | undefined;
+    if (raw.phoneNumber) {
+      const phoneNumberOrError = PhoneNumber.create(raw.phoneNumber);
+      if (phoneNumberOrError.isFailure) {
+        return null;
+      }
+      phoneNumber = phoneNumberOrError.getValue();
+    }
+
     if (emailOrError.isFailure || passwordOrError.isFailure || roleOrError.isFailure) {
       return null;
     }
@@ -25,8 +35,9 @@ export class UserMapper {
         email: emailOrError.getValue(),
         password: passwordOrError.getValue(),
         name: raw.fullName || '',
+        phoneNumber,
         role: roleOrError.getValue(),
-        isActive: true,
+        isActive: raw.isActive ?? true,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },
@@ -42,7 +53,9 @@ export class UserMapper {
     schema.email = user.email.value;
     schema.passwordHash = await user.password.getHashedValue();
     schema.fullName = user.name;
+    schema.phoneNumber = user.phoneNumber?.value;
     schema.role = user.role.value;
+    schema.isActive = user.isActive;
     schema.createdAt = user.createdAt;
     schema.updatedAt = user.updatedAt;
     return schema;

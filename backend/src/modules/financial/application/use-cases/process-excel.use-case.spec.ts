@@ -25,8 +25,16 @@ describe('ProcessExcelUseCase', () => {
       calculateSummary: jest.fn(),
       getMonthlyData: jest.fn(),
       getCategoryData: jest.fn(),
-      getTrendData: jest.fn(),      getDateRange: jest.fn(),
-      countAll: jest.fn(),    } as jest.Mocked<IFinancialRepository>;
+      getTrendData: jest.fn(),
+      getDateRange: jest.fn(),
+      countAll: jest.fn(),
+    } as jest.Mocked<IFinancialRepository>;
+
+    // Mock padrão do getDateRange para todos os testes
+    mockFinancialRepository.getDateRange.mockResolvedValue({
+      earliestDate: new Date('2024-01-01'),
+      latestDate: new Date('2024-12-31'),
+    });
 
     useCase = new ProcessExcelUseCase(mockExcelProcessor, mockFinancialRepository);
   });

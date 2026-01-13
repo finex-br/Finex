@@ -18,8 +18,14 @@ export class UserSchema {
   @Column({ name: 'full_name', nullable: true })
   fullName: string;
 
+  @Column({ name: 'phone_number', nullable: true })
+  phoneNumber?: string;
+
   @Column({ default: 'USER' })
   role: string;
+
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

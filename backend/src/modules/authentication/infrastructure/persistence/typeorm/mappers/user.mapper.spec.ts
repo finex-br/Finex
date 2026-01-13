@@ -34,9 +34,9 @@ describe('UserMapper', () => {
       // Assert
       expect(schema.id).toBe('test-id-123');
       expect(schema.email).toBe('user@example.com');
-      expect(schema.password).toBeDefined();
-      expect(schema.password).toMatch(/^\$2[aby]\$.{56}$/); // bcrypt hash
-      expect(schema.name).toBe('John Doe');
+      expect(schema.passwordHash).toBeDefined();
+      expect(schema.passwordHash).toMatch(/^\$2[aby]\$.{56}$/); // bcrypt hash
+      expect(schema.fullName).toBe('John Doe');
       expect(schema.phoneNumber).toBe('+5511987654321');
       expect(schema.role).toBe('ENTREPRENEUR');
       expect(schema.isActive).toBe(true);
@@ -53,8 +53,8 @@ describe('UserMapper', () => {
       const schema = new UserSchema();
       schema.id = 'test-id-456';
       schema.email = 'user@example.com';
-      schema.password = hashedPassword;
-      schema.name = 'Jane Doe';
+      schema.passwordHash = hashedPassword;
+      schema.fullName = 'Jane Doe';
       schema.phoneNumber = '+5511987654321';
       schema.role = 'INVESTOR';
       schema.isActive = true;
@@ -70,7 +70,7 @@ describe('UserMapper', () => {
       expect(user!.email.value).toBe('user@example.com');
       expect(user!.password.value).toBe(hashedPassword);
       expect(user!.name).toBe('Jane Doe');
-      expect(user!.phoneNumber.value).toBe('+5511987654321');
+      expect(user!.phoneNumber?.value).toBe('+5511987654321');
       expect(user!.role.value).toBe('INVESTOR');
       expect(user!.isActive).toBe(true);
     });
@@ -82,8 +82,8 @@ describe('UserMapper', () => {
       const schema = new UserSchema();
       schema.id = 'test-id-789';
       schema.email = 'invalid-email';
-      schema.password = hashedPassword;
-      schema.name = 'John Doe';
+      schema.passwordHash = hashedPassword;
+      schema.fullName = 'John Doe';
       schema.phoneNumber = '+5511987654321';
       schema.role = 'ADMIN';
       schema.isActive = true;
@@ -104,8 +104,8 @@ describe('UserMapper', () => {
       const schema = new UserSchema();
       schema.id = 'test-id-999';
       schema.email = 'user@example.com';
-      schema.password = hashedPassword;
-      schema.name = 'John Doe';
+      schema.passwordHash = hashedPassword;
+      schema.fullName = 'John Doe';
       schema.phoneNumber = '+5511987654321';
       schema.role = 'INVALID_ROLE';
       schema.isActive = true;
@@ -126,8 +126,8 @@ describe('UserMapper', () => {
       const schema = new UserSchema();
       schema.id = 'test-id-100';
       schema.email = 'user@example.com';
-      schema.password = hashedPassword;
-      schema.name = 'John Doe';
+      schema.passwordHash = hashedPassword;
+      schema.fullName = 'John Doe';
       schema.phoneNumber = 'invalid-phone';
       schema.role = 'ENTREPRENEUR';
       schema.isActive = true;

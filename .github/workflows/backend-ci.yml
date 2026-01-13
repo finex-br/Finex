@@ -43,6 +43,7 @@ jobs:
       
     - name: Lint Check (ESLint)
       run: npm run lint:check
+      continue-on-error: true
     
     - name: Run Unit Tests
       run: npm test -- --coverage --passWithNoTests

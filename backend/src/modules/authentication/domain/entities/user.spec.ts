@@ -320,7 +320,7 @@ describe('User Entity', () => {
       expect(user.equals(undefined as any)).toBe(false);
     });
 
-    it('should fail when phoneNumber is null or undefined', async () => {
+    it('should accept when phoneNumber is null or undefined', async () => {
       // Arrange
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
@@ -337,8 +337,9 @@ describe('User Entity', () => {
       });
 
       // Assert
-      expect(result.isFailure).toBe(true);
-      expect(result.error).toContain('phoneNumber is required');
+      expect(result.isSuccess).toBe(true);
+      const user = result.getValue();
+      expect(user.phoneNumber).toBeFalsy(); // null or undefined
     });
   });
 

@@ -57,11 +57,8 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
           ? this.parseDate(row.getCell(columnMap.data).value)
           : null;
         
-        // Pular linha se data inválida
-        if (!date) {
-          console.warn(`Linha ${rowNumber}: data inválida, pulando...`);
-          return;
-        }
+        // Usar data atual se data for inválida ou ausente
+        const finalDate = date || new Date();
         
         const description = columnMap.descricao !== -1
           ? (row.getCell(columnMap.descricao).value?.toString() || 'Sem descrição')
@@ -121,13 +118,13 @@ export class ExcelProcessorAdapter implements IExcelProcessor {
         // Criar entidade de domínio
         const transactionOrError = FinancialTransaction.create({
           companyId,
-          date,
+          date: finalDate,
           description,
           amount: moneyOrError.getValue(),
           type: transactionType,
           category: categoryOrError.getValue(),
-          competenceDate: date, // Por padrão, mesma data
-          paymentDate: date,
+          competenceDate: finalDate, // Por padrão, mesma data
+          paymentDate: finalDate,
         });
 
         if (transactionOrError.isSuccess) {

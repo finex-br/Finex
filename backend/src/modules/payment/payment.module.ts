@@ -35,6 +35,9 @@ import { JwtAuthGuard } from '../authentication/presentation/http/guards/jwt-aut
       provide: AsaasPaymentProvider,
       useFactory: (configService: ConfigService) => {
         const apiKey = configService.get<string>('ASAAS_API_KEY');
+        if (!apiKey) {
+          throw new Error('ASAAS_API_KEY is required');
+        }
         const environment = configService.get<string>('ASAAS_ENVIRONMENT', 'sandbox');
         return new AsaasPaymentProvider(apiKey, environment);
       },

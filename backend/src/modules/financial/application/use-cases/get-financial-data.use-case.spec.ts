@@ -22,8 +22,23 @@ describe('GetFinancialDataUseCase', () => {
       calculateSummary: jest.fn(),
       getMonthlyData: jest.fn(),
       getCategoryData: jest.fn(),
-      getTrendData: jest.fn(),      getDateRange: jest.fn(),
-      countAll: jest.fn(),    } as jest.Mocked<IFinancialRepository>;
+      getTrendData: jest.fn(),
+      getDateRange: jest.fn(),
+      countAll: jest.fn(),
+    } as jest.Mocked<IFinancialRepository>;
+
+    // Mock padrão do getDateRange para todos os testes
+    mockFinancialRepository.getDateRange.mockResolvedValue({
+      earliestDate: new Date('2024-01-01'),
+      latestDate: new Date('2024-12-31'),
+    });
+
+    // Mock padrão do countAll
+    mockFinancialRepository.countAll.mockResolvedValue(100);
+
+    // Mock padrão dos métodos de charts (para evitar erros no Promise.all)
+    mockFinancialRepository.getCategoryData.mockResolvedValue([]);
+    mockFinancialRepository.getTrendData.mockResolvedValue([]);
 
     useCase = new GetFinancialDataUseCase(mockFinancialRepository);
   });
