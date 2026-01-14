@@ -7,6 +7,7 @@ import { QuestionCard } from '../components/survey/QuestionCard';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Loader2, ChevronLeft, ChevronRight, CheckCircle, Save } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
+import { AppLayout } from '../components/AppLayout';
 
 export const SurveyQuestionnaireView = () => {
   const { assessmentId } = useParams<{ assessmentId: string }>();
@@ -71,28 +72,31 @@ export const SurveyQuestionnaireView = () => {
 
   if (loading && !questionsPage) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AppLayout>
     );
   }
 
   if (!questionsPage) {
     return (
-      <div className="container mx-auto p-6">
+      <AppLayout>
         <Alert variant="destructive">
           <AlertDescription>
             Não foi possível carregar o questionário.
           </AlertDescription>
         </Alert>
-      </div>
+      </AppLayout>
     );
   }
 
   const startIndex = (currentPage - 1) * 5;
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <AppLayout>
+      <div className="max-w-4xl">
       {/* Header */}
       <div className="mb-6">
         <Button
@@ -211,6 +215,7 @@ export const SurveyQuestionnaireView = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 };

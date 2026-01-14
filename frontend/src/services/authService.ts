@@ -15,6 +15,8 @@ export interface SignUpData {
   email: string;
   password: string;
   phoneNumber: string;
+  companyName: string;
+  cnpj: string;
 }
 
 export interface User {

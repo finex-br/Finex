@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   full_name VARCHAR(255),
   password_hash VARCHAR(255),
-  role VARCHAR(50) DEFAULT 'USER', -- ADMIN, USER
+  phone_number VARCHAR(20),
+  role VARCHAR(50) DEFAULT 'ENTREPRENEUR', -- ADMIN, ENTREPRENEUR, INVESTOR
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -198,6 +199,7 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 -- Índices para Companies
 CREATE INDEX IF NOT EXISTS idx_companies_cnpj ON companies(cnpj);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_companies_cnpj_unique ON companies(cnpj) WHERE cnpj IS NOT NULL;
 
 -- Índices para Company Members
 CREATE INDEX IF NOT EXISTS idx_company_members_user_id ON company_members(user_id);

@@ -7,7 +7,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   Menu,
-  X
+  X,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -46,6 +47,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       label: 'Importar Dados',
       icon: Upload,
       path: '/upload',
+    },
+    {
+      id: 'surveys',
+      label: 'Questionários',
+      icon: FileText,
+      path: '/surveys',
     },
   ];
 

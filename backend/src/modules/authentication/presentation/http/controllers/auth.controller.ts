@@ -36,6 +36,8 @@ export class AuthController {
       password: body.password,
       name: body.name,
       phoneNumber: body.phoneNumber,
+      companyName: body.companyName,
+      cnpj: body.cnpj,
     });
 
     if (result.isFailure) {

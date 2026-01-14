@@ -41,4 +41,23 @@ export class SignUpViewModel {
   @IsString({ message: 'Telefone deve ser uma string' })
   @IsNotEmpty({ message: 'Telefone é obrigatório' })
   phoneNumber: string;
+
+  @ApiProperty({
+    description: 'Company name',
+    example: 'Minha Empresa LTDA',
+    minLength: 3,
+    required: true,
+  })
+  @IsString({ message: 'Nome da empresa deve ser uma string' })
+  @MinLength(3, { message: 'Nome da empresa deve ter no mínimo 3 caracteres' })
+  @IsNotEmpty({ message: 'Nome da empresa é obrigatório' })
+  companyName: string;
+
+  @ApiProperty({
+    description: 'Company CNPJ',
+    example: '12.345.678/0001-90',
+    required: false,
+  })
+  @IsString({ message: 'CNPJ deve ser uma string' })
+  cnpj?: string;
 }

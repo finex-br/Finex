@@ -14,7 +14,6 @@ interface UserProps {
   name: string;
   phoneNumber?: PhoneNumber;
   role?: UserRole;
-  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
   socialAccounts?: SocialAccount[];
@@ -50,10 +49,6 @@ export class User extends Entity<UserProps> {
     return this.props.role!;
   }
 
-  get isActive(): boolean {
-    return this.props.isActive;
-  }
-
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -64,16 +59,6 @@ export class User extends Entity<UserProps> {
 
   get socialAccounts(): SocialAccount[] {
     return this.props.socialAccounts || [];
-  }
-
-  public activate(): void {
-    this.props.isActive = true;
-    this.props.updatedAt = new Date();
-  }
-
-  public deactivate(): void {
-    this.props.isActive = false;
-    this.props.updatedAt = new Date();
   }
 
   public updatePassword(newPassword: Password): void {
@@ -145,7 +130,6 @@ export class User extends Entity<UserProps> {
       {
         ...props,
         role: defaultRole,
-        isActive: props.isActive ?? true,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? new Date(),
         socialAccounts: props.socialAccounts || [],

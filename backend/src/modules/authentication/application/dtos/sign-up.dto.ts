@@ -3,4 +3,6 @@ export class SignUpDTO {
   password: string;
   name: string;
   phoneNumber: string;
+  companyName: string;
+  cnpj?: string;
 }

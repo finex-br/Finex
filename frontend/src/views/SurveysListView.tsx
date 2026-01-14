@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Progress } from '../components/ui/progress';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Loader2, FileText, PlayCircle } from 'lucide-react';
+import { AppLayout } from '../components/AppLayout';
 import type { Survey } from '../types/survey.types';
 
 export const SurveysListView = () => {
@@ -45,20 +46,23 @@ export const SurveysListView = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Questionários</h1>
-        <p className="text-muted-foreground">
-          Complete os questionários disponíveis para sua empresa
-        </p>
-      </div>
+    <AppLayout>
+      <div className="max-w-6xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Questionários</h1>
+          <p className="text-muted-foreground">
+            Complete os questionários disponíveis para sua empresa
+          </p>
+        </div>
 
       {error && (
         <Alert variant="destructive" className="mb-6">
@@ -119,6 +123,7 @@ export const SurveysListView = () => {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 };

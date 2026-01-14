@@ -37,7 +37,6 @@ export class UserMapper {
         name: raw.fullName || '',
         phoneNumber,
         role: roleOrError.getValue(),
-        isActive: raw.isActive ?? true,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },
@@ -55,7 +54,6 @@ export class UserMapper {
     schema.fullName = user.name;
     schema.phoneNumber = user.phoneNumber?.value;
     schema.role = user.role.value;
-    schema.isActive = user.isActive;
     schema.createdAt = user.createdAt;
     schema.updatedAt = user.updatedAt;
     return schema;

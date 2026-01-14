@@ -1,11 +1,16 @@
 import { IUseCase } from '../../../../shared/core/use-case.interface';
 import { Result } from '../../../../shared/core/result';
+import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 import { IUserRepository } from '../../domain/ports/user-repository.interface';
 import { ITokenService } from '../../domain/ports/token-service.interface';
+import { ICompanyRepository } from '../../../../shared/domain/repositories/company-repository.interface';
+import { ICompanyMemberRepository } from '../../../../shared/domain/repositories/company-member-repository.interface';
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
 import { PhoneNumber } from '../../domain/value-objects/phone-number';
 import { User } from '../../domain/entities/user';
+import { Company } from '../../../../shared/domain/entities/company.entity';
+import { CompanyMember } from '../../../../shared/domain/entities/company-member.entity';
 import { SignUpDTO } from '../dtos/sign-up.dto';
 import { AuthResponseDTO } from '../dtos/auth-response.dto';
 
@@ -13,6 +18,8 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
   constructor(
     private userRepository: IUserRepository,
     private tokenService: ITokenService,
+    private companyRepository: ICompanyRepository,
+    private companyMemberRepository: ICompanyMemberRepository,
   ) {}
 
   async execute(request: SignUpDTO): Promise<Result<AuthResponseDTO>> {
@@ -46,7 +53,6 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
       password: passwordOrError.getValue(),
       name: request.name,
       phoneNumber: phoneNumberOrError.getValue(),
-      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -57,8 +63,52 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
 
     const user = userOrError.getValue();
 
-    // Save user
+    // Check if CNPJ already exists (BEFORE creating user)
+    if (request.cnpj) {
+      const cnpjExists = await this.companyRepository.findByCnpj(request.cnpj);
+      if (cnpjExists) {
+        return Result.fail<AuthResponseDTO>('Company with this CNPJ already exists');
+      }
+    }
+
+    // Save user (only after CNPJ validation)
     await this.userRepository.save(user);
+
+    // Create company
+    const companyOrError = Company.create({
+      name: request.companyName,
+      cnpj: request.cnpj,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    if (companyOrError.isFailure) {
+      return Result.fail<AuthResponseDTO>(companyOrError.error!);
+    }
+
+    const company = companyOrError.getValue();
+
+    // Save company
+    await this.companyRepository.save(company);
+
+    // Create company member (link user to company as OWNER)
+    const memberOrError = CompanyMember.create({
+      userId: user.id,
+      companyId: company.id,
+      role: 'OWNER',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    if (memberOrError.isFailure) {
+      return Result.fail<AuthResponseDTO>(memberOrError.error!);
+    }
+
+    const member = memberOrError.getValue();
+
+    // Save company member
+    await this.companyMemberRepository.save(member);
 
     // Generate token
     const token = await this.tokenService.generateToken({
@@ -76,7 +126,6 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
         name: user.name,
         phoneNumber: user.phoneNumber?.value || '',
         role: user.role.value,
-        isActive: user.isActive,
         createdAt: user.createdAt,
       },
     };
