@@ -12,6 +12,9 @@ import { DashboardView } from "./views/DashboardView";
 import { GoogleCallbackView } from "./views/GoogleCallbackView";
 import { SurveysListView } from "./views/SurveysListView";
 import { SurveyQuestionnaireView } from "./views/SurveyQuestionnaireView";
+import { PendingDocumentsAdminView } from "./views/PendingDocumentsAdminView";
+import { PendingDocumentAdminDetailView } from "./views/PendingDocumentAdminDetailView";
+import { CompanySetupView } from "./views/CompanySetupView";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +100,36 @@ const App = () => (
                   <SurveyQuestionnaireView />
                 </ProtectedRoute>
               } 
+            />
+
+            {/* Rota Protegida - Admin Pending Documents */}
+            <Route 
+              path="/admin/pending-documents" 
+              element={
+                <ProtectedRoute>
+                  <PendingDocumentsAdminView />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Rota Protegida - Admin Pending Document Detail */}
+            <Route 
+              path="/admin/pending-documents/:id" 
+              element={
+                <ProtectedRoute>
+                  <PendingDocumentAdminDetailView />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Rota Protegida - Company Setup */}
+            <Route
+              path="/company/setup"
+              element={
+                <ProtectedRoute>
+                  <CompanySetupView />
+                </ProtectedRoute>
+              }
             />
             
             {/* Catch-all - Redireciona para a home */}

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useSignUpViewModel } from './useSignUpViewModel';
 import { authService } from '../services/authService';
@@ -18,9 +18,17 @@ vi.mock('react-router-dom', () => ({
 }));
 
 describe('useSignUpViewModel', () => {
+  const validPassword = 'Senha123!';
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn> | undefined;
+
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy?.mockRestore();
   });
 
   it('deve inicializar com estado correto', () => {
@@ -60,8 +68,8 @@ describe('useSignUpViewModel', () => {
       act(() => {
         result.current.handleChange('name', 'João Silva');
         result.current.handleChange('email', 'joao@example.com');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha456');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', 'Senha123?');
         result.current.handleChange('phoneNumber', '11999999999');
       });
 
@@ -79,8 +87,8 @@ describe('useSignUpViewModel', () => {
       act(() => {
         result.current.handleChange('name', '');
         result.current.handleChange('email', 'joao@example.com');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha123');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
       });
 
@@ -98,8 +106,8 @@ describe('useSignUpViewModel', () => {
       act(() => {
         result.current.handleChange('name', 'João Silva');
         result.current.handleChange('email', '');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha123');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
       });
 
@@ -136,8 +144,8 @@ describe('useSignUpViewModel', () => {
       act(() => {
         result.current.handleChange('name', 'João Silva');
         result.current.handleChange('email', 'joao@example.com');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha123');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '');
       });
 
@@ -153,15 +161,23 @@ describe('useSignUpViewModel', () => {
   describe('Cadastro com Sucesso', () => {
     it('deve chamar authService.signUp com os dados corretos', async () => {
       const mockToken = 'mock-jwt-token';
-      vi.mocked(authService.signUp).mockResolvedValue({ token: mockToken });
+      vi.mocked(authService.signUp).mockResolvedValue({
+        token: mockToken,
+        user: {
+          id: '1',
+          name: 'João Silva',
+          email: 'joao@example.com',
+          role: 'USER',
+        },
+      });
 
       const { result } = renderHook(() => useSignUpViewModel());
 
       act(() => {
         result.current.handleChange('name', 'João Silva');
         result.current.handleChange('email', 'joao@example.com');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha123');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
       });
 
@@ -172,22 +188,30 @@ describe('useSignUpViewModel', () => {
       expect(authService.signUp).toHaveBeenCalledWith({
         name: 'João Silva',
         email: 'joao@example.com',
-        password: 'senha123',
+        password: validPassword,
         phoneNumber: '11999999999',
       });
     });
 
     it('deve salvar o token no localStorage', async () => {
       const mockToken = 'mock-jwt-token';
-      vi.mocked(authService.signUp).mockResolvedValue({ token: mockToken });
+      vi.mocked(authService.signUp).mockResolvedValue({
+        token: mockToken,
+        user: {
+          id: '1',
+          name: 'João Silva',
+          email: 'joao@example.com',
+          role: 'USER',
+        },
+      });
 
       const { result } = renderHook(() => useSignUpViewModel());
 
       act(() => {
         result.current.handleChange('name', 'João Silva');
         result.current.handleChange('email', 'joao@example.com');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha123');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
       });
 
@@ -196,21 +220,29 @@ describe('useSignUpViewModel', () => {
       });
 
       await waitFor(() => {
-        expect(localStorage.getItem('token')).toBe(mockToken);
+        expect(localStorage.getItem('access_token')).toBe(mockToken);
       });
     });
 
     it('deve redirecionar para /upload após cadastro bem-sucedido', async () => {
       const mockToken = 'mock-jwt-token';
-      vi.mocked(authService.signUp).mockResolvedValue({ token: mockToken });
+      vi.mocked(authService.signUp).mockResolvedValue({
+        token: mockToken,
+        user: {
+          id: '1',
+          name: 'João Silva',
+          email: 'joao@example.com',
+          role: 'USER',
+        },
+      });
 
       const { result } = renderHook(() => useSignUpViewModel());
 
       act(() => {
         result.current.handleChange('name', 'João Silva');
         result.current.handleChange('email', 'joao@example.com');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha123');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
       });
 
@@ -228,7 +260,19 @@ describe('useSignUpViewModel', () => {
       vi.mocked(authService.signUp).mockImplementation(
         () =>
           new Promise((resolve) => {
-            setTimeout(() => resolve({ token: mockToken }), 100);
+            setTimeout(
+              () =>
+                resolve({
+                  token: mockToken,
+                  user: {
+                    id: '1',
+                    name: 'João Silva',
+                    email: 'joao@example.com',
+                    role: 'USER',
+                  },
+                }),
+              100,
+            );
           })
       );
 
@@ -237,8 +281,8 @@ describe('useSignUpViewModel', () => {
       act(() => {
         result.current.handleChange('name', 'João Silva');
         result.current.handleChange('email', 'joao@example.com');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha123');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
       });
 
@@ -267,8 +311,8 @@ describe('useSignUpViewModel', () => {
       act(() => {
         result.current.handleChange('name', 'João Silva');
         result.current.handleChange('email', 'joao@example.com');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha123');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
       });
 
@@ -289,8 +333,8 @@ describe('useSignUpViewModel', () => {
       act(() => {
         result.current.handleChange('name', 'João Silva');
         result.current.handleChange('email', 'joao@example.com');
-        result.current.handleChange('password', 'senha123');
-        result.current.handleChange('confirmPassword', 'senha123');
+        result.current.handleChange('password', validPassword);
+        result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
       });
 
@@ -298,7 +342,7 @@ describe('useSignUpViewModel', () => {
         await result.current.handleSubmit();
       });
 
-      expect(result.current.error).toBe('Erro ao fazer cadastro');
+      expect(result.current.error).toBe('Erro ao criar conta. Tente novamente.');
     });
   });
 });

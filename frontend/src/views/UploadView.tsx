@@ -4,9 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, FileSpreadsheet, Loader2, CheckCircle2 } from 'lucide-react';
-import { useFinancialData } from '@/hooks/useFinancialData';
-import { useAuthStore } from '@/store/authStore';
+import { pendingDocumentsService } from '@/services/pendingDocumentsService';
 import { AppLayout } from '@/components/AppLayout';
+import { AxiosError } from 'axios';
 
 /**
  * UploadView - Componente Presentacional (Dumb Component)
@@ -22,9 +22,10 @@ import { AppLayout } from '@/components/AppLayout';
 export function UploadView() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuthStore();
-  const { uploadExcel, isUploading, uploadError, uploadSuccess } = useFinancialData();
-  
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,25 +54,42 @@ export function UploadView() {
       return;
     }
 
-    // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
-    // Isso isola dados por usuário (cada user vê apenas seus próprios dados)
-    const companyId = user?.id || 'default-user';
-    
-    console.log('[UploadView] Fazendo upload com:', { 
-      userId: user?.id, 
-      userName: user?.name,
-      companyId,
-      fileName: selectedFile.name 
-    });
-    
-    // Chama o ViewModel (que chama o service, que chama o backend)
-    const success = await uploadExcel(selectedFile, companyId);
-    
-    if (success) {
-      // Redirecionar para o dashboard após 1.5 segundos
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadSuccess(false);
+
+    try {
+      console.log('[UploadView] Enviando documento para revisão...', {
+        fileName: selectedFile.name,
+      });
+
+      const result = await pendingDocumentsService.upload(selectedFile);
+
+      if (!result.success) {
+        setUploadError(result.message || 'Falha ao enviar documento');
+        return;
+      }
+
+      setUploadSuccess(true);
+
+      // Redirecionar para a tela de revisão do documento
       setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
+        navigate(`/admin/pending-documents/${result.documentId}`);
+      }, 1200);
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      const message =
+        axiosError.response?.data?.message ||
+        'Erro ao enviar documento. Verifique sua conexão e tente novamente.';
+
+      setUploadError(message);
+
+      // UX: if user has no company yet, send them to the setup page
+      if (message.toLowerCase().includes('not associated with any company')) {
+        setTimeout(() => navigate('/company/setup'), 600);
+      }
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -93,7 +111,7 @@ export function UploadView() {
                 Upload de Planilha Financeira
               </CardTitle>
               <CardDescription className="text-base">
-              Envie seu arquivo Excel para visualizar os dados no dashboard
+              Envie seu arquivo Excel para revisão (mapeamento e validação)
             </CardDescription>
           </CardHeader>
 
@@ -128,7 +146,7 @@ export function UploadView() {
               <Alert className="bg-green-50 border-green-200">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
-                  Arquivo processado com sucesso! Redirecionando para o dashboard...
+                  Documento enviado com sucesso! Redirecionando para a revisão...
                 </AlertDescription>
               </Alert>
             )}
@@ -150,12 +168,12 @@ export function UploadView() {
               {isUploading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processando...
+                  Enviando...
                 </>
               ) : (
                 <>
                   <Upload className="mr-2 h-5 w-5" />
-                  Processar Planilha
+                  Enviar para revisão
                 </>
               )}
             </Button>

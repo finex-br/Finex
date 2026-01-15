@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Upload, 
+  FileSearch,
   LogOut, 
   ChevronLeft, 
   ChevronRight,
@@ -47,6 +48,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       icon: Upload,
       path: '/upload',
     },
+    {
+      id: 'pending-docs',
+      label: 'Revisar Documentos',
+      icon: FileSearch,
+      path: '/admin/pending-documents',
+    },
   ];
 
   const handleLogout = () => {
@@ -59,7 +66,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     setIsMobileMenuOpen(false);
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">

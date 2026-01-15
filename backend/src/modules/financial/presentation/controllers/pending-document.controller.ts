@@ -54,7 +54,7 @@ export class PendingDocumentController {
 
     if (!result || result.length === 0) {
       throw new HttpException(
-        'User is not associated with any company',
+        'User is not associated with any company. Create a company first and associate your user.',
         HttpStatus.FORBIDDEN,
       );
     }
