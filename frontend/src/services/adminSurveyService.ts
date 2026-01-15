@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3000/api';
+import { api } from './api';
 
 export interface CreateSurveyRequest {
   title: string;
@@ -35,23 +33,13 @@ export interface QuestionResponse {
 }
 
 class AdminSurveyService {
-  private getAuthHeader() {
-    const token = localStorage.getItem('token');
-    return {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-  }
-
   /**
    * Create a new survey
    */
   async createSurvey(data: CreateSurveyRequest): Promise<SurveyResponse> {
-    const response = await axios.post<SurveyResponse>(
-      `${API_URL}/admin/surveys`,
-      data,
-      this.getAuthHeader()
+    const response = await api.post<SurveyResponse>(
+      '/admin/surveys',
+      data
     );
     return response.data;
   }
@@ -63,10 +51,9 @@ class AdminSurveyService {
     surveyVersionId: string,
     data: AddQuestionRequest
   ): Promise<QuestionResponse> {
-    const response = await axios.post<QuestionResponse>(
-      `${API_URL}/admin/surveys/versions/${surveyVersionId}/questions`,
-      data,
-      this.getAuthHeader()
+    const response = await api.post<QuestionResponse>(
+      `/admin/surveys/versions/${surveyVersionId}/questions`,
+      data
     );
     return response.data;
   }

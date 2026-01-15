@@ -99,15 +99,29 @@ export function CreateSurveyForm() {
 
     try {
       // Step 1: Create Survey
+      console.log('📝 Creating survey:', { title: surveyTitle, description: surveyDescription });
+      
       const surveyResponse = await adminSurveyService.createSurvey({
         title: surveyTitle.trim(),
         description: surveyDescription.trim() || undefined,
       });
 
+      console.log('✅ Survey created:', surveyResponse);
+      console.log('🆔 Version ID:', surveyResponse.versionId);
+
       setSurveyVersionId(surveyResponse.versionId);
 
       // Step 2: Add all questions
       for (const question of questions) {
+        console.log('➕ Adding question:', {
+          versionId: surveyResponse.versionId,
+          question: {
+            text: question.text,
+            type: question.type,
+            orderIndex: question.orderIndex,
+          }
+        });
+        
         await adminSurveyService.addQuestion(surveyResponse.versionId, {
           text: question.text.trim(),
           type: question.type,

@@ -66,6 +66,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   };
 
   const isAdmin = user?.role === 'ADMIN';
+  
+  // Debug logs
+  console.log('👤 Current User:', user);
+  console.log('🎭 User Role:', user?.role);
+  console.log('🛡️ Is Admin?:', isAdmin);
 
   const handleLogout = () => {
     clearAuth();

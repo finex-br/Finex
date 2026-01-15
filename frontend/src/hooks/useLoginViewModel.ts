@@ -80,11 +80,16 @@ export const useLoginViewModel = (): UseLoginViewModelReturn => {
       // Chama o serviço de autenticação
       const response = await authService.signIn(credentials);
 
+      // Debug: verificar o que está sendo retornado
+      console.log('🔐 Login Response:', response);
+      console.log('👤 User data:', response.user);
+      console.log('🎭 User role:', response.user.role);
+
       // Salva autenticação no store (localStorage + Zustand)
       setAuth(response.token, response.user);
 
-      // Redireciona para o dashboard (não upload - já pode ter dados salvos)
-      navigate('/dashboard');
+      // Redireciona para upload para começar a importar dados
+      navigate('/upload');
     } catch (err) {
       // Tratamento de erro com mensagem amigável
       const axiosError = err as AxiosError<{ message?: string }>;

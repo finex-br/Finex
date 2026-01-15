@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 
 // Schemas
 import { SurveySchema } from './infrastructure/database/entities/survey.schema';
@@ -21,7 +23,7 @@ import { IAssessmentRepository } from './domain/repositories/assessment.reposito
 import { IAnswerRepository } from './domain/repositories/answer.repository.interface';
 
 // Use Cases
-import { CreateSurveyUseCase } from './application/use-cases/create-survey/create-survey.use-case';
+import { CreateSurveyUseCase as AdminCreateSurveyUseCase } from './application/use-cases/admin/create-survey.use-case';
 import { CreateSurveyVersionUseCase } from './application/use-cases/create-survey-version/create-survey-version.use-case';
 import { StartAssessmentUseCase } from './application/use-cases/start-assessment/start-assessment.use-case';
 import { GetQuestionsUseCase } from './application/use-cases/get-questions/get-questions.use-case';
@@ -43,6 +45,11 @@ import { UserSurveyController } from './presentation/controllers/user-survey.con
       AssessmentSchema,
       AnswerSchema,
     ]),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'default-secret',
+      signOptions: { expiresIn: '24h' },
+    }),
   ],
   controllers: [AdminSurveyController, UserSurveyController],
   providers: [
@@ -70,11 +77,14 @@ import { UserSurveyController } from './presentation/controllers/user-survey.con
     
     // Use Cases
     {
-      provide: CreateSurveyUseCase,
-      useFactory: (surveyRepo: ISurveyRepository) => {
-        return new CreateSurveyUseCase(surveyRepo);
+      provide: 'AdminCreateSurveyUseCase',
+      useFactory: (
+        surveyRepo: ISurveyRepository,
+        versionRepo: ISurveyVersionRepository,
+      ) => {
+        return new AdminCreateSurveyUseCase(surveyRepo, versionRepo);
       },
-      inject: ['ISurveyRepository'],
+      inject: ['ISurveyRepository', 'ISurveyVersionRepository'],
     },
     {
       provide: CreateSurveyVersionUseCase,

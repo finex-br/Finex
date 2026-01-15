@@ -1,9 +1,9 @@
-import { Controller, Post, Body, Get, Patch, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param, Query, UseGuards, Inject } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../authentication/presentation/http/guards/jwt-auth.guard';
 import { AdminGuard } from '../../../authentication/presentation/http/guards/admin.guard';
 import { CreateSurveyDto } from '../dtos/create-survey.dto';
-import { CreateSurveyUseCase } from '../../application/use-cases/create-survey/create-survey.use-case';
+import { CreateSurveyUseCase } from '../../application/use-cases/admin/create-survey.use-case';
 import { CreateSurveyVersionUseCase } from '../../application/use-cases/create-survey-version/create-survey-version.use-case';
 import { AddQuestionUseCase } from '../../application/use-cases/admin/add-question.use-case';
 import { CreateSurveyVersionDto } from '../dto/create-survey-version.dto';
@@ -15,6 +15,7 @@ import { AddQuestionViewModel } from '../view-models/admin/add-question.view-mod
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminSurveyController {
   constructor(
+    @Inject('AdminCreateSurveyUseCase')
     private readonly createSurveyUseCase: CreateSurveyUseCase,
     private readonly createSurveyVersionUseCase: CreateSurveyVersionUseCase,
     private readonly addQuestionUseCase: AddQuestionUseCase,

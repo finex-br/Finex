@@ -21,6 +21,19 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Tabela de Contas Sociais (OAuth)
+CREATE TABLE IF NOT EXISTS social_accounts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider VARCHAR(50) NOT NULL, -- GOOGLE, GITHUB, FACEBOOK
+  provider_id VARCHAR(255) NOT NULL,
+  email VARCHAR(255),
+  display_name VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(provider, provider_id)
+);
+
 -- Tabela de Empresas
 CREATE TABLE IF NOT EXISTS companies (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -84,7 +97,7 @@ CREATE TABLE IF NOT EXISTS questions (
   survey_version_id UUID NOT NULL REFERENCES survey_versions(id) ON DELETE CASCADE,
   text TEXT NOT NULL,
   type VARCHAR(50) NOT NULL, -- DROPDOWN, TEXT, CNPJ, NUMBER, FILE_UPLOAD
-  options JSONB, -- Para armazenar opções de dropdown
+  options_json JSONB, -- Para armazenar opções de dropdown
   order_index INT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
@@ -145,12 +158,45 @@ CREATE TABLE IF NOT EXISTS financial_data (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Tabela de Transações Financeiras (modelo atualizado)
+CREATE TABLE IF NOT EXISTS financial_transactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id VARCHAR(255) NOT NULL,
+  date TIMESTAMP NOT NULL,
+  description VARCHAR(500) NOT NULL,
+  amount_value DECIMAL(10,2) NOT NULL,
+  amount_currency VARCHAR(3) DEFAULT 'BRL',
+  type VARCHAR(20) NOT NULL, -- RECEITA, DESPESA
+  category_name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
 -- Tabela de Categorias Financeiras
 CREATE TABLE IF NOT EXISTS financial_categories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
   name VARCHAR(100) NOT NULL,
   type VARCHAR(50) NOT NULL, -- INCOME, EXPENSE
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ================================================
+-- MÓDULO PAGAMENTO
+-- ================================================
+
+-- Tabela de Checkouts (Stripe)
+CREATE TABLE IF NOT EXISTS checkouts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  stripe_session_id VARCHAR(255) UNIQUE NOT NULL,
+  status VARCHAR(50) NOT NULL, -- PENDING, COMPLETED, CANCELLED, EXPIRED
+  amount DECIMAL(10,2) NOT NULL,
+  currency VARCHAR(3) DEFAULT 'BRL',
+  product_id VARCHAR(255),
+  metadata JSONB,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -217,6 +263,21 @@ CREATE INDEX IF NOT EXISTS idx_answers_question_id ON answers(question_id);
 CREATE INDEX IF NOT EXISTS idx_financial_data_company_id ON financial_data(company_id);
 CREATE INDEX IF NOT EXISTS idx_financial_data_date_competence ON financial_data(date_competence);
 CREATE INDEX IF NOT EXISTS idx_financial_data_type ON financial_data(type);
+
+-- Índices para Financial Transactions
+CREATE INDEX IF NOT EXISTS idx_financial_transactions_company_id ON financial_transactions(company_id);
+CREATE INDEX IF NOT EXISTS idx_financial_transactions_date ON financial_transactions(date);
+CREATE INDEX IF NOT EXISTS idx_financial_transactions_company_date ON financial_transactions(company_id, date);
+
+-- Índices para Social Accounts
+CREATE INDEX IF NOT EXISTS idx_social_accounts_user_id ON social_accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_social_accounts_provider ON social_accounts(provider);
+
+-- Índices para Checkouts
+CREATE INDEX IF NOT EXISTS idx_checkouts_user_id ON checkouts(user_id);
+CREATE INDEX IF NOT EXISTS idx_checkouts_company_id ON checkouts(company_id);
+CREATE INDEX IF NOT EXISTS idx_checkouts_status ON checkouts(status);
+CREATE INDEX IF NOT EXISTS idx_checkouts_stripe_session_id ON checkouts(stripe_session_id);
 
 -- Índices para Audit Logs
 CREATE INDEX IF NOT EXISTS idx_audit_logs_company_id ON audit_logs(company_id);
