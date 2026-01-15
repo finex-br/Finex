@@ -24,9 +24,6 @@ export class UserSchema {
   @Column({ default: 'USER' })
   role: string;
 
-  @Column({ name: 'is_active', default: true })
-  isActive: boolean;
-
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

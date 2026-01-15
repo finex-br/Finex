@@ -26,10 +26,6 @@ export class LinkSocialAccountUseCase
         return Result.fail<void>('User not found');
       }
 
-      if (!user.isActive) {
-        return Result.fail<void>('User account is inactive');
-      }
-
       // Validate provider
       const providerOrError = SocialProvider.create(request.provider);
       if (providerOrError.isFailure) {

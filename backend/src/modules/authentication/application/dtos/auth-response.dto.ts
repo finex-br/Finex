@@ -6,7 +6,6 @@ export interface AuthResponseDTO {
     name: string;
     phoneNumber: string;
     role: string;
-    isActive: boolean;
     createdAt: Date;
   };
 }

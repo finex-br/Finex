@@ -68,12 +68,6 @@ export class AuthenticateWithSocialUseCase
           );
         }
 
-        if (!user.isActive) {
-          return Result.fail<AuthenticateWithSocialResponse>(
-            'User account is inactive'
-          );
-        }
-
         // Generate tokens
         const accessToken = await this.tokenService.generateToken({
           userId: user.id.toString(),
@@ -129,7 +123,6 @@ export class AuthenticateWithSocialUseCase
           password: passwordOrError.getValue(),
           name: socialProfile.displayName,
           phoneNumber: phoneNumberOrError.getValue(),
-          isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         });

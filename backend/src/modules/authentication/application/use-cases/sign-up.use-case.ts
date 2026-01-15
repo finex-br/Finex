@@ -46,7 +46,6 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
       password: passwordOrError.getValue(),
       name: request.name,
       phoneNumber: phoneNumberOrError.getValue(),
-      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -76,7 +75,6 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
         name: user.name,
         phoneNumber: user.phoneNumber?.value || '',
         role: user.role.value,
-        isActive: user.isActive,
         createdAt: user.createdAt,
       },
     };

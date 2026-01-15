@@ -18,11 +18,6 @@ export class SignInUseCase implements IUseCase<SignInDTO, Result<AuthResponseDTO
       return Result.fail<AuthResponseDTO>('Invalid credentials');
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      return Result.fail<AuthResponseDTO>('User account is inactive');
-    }
-
     // Verify password
     const passwordMatches = await user.password.comparePassword(request.password);
     if (!passwordMatches) {
@@ -45,7 +40,6 @@ export class SignInUseCase implements IUseCase<SignInDTO, Result<AuthResponseDTO
         name: user.name,
         phoneNumber: user.phoneNumber?.value || '',
         role: user.role.value,
-        isActive: user.isActive,
         createdAt: user.createdAt,
       },
     };

@@ -23,8 +23,14 @@ export class AppController {
         type: 'postgres',
         url: envService.databaseUrl,
         entities: [__dirname + '/**/*.schema{.ts,.js}'],
-        synchronize: false, // Desabilitado - usamos migrations ou SQL scripts
+        synchronize: false,
         logging: envService.nodeEnv === 'development',
+        ssl: false, // Desabilita SSL para desenvolvimento local
+        extra: {
+          max: 10,
+          connectionTimeoutMillis: 5000,
+          idleTimeoutMillis: 30000,
+        },
       }),
     }),
     AuthenticationModule,
