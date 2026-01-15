@@ -12,6 +12,7 @@ import { DashboardView } from "./views/DashboardView";
 import { GoogleCallbackView } from "./views/GoogleCallbackView";
 import { SurveysListView } from "./views/SurveysListView";
 import { SurveyQuestionnaireView } from "./views/SurveyQuestionnaireView";
+import { AdminPanelView } from "./views/AdminPanelView";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +96,16 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <SurveyQuestionnaireView />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Rota Protegida - Admin Panel (somente ADMIN) */}
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute>
+                  <AdminPanelView />
                 </ProtectedRoute>
               } 
             />

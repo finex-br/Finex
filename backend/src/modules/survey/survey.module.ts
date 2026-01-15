@@ -28,6 +28,7 @@ import { GetQuestionsUseCase } from './application/use-cases/get-questions/get-q
 import { SubmitAnswersUseCase } from './application/use-cases/submit-answers/submit-answers.use-case';
 import { CompleteAssessmentUseCase } from './application/use-cases/complete-assessment/complete-assessment.use-case';
 import { GetPendingAssessmentsUseCase } from './application/use-cases/get-pending-assessments/get-pending-assessments.use-case';
+import { AddQuestionUseCase } from './application/use-cases/admin/add-question.use-case';
 
 // Controllers
 import { AdminSurveyController } from './presentation/controllers/admin-survey.controller';
@@ -154,6 +155,16 @@ import { UserSurveyController } from './presentation/controllers/user-survey.con
         return new GetPendingAssessmentsUseCase(surveyRepo, versionRepo, assessmentRepo);
       },
       inject: ['ISurveyRepository', 'ISurveyVersionRepository', 'IAssessmentRepository'],
+    },
+    {
+      provide: AddQuestionUseCase,
+      useFactory: (
+        questionRepo: IQuestionRepository,
+        versionRepo: ISurveyVersionRepository,
+      ) => {
+        return new AddQuestionUseCase(questionRepo, versionRepo);
+      },
+      inject: ['IQuestionRepository', 'ISurveyVersionRepository'],
     },
   ],
   exports: [],

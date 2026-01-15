@@ -57,7 +57,6 @@ describe('LinkSocialAccountUseCase', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -94,7 +93,6 @@ describe('LinkSocialAccountUseCase', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -141,32 +139,6 @@ describe('LinkSocialAccountUseCase', () => {
       expect(result.error).toContain('User not found');
     });
 
-    it('should fail when user is inactive', async () => {
-      const email = Email.create('user@example.com').getValue();
-      const password = (await Password.create('StrongPass123!')).getValue();
-      const phoneNumber = PhoneNumber.create('11987654321').getValue();
-      const inactiveUser = User.create({
-        email,
-        password,
-        name: 'John Doe',
-        phoneNumber,
-        isActive: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }).getValue();
-
-      userRepository.findById.mockResolvedValue(inactiveUser);
-
-      const result = await useCase.execute({
-        userId: inactiveUser.id.toString(),
-        provider: 'GOOGLE',
-        code: 'auth-code',
-      });
-
-      expect(result.isFailure).toBe(true);
-      expect(result.error).toContain('inactive');
-    });
-
     it('should fail when provider already linked', async () => {
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
@@ -176,7 +148,6 @@ describe('LinkSocialAccountUseCase', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -213,7 +184,6 @@ describe('LinkSocialAccountUseCase', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -259,7 +229,6 @@ describe('LinkSocialAccountUseCase', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();

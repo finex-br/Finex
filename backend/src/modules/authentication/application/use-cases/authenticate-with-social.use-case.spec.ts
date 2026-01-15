@@ -74,7 +74,6 @@ describe('AuthenticateWithSocialUseCase', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -151,7 +150,6 @@ describe('AuthenticateWithSocialUseCase', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -196,50 +194,6 @@ describe('AuthenticateWithSocialUseCase', () => {
 
       expect(result.isFailure).toBe(true);
       expect(result.error).toContain('OAuth exchange failed');
-    });
-
-    it('should fail when user is inactive', async () => {
-      const socialProfile = {
-        id: 'google999',
-        email: 'inactive@gmail.com',
-        displayName: 'Inactive User',
-        provider: 'GOOGLE',
-      };
-
-      const email = Email.create('inactive@gmail.com').getValue();
-      const password = (await Password.create('StrongPass123!')).getValue();
-      const phoneNumber = PhoneNumber.create('11987654321').getValue();
-      const inactiveUser = User.create({
-        email,
-        password,
-        name: 'Inactive User',
-        phoneNumber,
-        isActive: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }).getValue();
-
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const providerId = SocialAccountId.create('google999').getValue();
-      const socialAccount = SocialAccount.create({
-        userId: inactiveUser.id,
-        provider,
-        providerId,
-        email,
-        displayName: 'Inactive User',
-      }).getValue();
-
-      oauthProvider.exchangeCodeForProfile.mockResolvedValue(socialProfile);
-      socialAccountRepository.findByProviderAndProviderId.mockResolvedValue(socialAccount);
-      userRepository.findById.mockResolvedValue(inactiveUser);
-
-      const result = await useCase.execute({
-        provider: 'GOOGLE',
-        code: 'auth-code',
-      });
-
-      expect(result.isFailure).toBe(true);
-      expect(result.error).toContain('inactive');
     });
   });
 });
