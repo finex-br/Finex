@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Company } from '../../../../domain/entities/company.entity';
 import { ICompanyRepository } from '../../../../domain/repositories/company-repository.interface';
 import { UniqueEntityID } from '../../../../core/unique-entity-id';
+import { CNPJ } from '../../../../domain/value-objects/cnpj';
 import { CompanySchema } from '../entities/company.schema';
 import { CompanyMemberSchema } from '../entities/company-member.schema';
 
@@ -20,7 +21,7 @@ export class CompanyRepository implements ICompanyRepository {
     const schema = new CompanySchema();
     schema.id = company.id.toString();
     schema.name = company.name;
-    schema.cnpj = company.cnpj;
+    schema.cnpj = company.cnpj?.value; // Extract string value from CNPJ value object
     schema.sector = company.sector;
     schema.createdAt = company.createdAt;
     schema.updatedAt = company.updatedAt;
@@ -70,10 +71,20 @@ export class CompanyRepository implements ICompanyRepository {
   }
 
   private toDomain(schema: CompanySchema): Company {
+    // Convert CNPJ string to CNPJ value object if present
+    let cnpjValueObject: CNPJ | undefined;
+    if (schema.cnpj) {
+      const cnpjOrError = CNPJ.create(schema.cnpj);
+      if (cnpjOrError.isFailure) {
+        throw new Error(`Invalid CNPJ in database: ${cnpjOrError.error}`);
+      }
+      cnpjValueObject = cnpjOrError.getValue();
+    }
+
     const companyOrError = Company.create(
       {
         name: schema.name,
-        cnpj: schema.cnpj,
+        cnpj: cnpjValueObject,
         sector: schema.sector,
         createdAt: schema.createdAt,
         updatedAt: schema.updatedAt,

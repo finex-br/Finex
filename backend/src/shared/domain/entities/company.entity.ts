@@ -1,10 +1,11 @@
 import { Entity } from '../../core/entity';
 import { UniqueEntityID } from '../../core/unique-entity-id';
 import { Result } from '../../core/result';
+import { CNPJ } from '../value-objects/cnpj';
 
 interface CompanyProps {
   name: string;
-  cnpj?: string;
+  cnpj?: CNPJ;
   sector?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -23,7 +24,7 @@ export class Company extends Entity<CompanyProps> {
     return this.props.name;
   }
 
-  get cnpj(): string | undefined {
+  get cnpj(): CNPJ | undefined {
     return this.props.cnpj;
   }
 

@@ -55,7 +55,7 @@ export class SignUpViewModel {
 
   @ApiProperty({
     description: 'Company CNPJ',
-    example: '12.345.678/0001-90',
+    example: '11.222.333/0001-81',
     required: false,
   })
   @IsString({ message: 'CNPJ deve ser uma string' })

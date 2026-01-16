@@ -8,6 +8,7 @@ import { ICompanyMemberRepository } from '../../../../shared/domain/repositories
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
 import { PhoneNumber } from '../../domain/value-objects/phone-number';
+import { CNPJ } from '../../../../shared/domain/value-objects/cnpj';
 import { User } from '../../domain/entities/user';
 import { Company } from '../../../../shared/domain/entities/company.entity';
 import { CompanyMember } from '../../../../shared/domain/entities/company-member.entity';
@@ -47,6 +48,22 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
       return Result.fail<AuthResponseDTO>(phoneNumberOrError.error!);
     }
 
+    // Validate CNPJ if provided (BEFORE creating user)
+    let cnpjValueObject: CNPJ | undefined;
+    if (request.cnpj) {
+      const cnpjOrError = CNPJ.create(request.cnpj);
+      if (cnpjOrError.isFailure) {
+        return Result.fail<AuthResponseDTO>(cnpjOrError.error!);
+      }
+      cnpjValueObject = cnpjOrError.getValue();
+
+      // Check if CNPJ already exists
+      const cnpjExists = await this.companyRepository.findByCnpj(cnpjValueObject.value);
+      if (cnpjExists) {
+        return Result.fail<AuthResponseDTO>('Company with this CNPJ already exists');
+      }
+    }
+
     // Create user (role will default to ENTREPRENEUR)
     const userOrError = User.create({
       email: emailOrError.getValue(),
@@ -63,21 +80,13 @@ export class SignUpUseCase implements IUseCase<SignUpDTO, Result<AuthResponseDTO
 
     const user = userOrError.getValue();
 
-    // Check if CNPJ already exists (BEFORE creating user)
-    if (request.cnpj) {
-      const cnpjExists = await this.companyRepository.findByCnpj(request.cnpj);
-      if (cnpjExists) {
-        return Result.fail<AuthResponseDTO>('Company with this CNPJ already exists');
-      }
-    }
-
-    // Save user (only after CNPJ validation)
+    // Save user (only after ALL validations pass)
     await this.userRepository.save(user);
 
     // Create company
     const companyOrError = Company.create({
       name: request.companyName,
-      cnpj: request.cnpj,
+      cnpj: cnpjValueObject,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
