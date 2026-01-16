@@ -4,7 +4,7 @@ import { Result } from '../../../../shared/core/result';
 
 interface SurveyProps {
   title: string;
-  description: string;
+  description?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -12,7 +12,7 @@ interface SurveyProps {
 
 export interface CreateSurveyProps {
   title: string;
-  description: string;
+  description?: string;
   isActive?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -31,7 +31,7 @@ export class Survey extends Entity<SurveyProps> {
     return this.props.title;
   }
 
-  get description(): string {
+  get description(): string | undefined {
     return this.props.description;
   }
 
@@ -91,10 +91,6 @@ export class Survey extends Entity<SurveyProps> {
       return Result.fail<Survey>('Title is required');
     }
 
-    if (!props.description || props.description.trim().length === 0) {
-      return Result.fail<Survey>('Description is required');
-    }
-
     if (props.title.trim().length > 255) {
       return Result.fail<Survey>('Title cannot exceed 255 characters');
     }
@@ -102,7 +98,7 @@ export class Survey extends Entity<SurveyProps> {
     const survey = new Survey(
       {
         title: props.title.trim(),
-        description: props.description.trim(),
+        description: props.description?.trim(),
         isActive: props.isActive ?? true,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? new Date(),

@@ -12,6 +12,8 @@ export interface SignUpFormData {
   password: string;
   confirmPassword: string;
   phoneNumber: string;
+  companyName: string;
+  cnpj: string;
 }
 
 /**
@@ -36,6 +38,8 @@ export const useSignUpViewModel = () => {
     password: '',
     confirmPassword: '',
     phoneNumber: '',
+    companyName: '',
+    cnpj: '',
   });
   
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +74,9 @@ export const useSignUpViewModel = () => {
       !formData.email.trim() ||
       !formData.password.trim() ||
       !formData.confirmPassword.trim() ||
-      !formData.phoneNumber.trim()
+      !formData.phoneNumber.trim() ||
+      !formData.companyName.trim() ||
+      !formData.cnpj.trim()
     ) {
       setError('Todos os campos são obrigatórios');
       return false;
@@ -79,6 +85,12 @@ export const useSignUpViewModel = () => {
     // Valida nome (mínimo 2 caracteres)
     if (formData.name.trim().length < 2) {
       setError('Nome deve ter no mínimo 2 caracteres');
+      return false;
+    }
+
+    // Valida nome da empresa (mínimo 3 caracteres)
+    if (formData.companyName.trim().length < 3) {
+      setError('Nome da empresa deve ter no mínimo 3 caracteres');
       return false;
     }
 
@@ -154,6 +166,8 @@ export const useSignUpViewModel = () => {
         email: formData.email,
         password: formData.password,
         phoneNumber: formData.phoneNumber,
+        companyName: formData.companyName,
+        cnpj: formData.cnpj,
       });
 
       // Salva autenticação no store (localStorage + Zustand)

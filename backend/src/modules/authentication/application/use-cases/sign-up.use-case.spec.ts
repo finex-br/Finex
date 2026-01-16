@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SignUpUseCase } from './sign-up.use-case';
 import { IUserRepository } from '../../domain/ports/user-repository.interface';
 import { ITokenService } from '../../domain/ports/token-service.interface';
+import { ICompanyRepository } from '../../../../shared/domain/repositories/company-repository.interface';
+import { ICompanyMemberRepository } from '../../../../shared/domain/repositories/company-member-repository.interface';
 import { User } from '../../domain/entities/user';
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
@@ -12,6 +14,8 @@ describe('SignUpUseCase', () => {
   let signUpUseCase: SignUpUseCase;
   let userRepository: jest.Mocked<IUserRepository>;
   let tokenService: jest.Mocked<ITokenService>;
+  let companyRepository: jest.Mocked<ICompanyRepository>;
+  let companyMemberRepository: jest.Mocked<ICompanyMemberRepository>;
 
   beforeEach(() => {
     userRepository = {
@@ -28,12 +32,32 @@ describe('SignUpUseCase', () => {
       verifyToken: jest.fn(),
     };
 
-    signUpUseCase = new SignUpUseCase(userRepository, tokenService);
+    companyRepository = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      findByUserId: jest.fn(),
+      findByCnpj: jest.fn(),
+    } as any;
+
+    companyMemberRepository = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      findByUserId: jest.fn(),
+      findByCompanyId: jest.fn(),
+    } as any;
+
+    signUpUseCase = new SignUpUseCase(
+      userRepository, 
+      tokenService,
+      companyRepository,
+      companyMemberRepository
+    );
   });
 
   it('should successfully sign up a new user', async () => {
     // Arrange
     userRepository.exists.mockResolvedValue(false);
+    companyRepository.findByCnpj.mockResolvedValue(null);
     tokenService.generateToken.mockResolvedValue('jwt-token-123');
 
     const request = {
@@ -41,6 +65,8 @@ describe('SignUpUseCase', () => {
       password: 'StrongPass123!',
       name: 'John Doe',
       phoneNumber: '11987654321',
+      companyName: 'Test Company',
+      cnpj: '12.345.678/0001-90',
     };
 
     // Act
@@ -67,6 +93,7 @@ describe('SignUpUseCase', () => {
       password: 'StrongPass123!',
       name: 'John Doe',
       phoneNumber: '11987654321',
+      companyName: 'Test Company',
     };
 
     // Act
@@ -87,6 +114,7 @@ describe('SignUpUseCase', () => {
       password: 'StrongPass123!',
       name: 'John Doe',
       phoneNumber: '11987654321',
+      companyName: 'Test Company',
     };
 
     // Act
@@ -107,6 +135,7 @@ describe('SignUpUseCase', () => {
       password: 'weak',
       name: 'John Doe',
       phoneNumber: '11987654321',
+      companyName: 'Test Company',
     };
 
     // Act
@@ -126,6 +155,7 @@ describe('SignUpUseCase', () => {
       password: 'StrongPass123!',
       name: 'John Doe',
       phoneNumber: '123', // too short
+      companyName: 'Test Company',
     };
 
     // Act
@@ -146,6 +176,7 @@ describe('SignUpUseCase', () => {
       password: 'StrongPass123!',
       name: '',
       phoneNumber: '11987654321',
+      companyName: 'Test Company',
     };
 
     // Act

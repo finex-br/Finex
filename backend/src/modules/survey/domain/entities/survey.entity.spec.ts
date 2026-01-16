@@ -89,16 +89,6 @@ describe('Survey Entity', () => {
       expect(result.error).toBe('Title is required');
     });
 
-    it('should fail with empty description', () => {
-      const result = Survey.create({
-        title: 'Title',
-        description: '',
-      });
-
-      expect(result.isFailure).toBe(true);
-      expect(result.error).toBe('Description is required');
-    });
-
     it('should fail with title exceeding 255 characters', () => {
       const longTitle = 'a'.repeat(256);
       const result = Survey.create({

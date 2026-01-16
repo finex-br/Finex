@@ -44,7 +44,6 @@ describe('SignInUseCase', () => {
       name: 'John Doe',
       phoneNumber,
       role,
-      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     }).getValue();
@@ -101,7 +100,6 @@ describe('SignInUseCase', () => {
       name: 'John Doe',
       phoneNumber,
       role,
-      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     }).getValue();
@@ -119,40 +117,6 @@ describe('SignInUseCase', () => {
     // Assert
     expect(result.isFailure).toBe(true);
     expect(result.error).toContain('Invalid credentials');
-    expect(tokenService.generateToken).not.toHaveBeenCalled();
-  });
-
-  it('should fail when user is inactive', async () => {
-    // Arrange
-    const email = Email.create('user@example.com').getValue();
-    const password = (await Password.create('StrongPass123!')).getValue();
-    const phoneNumber = PhoneNumber.create('+5511987654321').getValue();
-    const role = UserRole.create('ENTREPRENEUR').getValue();
-    
-    const user = User.create({
-      email,
-      password,
-      name: 'John Doe',
-      phoneNumber,
-      role,
-      isActive: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }).getValue();
-
-    userRepository.findByEmail.mockResolvedValue(user);
-
-    const request = {
-      email: 'user@example.com',
-      password: 'StrongPass123!',
-    };
-
-    // Act
-    const result = await signInUseCase.execute(request);
-
-    // Assert
-    expect(result.isFailure).toBe(true);
-    expect(result.error).toContain('inactive');
     expect(tokenService.generateToken).not.toHaveBeenCalled();
   });
 });

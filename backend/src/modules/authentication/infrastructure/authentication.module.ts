@@ -5,8 +5,12 @@ import { PassportModule } from '@nestjs/passport';
 import axios from 'axios';
 import { UserSchema } from './persistence/typeorm/entities/user.schema';
 import { SocialAccountSchema } from './persistence/typeorm/schemas/social-account.schema';
+import { CompanySchema } from '../../../shared/infra/database/typeorm/entities/company.schema';
+import { CompanyMemberSchema } from '../../../shared/infra/database/typeorm/entities/company-member.schema';
 import { UserRepository } from './persistence/typeorm/repositories/user.repository';
 import { SocialAccountRepository } from './persistence/typeorm/social-account.repository';
+import { CompanyRepository } from '../../../shared/infra/database/typeorm/repositories/company.repository';
+import { CompanyMemberRepository } from '../../../shared/infra/database/typeorm/repositories/company-member.repository';
 import { JwtTokenService } from './adapters/jwt-token.service';
 import { SignUpUseCase } from '../application/use-cases/sign-up.use-case';
 import { SignInUseCase } from '../application/use-cases/sign-in.use-case';
@@ -24,7 +28,7 @@ import { EnvService } from '../../../shared/infra/env';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserSchema, SocialAccountSchema]),
+    TypeOrmModule.forFeature([UserSchema, SocialAccountSchema, CompanySchema, CompanyMemberSchema]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       inject: [EnvService],
@@ -40,6 +44,8 @@ import { EnvService } from '../../../shared/infra/env';
   providers: [
     UserRepository,
     SocialAccountRepository,
+    CompanyRepository,
+    CompanyMemberRepository,
     JwtTokenService,
     {
       provide: 'GOOGLE_OAUTH_PROVIDER',
@@ -101,10 +107,15 @@ import { EnvService } from '../../../shared/infra/env';
     },
     {
       provide: SignUpUseCase,
-      useFactory: (userRepo: UserRepository, tokenService: JwtTokenService) => {
-        return new SignUpUseCase(userRepo, tokenService);
+      useFactory: (
+        userRepo: UserRepository,
+        tokenService: JwtTokenService,
+        companyRepo: CompanyRepository,
+        companyMemberRepo: CompanyMemberRepository,
+      ) => {
+        return new SignUpUseCase(userRepo, tokenService, companyRepo, companyMemberRepo);
       },
-      inject: [UserRepository, JwtTokenService],
+      inject: [UserRepository, JwtTokenService, CompanyRepository, CompanyMemberRepository],
     },
     {
       provide: SignInUseCase,

@@ -23,7 +23,6 @@ describe('User Entity', () => {
         password: password.getValue(),
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -35,7 +34,6 @@ describe('User Entity', () => {
       expect(user.name).toBe('John Doe');
       expect(user.phoneNumber).toBe(phoneNumber);
       expect(user.role.value).toBe(UserRoleEnum.ENTREPRENEUR);
-      expect(user.isActive).toBe(true);
     });
 
     it('should fail when name is empty', async () => {
@@ -50,7 +48,6 @@ describe('User Entity', () => {
         password,
         name: '',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -72,7 +69,6 @@ describe('User Entity', () => {
         password,
         name: '   ',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -94,7 +90,6 @@ describe('User Entity', () => {
         password,
         name: 'J',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -102,28 +97,6 @@ describe('User Entity', () => {
       // Assert
       expect(result.isFailure).toBe(true);
       expect(result.error).toContain('at least 2 characters');
-    });
-
-    it('should default isActive to true when not provided', async () => {
-      // Arrange
-      const email = Email.create('user@example.com').getValue();
-      const password = (await Password.create('StrongPass123!')).getValue();
-      const phoneNumber = PhoneNumber.create('11987654321').getValue();
-
-      // Act
-      const result = User.create({
-        email,
-        password,
-        name: 'John Doe',
-        phoneNumber,
-        isActive: undefined as any,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-      // Assert
-      expect(result.isSuccess).toBe(true);
-      expect(result.getValue().isActive).toBe(true);
     });
 
     it('should set timestamps when not provided', async () => {
@@ -139,7 +112,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: undefined as any,
         updatedAt: undefined as any,
       });
@@ -155,66 +127,6 @@ describe('User Entity', () => {
     });
   });
 
-  describe('activate', () => {
-    it('should activate an inactive user', async () => {
-      // Arrange
-      const email = Email.create('user@example.com').getValue();
-      const password = (await Password.create('StrongPass123!')).getValue();
-      const phoneNumber = PhoneNumber.create('11987654321').getValue();
-      const user = User.create({
-        email,
-        password,
-        name: 'John Doe',
-        phoneNumber,
-        isActive: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }).getValue();
-
-      const oldUpdatedAt = user.updatedAt;
-
-      // Wait a bit to ensure timestamp changes
-      await new Promise(resolve => setTimeout(resolve, 10));
-
-      // Act
-      user.activate();
-
-      // Assert
-      expect(user.isActive).toBe(true);
-      expect(user.updatedAt.getTime()).toBeGreaterThan(oldUpdatedAt.getTime());
-    });
-  });
-
-  describe('deactivate', () => {
-    it('should deactivate an active user', async () => {
-      // Arrange
-      const email = Email.create('user@example.com').getValue();
-      const password = (await Password.create('StrongPass123!')).getValue();
-      const phoneNumber = PhoneNumber.create('11987654321').getValue();
-      const user = User.create({
-        email,
-        password,
-        name: 'John Doe',
-        phoneNumber,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }).getValue();
-
-      const oldUpdatedAt = user.updatedAt;
-
-      // Wait a bit to ensure timestamp changes
-      await new Promise(resolve => setTimeout(resolve, 10));
-
-      // Act
-      user.deactivate();
-
-      // Assert
-      expect(user.isActive).toBe(false);
-      expect(user.updatedAt.getTime()).toBeGreaterThan(oldUpdatedAt.getTime());
-    });
-  });
-
   describe('updatePassword', () => {
     it('should update user password', async () => {
       // Arrange
@@ -226,7 +138,6 @@ describe('User Entity', () => {
         password: oldPassword,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -258,7 +169,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -280,7 +190,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber: phoneNumber1,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -290,7 +199,6 @@ describe('User Entity', () => {
         password,
         name: 'Jane Doe',
         phoneNumber: phoneNumber2,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -310,7 +218,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -331,7 +238,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber: null as any,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -353,7 +259,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -385,7 +290,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -427,7 +331,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -469,7 +372,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -501,7 +403,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -524,7 +425,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();
@@ -554,7 +454,6 @@ describe('User Entity', () => {
         password,
         name: 'John Doe',
         phoneNumber,
-        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).getValue();

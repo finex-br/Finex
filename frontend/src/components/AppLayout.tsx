@@ -8,7 +8,9 @@ import {
   ChevronLeft, 
   ChevronRight,
   Menu,
-  X
+  X,
+  FileText,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -50,6 +52,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       icon: Upload,
       path: '/upload',
     },
+    {
+      id: 'surveys',
+      label: 'Questionários',
+      icon: FileText,
+      path: '/surveys',
+    },
     ...(!isSystemAdmin
       ? [
           {
@@ -71,6 +79,21 @@ export function AppLayout({ children }: AppLayoutProps) {
         ]
       : []),
   ];
+
+  // Admin menu item - only visible for ADMIN role
+  const adminMenuItem = {
+    id: 'admin',
+    label: 'Admin',
+    icon: Shield,
+    path: '/admin',
+  };
+
+  const isAdmin = user?.role === 'ADMIN';
+  
+  // Debug logs
+  console.log('👤 Current User:', user);
+  console.log('🎭 User Role:', user?.role);
+  console.log('🛡️ Is Admin?:', isAdmin);
 
   const handleLogout = () => {
     clearAuth();
@@ -172,6 +195,30 @@ export function AppLayout({ children }: AppLayoutProps) {
               </button>
             );
           })}
+
+          {/* Admin Button - Only for ADMIN role */}
+          {isAdmin && (
+            <>
+              {!isCollapsed && (
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-3 mt-6">
+                  Administração
+                </p>
+              )}
+              <button
+                onClick={() => handleNavigation(adminMenuItem.path)}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
+                  'hover:bg-slate-100 dark:hover:bg-slate-700',
+                  isActive(adminMenuItem.path) && 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-medium',
+                  !isActive(adminMenuItem.path) && 'text-slate-700 dark:text-slate-300',
+                  isCollapsed && 'justify-center'
+                )}
+              >
+                <Shield className="w-5 h-5 flex-shrink-0" />
+                {!isCollapsed && <span>{adminMenuItem.label}</span>}
+              </button>
+            </>
+          )}
         </nav>
 
         {/* Bottom Actions */}

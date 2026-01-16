@@ -15,6 +15,8 @@ export interface SignUpData {
   email: string;
   password: string;
   phoneNumber: string;
+  companyName: string;
+  cnpj: string;
 }
 
 export interface User {
@@ -26,7 +28,7 @@ export interface User {
 
 export interface AuthResponse {
   token: string;
-  user?: User;
+  user: User; // Backend sempre retorna user no sign-in/sign-up
 }
 
 /**

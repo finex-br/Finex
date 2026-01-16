@@ -23,7 +23,6 @@ describe('UserMapper', () => {
         name: 'John Doe',
         phoneNumber,
         role,
-        isActive: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-02'),
       }, new UniqueEntityID('test-id-123')).getValue();
@@ -39,7 +38,6 @@ describe('UserMapper', () => {
       expect(schema.fullName).toBe('John Doe');
       expect(schema.phoneNumber).toBe('+5511987654321');
       expect(schema.role).toBe('ENTREPRENEUR');
-      expect(schema.isActive).toBe(true);
       expect(schema.createdAt).toEqual(new Date('2024-01-01'));
       expect(schema.updatedAt).toEqual(new Date('2024-01-02'));
     });
@@ -57,7 +55,6 @@ describe('UserMapper', () => {
       schema.fullName = 'Jane Doe';
       schema.phoneNumber = '+5511987654321';
       schema.role = 'INVESTOR';
-      schema.isActive = true;
       schema.createdAt = new Date('2024-01-01');
       schema.updatedAt = new Date('2024-01-02');
 
@@ -72,7 +69,6 @@ describe('UserMapper', () => {
       expect(user!.name).toBe('Jane Doe');
       expect(user!.phoneNumber?.value).toBe('+5511987654321');
       expect(user!.role.value).toBe('INVESTOR');
-      expect(user!.isActive).toBe(true);
     });
 
     it('should return null when email is invalid', async () => {
@@ -86,7 +82,6 @@ describe('UserMapper', () => {
       schema.fullName = 'John Doe';
       schema.phoneNumber = '+5511987654321';
       schema.role = 'ADMIN';
-      schema.isActive = true;
       schema.createdAt = new Date();
       schema.updatedAt = new Date();
 
@@ -108,7 +103,6 @@ describe('UserMapper', () => {
       schema.fullName = 'John Doe';
       schema.phoneNumber = '+5511987654321';
       schema.role = 'INVALID_ROLE';
-      schema.isActive = true;
       schema.createdAt = new Date();
       schema.updatedAt = new Date();
 
@@ -130,7 +124,6 @@ describe('UserMapper', () => {
       schema.fullName = 'John Doe';
       schema.phoneNumber = 'invalid-phone';
       schema.role = 'ENTREPRENEUR';
-      schema.isActive = true;
       schema.createdAt = new Date();
       schema.updatedAt = new Date();
 

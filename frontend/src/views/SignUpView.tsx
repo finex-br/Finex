@@ -107,6 +107,44 @@ export function SignUpView() {
               </p>
             </div>
 
+            {/* Campo de Nome da Empresa */}
+            <div className="space-y-2">
+              <Label htmlFor="companyName" className="text-sm font-medium">
+                Nome da Empresa
+              </Label>
+              <Input
+                id="companyName"
+                type="text"
+                placeholder="Minha Empresa LTDA"
+                value={formData.companyName}
+                onChange={(e) => handleChange('companyName', e.target.value)}
+                disabled={isLoading}
+                required
+                className="w-full"
+                autoComplete="organization"
+              />
+            </div>
+
+            {/* Campo de CNPJ */}
+            <div className="space-y-2">
+              <Label htmlFor="cnpj" className="text-sm font-medium">
+                CNPJ
+              </Label>
+              <Input
+                id="cnpj"
+                type="text"
+                placeholder="12.345.678/0001-90"
+                value={formData.cnpj}
+                onChange={(e) => handleChange('cnpj', e.target.value)}
+                disabled={isLoading}
+                required
+                className="w-full"
+              />
+              <p className="text-xs text-slate-500">
+                Formato: 12.345.678/0001-90
+              </p>
+            </div>
+
             {/* Campo de Senha */}
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">
