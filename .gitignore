@@ -17,6 +17,14 @@ build/
 npm-debug.log*
 logs/
 
+# Local test fixtures (DO NOT COMMIT REAL CREDENTIALS)
+test-login.json
+login.json
+signup.json
+
+# Local dev logs
+backend-log.txt
+
 # IDE
 .vscode/
 .idea/

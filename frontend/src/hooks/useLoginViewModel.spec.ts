@@ -43,7 +43,7 @@ describe('useLoginViewModel', () => {
   });
 
   describe('Login com Sucesso', () => {
-    it('deve fazer login, salvar token no localStorage e navegar para /upload', async () => {
+    it('deve fazer login, salvar token no localStorage e navegar para /dashboard', async () => {
       // Arrange: Preparar o mock de resposta
       const mockAuthResponse: AuthResponse = {
         token: 'fake-jwt-token-12345',
@@ -82,8 +82,8 @@ describe('useLoginViewModel', () => {
       // Assert: Verificar que o token foi salvo no localStorage
       expect(localStorage.getItem('access_token')).toBe('fake-jwt-token-12345');
 
-      // Assert: Verificar que navegou para /upload
-      expect(mockNavigate).toHaveBeenCalledWith('/upload');
+      // Assert: Verificar que navegou para /dashboard
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
       expect(mockNavigate).toHaveBeenCalledTimes(1);
 
       // Assert: Verificar que não há erro

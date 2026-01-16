@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useAuthStore } from '@/store/authStore';
 
 /**
  * Interface para os dados do formulário de cadastro
@@ -29,6 +30,7 @@ export interface SignUpFormData {
  */
 export const useSignUpViewModel = () => {
   const navigate = useNavigate();
+  const { setAuth } = useAuthStore();
   
   const [formData, setFormData] = useState<SignUpFormData>({
     name: '',
@@ -168,8 +170,19 @@ export const useSignUpViewModel = () => {
         cnpj: formData.cnpj,
       });
 
-      // Salva o token no localStorage
-      localStorage.setItem('token', response.token);
+      // Salva autenticação no store (localStorage + Zustand)
+      // Backend retorna user também; usamos apenas o necessário para o store
+      if (response.user) {
+        setAuth(response.token, {
+          id: response.user.id,
+          name: response.user.name,
+          email: response.user.email,
+          role: response.user.role,
+        });
+      } else {
+        // Fallback defensivo (não esperado): manter compatível com ProtectedRoute
+        localStorage.setItem('access_token', response.token);
+      }
 
       // Redireciona para a tela de upload (onboarding)
       navigate('/upload');

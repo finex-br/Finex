@@ -13,6 +13,12 @@ import { GoogleCallbackView } from "./views/GoogleCallbackView";
 import { SurveysListView } from "./views/SurveysListView";
 import { SurveyQuestionnaireView } from "./views/SurveyQuestionnaireView";
 import { AdminPanelView } from "./views/AdminPanelView";
+import { PendingDocumentsAdminView } from "./views/PendingDocumentsAdminView";
+import { PendingDocumentAdminDetailView } from "./views/PendingDocumentAdminDetailView";
+import { CompanySetupView } from "./views/CompanySetupView";
+import { MyDocumentsView } from "./views/MyDocumentsView";
+import { MyDocumentDetailView } from "./views/MyDocumentDetailView";
+import { useAuthStore } from "./store/authStore";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +43,21 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
   
   // Renderiza os filhos se o usuário estiver autenticado
+  return <>{children}</>;
+};
+
+const AdminRoute = ({ children }: ProtectedRouteProps) => {
+  const token = localStorage.getItem('access_token');
+  const userRole = useAuthStore((s) => s.user?.role);
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (userRole !== 'ADMIN') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return <>{children}</>;
 };
 
@@ -98,6 +119,54 @@ const App = () => (
                   <SurveyQuestionnaireView />
                 </ProtectedRoute>
               } 
+            />
+
+            {/* Rota Protegida - Admin Pending Documents */}
+            <Route 
+              path="/admin/pending-documents" 
+              element={
+                <AdminRoute>
+                  <PendingDocumentsAdminView />
+                </AdminRoute>
+              }
+            />
+
+            {/* Rota Protegida - Admin Pending Document Detail */}
+            <Route 
+              path="/admin/pending-documents/:id" 
+              element={
+                <AdminRoute>
+                  <PendingDocumentAdminDetailView />
+                </AdminRoute>
+              }
+            />
+
+            {/* Rota Protegida - Company Setup */}
+            <Route
+              path="/company/setup"
+              element={
+                <ProtectedRoute>
+                  <CompanySetupView />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Rota Protegida - Company Member: acompanhar documentos */}
+            <Route
+              path="/documents"
+              element={
+                <ProtectedRoute>
+                  <MyDocumentsView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/documents/:id"
+              element={
+                <ProtectedRoute>
+                  <MyDocumentDetailView />
+                </ProtectedRoute>
+              }
             />
             
             {/* Rota Protegida - Admin Panel (somente ADMIN) */}

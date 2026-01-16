@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Upload, 
+  FileSearch,
   LogOut, 
   ChevronLeft, 
   ChevronRight,
@@ -36,6 +37,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const isSystemAdmin = user?.role === 'ADMIN';
+
   const menuItems = [
     {
       id: 'dashboard',
@@ -55,6 +58,26 @@ export function AppLayout({ children }: AppLayoutProps) {
       icon: FileText,
       path: '/surveys',
     },
+    ...(!isSystemAdmin
+      ? [
+          {
+            id: 'my-docs',
+            label: 'Meus Documentos',
+            icon: FileSearch,
+            path: '/documents',
+          },
+        ]
+      : []),
+    ...(isSystemAdmin
+      ? [
+          {
+            id: 'pending-docs',
+            label: 'Revisar Documentos',
+            icon: FileSearch,
+            path: '/admin/pending-documents',
+          },
+        ]
+      : []),
   ];
 
   // Admin menu item - only visible for ADMIN role
@@ -82,7 +105,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     setIsMobileMenuOpen(false);
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
