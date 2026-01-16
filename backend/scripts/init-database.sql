@@ -138,10 +138,30 @@ CREATE TABLE IF NOT EXISTS financial_uploads (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   filename VARCHAR(255) NOT NULL,
   storage_path VARCHAR(500),
-  status VARCHAR(50) NOT NULL, -- PROCESSING, DONE, ERROR
+  status VARCHAR(50) NOT NULL, -- UPLOADED, MAPPED, VALIDATED, PROCESSING, DONE, ERROR, REJECTED
+  raw_data JSONB,
+  column_mapping JSONB,
+  validation_result JSONB,
+  CONSTRAINT financial_uploads_status_check 
+    CHECK (status IN ('UPLOADED', 'MAPPED', 'VALIDATED', 'PROCESSING', 'DONE', 'ERROR', 'REJECTED')),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- ================================================
+-- MIGRATION MERGED: Staging Columns (idempotente)
+-- ================================================
+
+-- Caso a tabela já exista (ambientes antigos), garante colunas e constraint
+ALTER TABLE financial_uploads 
+  ADD COLUMN IF NOT EXISTS raw_data jsonb,
+  ADD COLUMN IF NOT EXISTS column_mapping jsonb,
+  ADD COLUMN IF NOT EXISTS validation_result jsonb;
+
+ALTER TABLE financial_uploads DROP CONSTRAINT IF EXISTS financial_uploads_status_check;
+ALTER TABLE financial_uploads 
+  ADD CONSTRAINT financial_uploads_status_check 
+  CHECK (status IN ('UPLOADED', 'MAPPED', 'VALIDATED', 'PROCESSING', 'DONE', 'ERROR', 'REJECTED'));
 
 -- Tabela de Dados Financeiros
 CREATE TABLE IF NOT EXISTS financial_data (
@@ -264,6 +284,10 @@ CREATE INDEX IF NOT EXISTS idx_financial_data_company_id ON financial_data(compa
 CREATE INDEX IF NOT EXISTS idx_financial_data_date_competence ON financial_data(date_competence);
 CREATE INDEX IF NOT EXISTS idx_financial_data_type ON financial_data(type);
 
+-- Índices para Financial Uploads
+CREATE INDEX IF NOT EXISTS idx_financial_uploads_status ON financial_uploads(status);
+CREATE INDEX IF NOT EXISTS idx_financial_uploads_company_status ON financial_uploads(company_id, status);
+
 -- Índices para Financial Transactions
 CREATE INDEX IF NOT EXISTS idx_financial_transactions_company_id ON financial_transactions(company_id);
 CREATE INDEX IF NOT EXISTS idx_financial_transactions_date ON financial_transactions(date);
@@ -307,4 +331,16 @@ VALUES (
 )
 ON CONFLICT DO NOTHING;
 
-COMMENT ON DATABASE finex_db IS 'FinEx - Financial Intelligence Platform';
+DO $$
+BEGIN
+  EXECUTE format(
+    'COMMENT ON DATABASE %I IS %L',
+    current_database(),
+    'FinEx - Financial Intelligence Platform'
+  );
+END
+$$;
+
+COMMENT ON COLUMN financial_uploads.raw_data IS 'Estrutura bruta do Excel: { headers: string[], rows: any[][], totalRows: number }';
+COMMENT ON COLUMN financial_uploads.column_mapping IS 'Mapeamento definido pelo admin (rascunho): { date: "coluna", amount: "coluna", ... }';
+COMMENT ON COLUMN financial_uploads.validation_result IS 'Resultado da validação (rascunho): { isValid: boolean, errors: [], warnings: [], ... }';

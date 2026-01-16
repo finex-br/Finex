@@ -88,8 +88,8 @@ export const useLoginViewModel = (): UseLoginViewModelReturn => {
       // Salva autenticação no store (localStorage + Zustand)
       setAuth(response.token, response.user);
 
-      // Redireciona para upload para começar a importar dados
-      navigate('/upload');
+      // Redireciona para dashboard após login
+      navigate('/dashboard');
     } catch (err) {
       // Tratamento de erro com mensagem amigável
       const axiosError = err as AxiosError<{ message?: string }>;

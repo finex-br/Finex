@@ -102,7 +102,9 @@ export class TypeORMFinancialUploadRepository implements IPendingDocumentReposit
     const schema = await this.repository
       .createQueryBuilder('u')
       .where('u.companyId = :companyId', { companyId })
-      .andWhere("(u.rawData->'metadata'->>'fileHash') = :fileHash", { fileHash })
+      // Note: inside raw SQL expressions TypeORM does not map property names to column names.
+      // The DB column is raw_data (jsonb), not rawData.
+      .andWhere("(u.raw_data->'metadata'->>'fileHash') = :fileHash", { fileHash })
       .limit(1)
       .getOne();
 

@@ -40,6 +40,8 @@ describe('useSignUpViewModel', () => {
       password: '',
       confirmPassword: '',
       phoneNumber: '',
+      companyName: '',
+      cnpj: '',
     });
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
@@ -71,6 +73,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', 'Senha123?');
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
@@ -90,6 +94,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
@@ -109,6 +115,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
@@ -128,6 +136,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', '');
         result.current.handleChange('confirmPassword', '');
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
@@ -147,6 +157,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
@@ -179,6 +191,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
@@ -190,6 +204,8 @@ describe('useSignUpViewModel', () => {
         email: 'joao@example.com',
         password: validPassword,
         phoneNumber: '11999999999',
+        companyName: 'Empresa LTDA',
+        cnpj: '12345678000199',
       });
     });
 
@@ -213,6 +229,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
@@ -244,6 +262,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
@@ -284,6 +304,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       let submitPromise: Promise<void>;
@@ -314,6 +336,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
@@ -336,6 +360,8 @@ describe('useSignUpViewModel', () => {
         result.current.handleChange('password', validPassword);
         result.current.handleChange('confirmPassword', validPassword);
         result.current.handleChange('phoneNumber', '11999999999');
+        result.current.handleChange('companyName', 'Empresa LTDA');
+        result.current.handleChange('cnpj', '12345678000199');
       });
 
       await act(async () => {
