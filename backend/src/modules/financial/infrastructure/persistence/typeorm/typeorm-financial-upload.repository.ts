@@ -20,12 +20,16 @@ export class TypeORMFinancialUploadRepository implements IPendingDocumentReposit
   ) {}
 
   async save(document: PendingDocument): Promise<void> {
-    // Salva fileSize e mimeType dentro de raw_data.metadata
+    // Salva fileSize e mimeType dentro de raw_data.metadata (preservando metadata existente)
+    const existingMetadata = (document.rawData as any)?.metadata || {};
     const rawDataWithMetadata = {
       ...document.rawData,
       metadata: {
+        ...existingMetadata,
         fileSize: document.fileSize,
         mimeType: document.mimeType,
+        // Notes/comments from ADMIN (e.g., reject reason). Stored here to avoid DB migrations.
+        notes: document.notes ?? existingMetadata.notes ?? null,
       },
     };
 
@@ -86,6 +90,25 @@ export class TypeORMFinancialUploadRepository implements IPendingDocumentReposit
     return schemas.map(schema => this.toDomain(schema));
   }
 
+  async findAll(): Promise<PendingDocument[]> {
+    const schemas = await this.repository.find({
+      order: { createdAt: 'DESC' },
+    });
+
+    return schemas.map((schema) => this.toDomain(schema));
+  }
+
+  async findByCompanyIdAndFileHash(companyId: string, fileHash: string): Promise<PendingDocument | null> {
+    const schema = await this.repository
+      .createQueryBuilder('u')
+      .where('u.companyId = :companyId', { companyId })
+      .andWhere("(u.rawData->'metadata'->>'fileHash') = :fileHash", { fileHash })
+      .limit(1)
+      .getOne();
+
+    return schema ? this.toDomain(schema) : null;
+  }
+
   async delete(id: string): Promise<void> {
     await this.repository.delete(id);
   }
@@ -132,7 +155,7 @@ export class TypeORMFinancialUploadRepository implements IPendingDocumentReposit
       rawData: rawData,
       columnMapping,
       validationResult: schema.validationResult,
-      notes: null,
+      notes: metadata.notes ?? null,
       createdAt: schema.createdAt,
       updatedAt: schema.updatedAt,
     });

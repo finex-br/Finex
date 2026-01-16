@@ -33,6 +33,16 @@ export interface IPendingDocumentRepository {
   findPendingDocuments(companyId: string): Promise<PendingDocument[]>;
 
   /**
+   * Lista todos os documentos (uso do ADMIN do sistema)
+   */
+  findAll(): Promise<PendingDocument[]>;
+
+  /**
+   * Busca documento por hash do arquivo dentro de uma empresa (para deduplicação)
+   */
+  findByCompanyIdAndFileHash(companyId: string, fileHash: string): Promise<PendingDocument | null>;
+
+  /**
    * Deleta um documento
    */
   delete(id: string): Promise<void>;

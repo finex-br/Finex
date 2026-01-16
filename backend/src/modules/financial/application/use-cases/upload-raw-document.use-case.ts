@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { createHash } from 'crypto';
 import { IUseCase } from '../../../../shared/core/use-case.interface';
 import { IExcelAnalyzer } from '../../domain/ports/excel-analyzer.interface';
 import { IPendingDocumentRepository } from '../../domain/ports/pending-document-repository.interface';
@@ -42,7 +43,17 @@ export class UploadRawDocumentUseCase
       throw new Error('Arquivo vazio');
     }
 
-    // 2. Analisar estrutura do Excel
+    // 2. Deduplicação (mesmo arquivo dentro da mesma empresa)
+    const fileHash = createHash('sha256').update(request.fileBuffer).digest('hex');
+    const existing = await this.pendingDocumentRepository.findByCompanyIdAndFileHash(
+      request.companyId,
+      fileHash,
+    );
+    if (existing) {
+      throw new Error('DUPLICATE_DOCUMENT: Este arquivo já foi enviado anteriormente');
+    }
+
+    // 3. Analisar estrutura do Excel
     const structure = await this.excelAnalyzer.analyzeStructure(request.fileBuffer);
 
     if (structure.headers.length === 0) {
@@ -53,13 +64,13 @@ export class UploadRawDocumentUseCase
       throw new Error('Arquivo não possui dados (rows)');
     }
 
-    // 3. Tentar criar mapeamento automático (sugestão)
+    // 4. Tentar criar mapeamento automático (sugestão)
     const autoMappingResult = ColumnMapping.createAutoMapping(structure.headers);
     const suggestedMapping = autoMappingResult.isSuccess
       ? autoMappingResult.getValue().toJSON()
       : undefined;
 
-    // 4. Criar entidade de domínio
+    // 5. Criar entidade de domínio
     const statusResult = DocumentStatus.create(DocumentStatusEnum.UPLOADED);
     if (statusResult.isFailure) {
       throw new Error(statusResult.error);
@@ -75,7 +86,13 @@ export class UploadRawDocumentUseCase
       mimeType: request.mimeType,
       fileSize: request.fileSize,
       status: statusResult.getValue(),
-      rawData: structure,
+      rawData: {
+        ...structure,
+        metadata: {
+          ...(structure as any)?.metadata,
+          fileHash,
+        },
+      } as any,
       columnMapping: null,
       validationResult: null,
       notes: null,
@@ -89,10 +106,10 @@ export class UploadRawDocumentUseCase
 
     const document = documentResult.getValue();
 
-    // 5. Persistir documento
+    // 6. Persistir documento
     await this.pendingDocumentRepository.save(document);
 
-    // 6. Retornar resposta com preview
+    // 7. Retornar resposta com preview
     return {
       success: true,
       documentId: document.id,

@@ -7,6 +7,7 @@ import { Upload, FileSpreadsheet, Loader2, CheckCircle2 } from 'lucide-react';
 import { pendingDocumentsService } from '@/services/pendingDocumentsService';
 import { AppLayout } from '@/components/AppLayout';
 import { AxiosError } from 'axios';
+import { useAuthStore } from '@/store/authStore';
 
 /**
  * UploadView - Componente Presentacional (Dumb Component)
@@ -21,6 +22,7 @@ import { AxiosError } from 'axios';
  */
 export function UploadView() {
   const navigate = useNavigate();
+  const isSystemAdmin = useAuthStore((s) => s.user?.role === 'ADMIN');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -72,9 +74,9 @@ export function UploadView() {
 
       setUploadSuccess(true);
 
-      // Redirecionar para a tela de revisão do documento
+      // ADMIN do sistema pode revisar imediatamente; usuários comuns voltam ao dashboard
       setTimeout(() => {
-        navigate(`/admin/pending-documents/${result.documentId}`);
+        navigate(isSystemAdmin ? `/admin/pending-documents/${result.documentId}` : `/documents/${result.documentId}`);
       }, 1200);
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
@@ -146,7 +148,9 @@ export function UploadView() {
               <Alert className="bg-green-50 border-green-200">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
-                  Documento enviado com sucesso! Redirecionando para a revisão...
+                  {isSystemAdmin
+                    ? 'Documento enviado com sucesso! Redirecionando para a revisão...'
+                    : 'Documento enviado com sucesso! Um administrador irá revisar.'}
                 </AlertDescription>
               </Alert>
             )}

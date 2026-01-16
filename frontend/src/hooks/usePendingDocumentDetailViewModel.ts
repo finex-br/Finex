@@ -6,11 +6,14 @@ import {
   DocumentDetails,
   ValidateDocumentResponse,
 } from '@/services/pendingDocumentsService';
+import { useAuthStore } from '@/store/authStore';
 
 export const usePendingDocumentDetailViewModel = (documentId: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [document, setDocument] = useState<DocumentDetails | null>(null);
+
+  const isSystemAdmin = useAuthStore((s) => s.user?.role === 'ADMIN');
 
   const [isSavingMapping, setIsSavingMapping] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
@@ -28,6 +31,12 @@ export const usePendingDocumentDetailViewModel = (documentId: string) => {
   const [validation, setValidation] = useState<ValidateDocumentResponse | null>(null);
   const [rejectNotes, setRejectNotes] = useState('');
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  const [rowOverrides, setRowOverrides] = useState<Record<string, { date?: string; amount?: string }>>({});
+  const [isSavingOverrides, setIsSavingOverrides] = useState(false);
+
+  const [excludedRows, setExcludedRows] = useState<number[]>([]);
+  const [isExcludingRows, setIsExcludingRows] = useState(false);
 
   const headers = useMemo(() => document?.rawData.headers || [], [document]);
 
@@ -48,6 +57,23 @@ export const usePendingDocumentDetailViewModel = (documentId: string) => {
           category: existing.category || undefined,
           type: existing.type || undefined,
         });
+
+        const overrides = (existing as any).overrides as Record<string, any> | undefined;
+        if (overrides) {
+          const normalized: Record<string, { date?: string; amount?: string }> = {};
+          Object.entries(overrides).forEach(([row, values]) => {
+            normalized[row] = {
+              date: values?.date !== undefined ? String(values.date) : undefined,
+              amount: values?.amount !== undefined ? String(values.amount) : undefined,
+            };
+          });
+          setRowOverrides((prev) => ({ ...normalized, ...prev }));
+        }
+
+        const excluded = (existing as any).excludedRows as number[] | undefined;
+        if (Array.isArray(excluded)) {
+          setExcludedRows(excluded);
+        }
       }
 
       if (response.document.validationResult) {
@@ -67,6 +93,29 @@ export const usePendingDocumentDetailViewModel = (documentId: string) => {
       setError(axiosError.response?.data?.message || 'Erro ao buscar documento');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const excludeRow = async (rowNumber: number) => {
+    setIsExcludingRows(true);
+    setError(null);
+    setActionMessage(null);
+
+    try {
+      const result = await pendingDocumentsService.excludeRows(documentId, [rowNumber]);
+      if (!result.success) {
+        setError(result.message || 'Falha ao excluir linha');
+        return;
+      }
+      setExcludedRows(result.excludedRows);
+      setActionMessage(result.message);
+      await fetchDetails();
+      await validate();
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setError(axiosError.response?.data?.message || 'Erro ao excluir linha');
+    } finally {
+      setIsExcludingRows(false);
     }
   };
 
@@ -121,6 +170,29 @@ export const usePendingDocumentDetailViewModel = (documentId: string) => {
     }
   };
 
+  const saveOverrides = async () => {
+    setIsSavingOverrides(true);
+    setError(null);
+    setActionMessage(null);
+
+    try {
+      const result = await pendingDocumentsService.saveRowOverrides(documentId, rowOverrides);
+      if (!result.success) {
+        setError(result.message || 'Falha ao salvar correções');
+        return;
+      }
+
+      setActionMessage(result.message);
+      await fetchDetails();
+      await validate();
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setError(axiosError.response?.data?.message || 'Erro ao salvar correções');
+    } finally {
+      setIsSavingOverrides(false);
+    }
+  };
+
   const approve = async () => {
     setIsApproving(true);
     setError(null);
@@ -160,6 +232,8 @@ export const usePendingDocumentDetailViewModel = (documentId: string) => {
     error,
     document,
 
+    isSystemAdmin,
+
     headers,
 
     mapping,
@@ -170,6 +244,15 @@ export const usePendingDocumentDetailViewModel = (documentId: string) => {
     validation,
     isValidating,
     validate,
+
+    rowOverrides,
+    setRowOverrides,
+    isSavingOverrides,
+    saveOverrides,
+
+    excludedRows,
+    isExcludingRows,
+    excludeRow,
 
     isApproving,
     approve,

@@ -14,6 +14,7 @@ export class ExcelAnalyzerAdapter implements IExcelAnalyzer {
     headers: string[];
     rows: any[][];
     totalRows: number;
+    rowNumbers?: number[];
   }> {
     // 1. Ler o arquivo Excel com ExcelJS
     const workbook = new ExcelJS.Workbook();
@@ -63,6 +64,7 @@ export class ExcelAnalyzerAdapter implements IExcelAnalyzer {
 
     // 3. Extrair todas as linhas de dados
     const rows: any[][] = [];
+    const rowNumbers: number[] = [];
     let totalRows = 0;
 
     worksheet.eachRow((row, rowNumber) => {
@@ -85,6 +87,7 @@ export class ExcelAnalyzerAdapter implements IExcelAnalyzer {
       const cleanRow = rowValues;
       if (hasData && cleanRow.length > 0) {
         rows.push(cleanRow);
+        rowNumbers.push(rowNumber);
         totalRows++;
       }
     });
@@ -97,6 +100,7 @@ export class ExcelAnalyzerAdapter implements IExcelAnalyzer {
       headers: cleanHeaders,
       rows,
       totalRows,
+      rowNumbers,
     };
   }
 

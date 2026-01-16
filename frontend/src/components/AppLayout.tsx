@@ -35,6 +35,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const isSystemAdmin = user?.role === 'ADMIN';
+
   const menuItems = [
     {
       id: 'dashboard',
@@ -48,12 +50,26 @@ export function AppLayout({ children }: AppLayoutProps) {
       icon: Upload,
       path: '/upload',
     },
-    {
-      id: 'pending-docs',
-      label: 'Revisar Documentos',
-      icon: FileSearch,
-      path: '/admin/pending-documents',
-    },
+    ...(!isSystemAdmin
+      ? [
+          {
+            id: 'my-docs',
+            label: 'Meus Documentos',
+            icon: FileSearch,
+            path: '/documents',
+          },
+        ]
+      : []),
+    ...(isSystemAdmin
+      ? [
+          {
+            id: 'pending-docs',
+            label: 'Revisar Documentos',
+            icon: FileSearch,
+            path: '/admin/pending-documents',
+          },
+        ]
+      : []),
   ];
 
   const handleLogout = () => {

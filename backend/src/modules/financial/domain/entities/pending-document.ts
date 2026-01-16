@@ -15,6 +15,7 @@ export interface PendingDocumentProps {
     headers: string[];
     rows: any[][];
     totalRows: number;
+    rowNumbers?: number[];
   };
   columnMapping?: ColumnMapping | null;
   validationResult?: {
@@ -130,11 +131,16 @@ export class PendingDocument {
    * Define o mapeamento de colunas
    */
   public setColumnMapping(mapping: ColumnMapping): Result<void> {
-    if (!this.status.isUploaded()) {
-      return Result.fail('Só é possível mapear colunas em documentos com status UPLOADED');
+    // Permite ajustar mapeamento/correções também após o primeiro save.
+    // Sempre que o mapeamento muda, a validação anterior deixa de ser válida.
+    if (!this.status.isUploaded() && !this.status.isMapped() && !this.status.isValidated()) {
+      return Result.fail('Só é possível mapear colunas em documentos com status UPLOADED, MAPPED ou VALIDATED');
     }
 
     this.props.columnMapping = mapping;
+
+    // Resetar validação (mapeamento/correções mudaram)
+    this.props.validationResult = null;
     
     const newStatusResult = DocumentStatus.create(DocumentStatusEnum.MAPPED);
     if (newStatusResult.isFailure) {

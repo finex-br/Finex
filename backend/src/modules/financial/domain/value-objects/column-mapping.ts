@@ -12,6 +12,35 @@ export interface ColumnMappingProps {
   category?: string;
   amount?: string;
   type?: string;
+  /**
+   * Linhas do Excel (row number) que devem ser ignoradas (ex.: TOTAL, linhas lixo).
+   */
+  excludedRows?: number[];
+  /**
+   * Correções por linha (row number do Excel, ex: "22")
+   * Exemplo:
+   * { "22": { date: "2025-01-10", amount: "123,45" } }
+   */
+  overrides?: Record<
+    string,
+    {
+      date?: any;
+      amount?: any;
+      description?: any;
+      category?: any;
+      type?: any;
+    }
+  >;
+
+  /**
+   * Trilho de auditoria de alterações (ADMIN)
+   */
+  audit?: Array<{
+    at: string; // ISO
+    userId: string;
+    action: 'OVERRIDE' | 'EXCLUDE';
+    details?: any;
+  }>;
 }
 
 export class ColumnMapping {
@@ -35,6 +64,14 @@ export class ColumnMapping {
 
   get type(): string | undefined {
     return this.props.type;
+  }
+
+  get overrides(): ColumnMappingProps['overrides'] {
+    return this.props.overrides;
+  }
+
+  get excludedRows(): ColumnMappingProps['excludedRows'] {
+    return this.props.excludedRows;
   }
 
   public static create(props: ColumnMappingProps): Result<ColumnMapping> {

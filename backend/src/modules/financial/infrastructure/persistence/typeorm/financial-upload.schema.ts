@@ -45,6 +45,7 @@ export class FinancialUploadSchema {
     headers: string[];
     rows: any[][];
     totalRows: number;
+    rowNumbers?: number[];
   } | null;
 
   /**

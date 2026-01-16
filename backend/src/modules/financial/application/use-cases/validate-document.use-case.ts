@@ -59,8 +59,12 @@ export class ValidateDocumentUseCase
     let validTransactions = 0;
     let invalidTransactions = 0;
 
-    const { headers, rows } = document.rawData;
+    const { headers, rows, rowNumbers } = document.rawData as any;
     const mapping = document.columnMapping;
+    const mappingJson = mapping.toJSON() as any;
+    const excludedRows: number[] = Array.isArray(mappingJson?.excludedRows)
+      ? mappingJson.excludedRows
+      : [];
 
     // Criar índice de colunas
     const getColumnIndex = (columnName?: string): number => {
@@ -76,8 +80,17 @@ export class ValidateDocumentUseCase
 
     // Validar cada linha
     rows.forEach((row, index) => {
-      const rowNumber = index + 2; // +2 porque linha 1 é header e arrays começam em 0
+      const rowNumber = Array.isArray(rowNumbers) && rowNumbers[index]
+        ? rowNumbers[index]
+        : index + 2; // fallback: assume contíguo
       let hasError = false;
+
+      // Ignorar linhas marcadas como excluídas
+      if (excludedRows.includes(rowNumber)) {
+        return;
+      }
+
+      const overridesForRow = mappingJson?.overrides?.[String(rowNumber)] || {};
 
       // Validar Data
       if (dateIndex === -1) {
@@ -88,7 +101,8 @@ export class ValidateDocumentUseCase
         });
         hasError = true;
       } else {
-        const dateValue = row[dateIndex];
+        const dateValue =
+          overridesForRow.date !== undefined ? overridesForRow.date : row[dateIndex];
         if (!dateValue) {
           errors.push({
             row: rowNumber,
@@ -119,16 +133,28 @@ export class ValidateDocumentUseCase
         });
         hasError = true;
       } else {
-        const amountValue = row[amountIndex];
-        const parsedAmount = this.parseNumber(amountValue);
-        
-        if (parsedAmount === null) {
+        const amountValue =
+          overridesForRow.amount !== undefined ? overridesForRow.amount : row[amountIndex];
+        if (amountValue === null || amountValue === undefined || String(amountValue).trim() === '') {
           errors.push({
             row: rowNumber,
             field: 'amount',
-            message: `Valor inválido: ${amountValue}`,
+            message: 'Valor é obrigatório',
           });
           hasError = true;
+        }
+
+        const parsedAmount = hasError ? null : this.parseNumber(amountValue);
+        
+        if (parsedAmount === null) {
+          if (!hasError) {
+            errors.push({
+              row: rowNumber,
+              field: 'amount',
+              message: `Valor inválido: ${amountValue}`,
+            });
+            hasError = true;
+          }
         } else {
           const moneyResult = Money.create(parsedAmount);
           if (moneyResult.isFailure) {
@@ -144,7 +170,10 @@ export class ValidateDocumentUseCase
 
       // Validar Description (opcional, mas avisar se vazio)
       if (descriptionIndex !== -1) {
-        const description = row[descriptionIndex];
+        const description =
+          overridesForRow.description !== undefined
+            ? overridesForRow.description
+            : row[descriptionIndex];
         if (!description || description.toString().trim() === '') {
           warnings.push({
             row: rowNumber,
@@ -156,7 +185,10 @@ export class ValidateDocumentUseCase
 
       // Validar Category (opcional)
       if (categoryIndex !== -1) {
-        const categoryValue = row[categoryIndex];
+        const categoryValue =
+          overridesForRow.category !== undefined
+            ? overridesForRow.category
+            : row[categoryIndex];
         if (categoryValue) {
           const categoryResult = Category.create(categoryValue.toString());
           if (categoryResult.isFailure) {
@@ -171,7 +203,8 @@ export class ValidateDocumentUseCase
 
       // Validar Type (opcional)
       if (typeIndex !== -1) {
-        const typeValue = row[typeIndex];
+        const typeValue =
+          overridesForRow.type !== undefined ? overridesForRow.type : row[typeIndex];
         if (typeValue) {
           const typeString = typeValue.toString().toLowerCase();
           if (

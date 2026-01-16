@@ -15,6 +15,9 @@ import { SurveyQuestionnaireView } from "./views/SurveyQuestionnaireView";
 import { PendingDocumentsAdminView } from "./views/PendingDocumentsAdminView";
 import { PendingDocumentAdminDetailView } from "./views/PendingDocumentAdminDetailView";
 import { CompanySetupView } from "./views/CompanySetupView";
+import { MyDocumentsView } from "./views/MyDocumentsView";
+import { MyDocumentDetailView } from "./views/MyDocumentDetailView";
+import { useAuthStore } from "./store/authStore";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +42,21 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
   
   // Renderiza os filhos se o usuário estiver autenticado
+  return <>{children}</>;
+};
+
+const AdminRoute = ({ children }: ProtectedRouteProps) => {
+  const token = localStorage.getItem('access_token');
+  const userRole = useAuthStore((s) => s.user?.role);
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (userRole !== 'ADMIN') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return <>{children}</>;
 };
 
@@ -106,9 +124,9 @@ const App = () => (
             <Route 
               path="/admin/pending-documents" 
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <PendingDocumentsAdminView />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
 
@@ -116,9 +134,9 @@ const App = () => (
             <Route 
               path="/admin/pending-documents/:id" 
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <PendingDocumentAdminDetailView />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
 
@@ -128,6 +146,24 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CompanySetupView />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Rota Protegida - Company Member: acompanhar documentos */}
+            <Route
+              path="/documents"
+              element={
+                <ProtectedRoute>
+                  <MyDocumentsView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/documents/:id"
+              element={
+                <ProtectedRoute>
+                  <MyDocumentDetailView />
                 </ProtectedRoute>
               }
             />

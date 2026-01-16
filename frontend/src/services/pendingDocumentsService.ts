@@ -12,6 +12,7 @@ export type PendingDocumentStatus =
 
 export interface PendingDocumentSummary {
   id: string;
+  companyId?: string;
   fileName: string;
   fileSize: number;
   status: string;
@@ -31,10 +32,12 @@ export interface GetPendingDocumentsResponse {
 
 export interface DocumentDetails {
   id: string;
+  companyId?: string;
   fileName: string;
   fileSize: number;
   status: string;
   uploadedBy: string;
+  notes?: string | null;
   createdAt: string;
   updatedAt: string;
   rawData: {
@@ -48,12 +51,43 @@ export interface DocumentDetails {
     category?: string;
     amount?: string;
     type?: string;
+    excludedRows?: number[];
+    audit?: Array<{
+      at: string;
+      userId: string;
+      action: string;
+      details?: unknown;
+    }>;
+    overrides?: Record<
+      string,
+      {
+        date?: unknown;
+        amount?: unknown;
+        description?: unknown;
+        category?: unknown;
+        type?: unknown;
+      }
+    >;
   } | null;
   validationResult:
     | {
         isValid: boolean;
-        errors: Array<{ row: number; field: string; message: string }>;
-        warnings: Array<{ row: number; field: string; message: string }>;
+        errors: Array<{
+          row: number;
+          field: string;
+          message: string;
+          rowIndex?: number;
+          rowValues?: unknown[] | null;
+          rowData?: Record<string, unknown> | null;
+        }>;
+        warnings: Array<{
+          row: number;
+          field: string;
+          message: string;
+          rowIndex?: number;
+          rowValues?: unknown[] | null;
+          rowData?: Record<string, unknown> | null;
+        }>;
         validTransactions: number;
         invalidTransactions: number;
         message?: string;
@@ -102,8 +136,22 @@ export interface ValidateDocumentResponse {
   success: boolean;
   documentId: string;
   isValid: boolean;
-  errors: Array<{ row: number; field: string; message: string }>;
-  warnings: Array<{ row: number; field: string; message: string }>;
+  errors: Array<{
+    row: number;
+    field: string;
+    message: string;
+    rowIndex?: number;
+    rowValues?: unknown[] | null;
+    rowData?: Record<string, unknown> | null;
+  }>;
+  warnings: Array<{
+    row: number;
+    field: string;
+    message: string;
+    rowIndex?: number;
+    rowValues?: unknown[] | null;
+    rowData?: Record<string, unknown> | null;
+  }>;
   validTransactions: number;
   invalidTransactions: number;
   message: string;
@@ -121,6 +169,19 @@ export interface RejectDocumentResponse {
   message: string;
   documentId: string;
   status?: string;
+}
+
+export interface SaveRowOverridesResponse {
+  success: boolean;
+  message: string;
+  documentId: string;
+}
+
+export interface ExcludeRowsResponse {
+  success: boolean;
+  message: string;
+  documentId: string;
+  excludedRows: number[];
 }
 
 const basePath = '/financial/pending-documents';
@@ -173,6 +234,24 @@ export const pendingDocumentsService = {
   reject: async (documentId: string, notes?: string): Promise<RejectDocumentResponse> => {
     const response = await api.post<RejectDocumentResponse>(`${basePath}/${documentId}/reject`, {
       notes,
+    });
+    return response.data;
+  },
+
+  saveRowOverrides: async (
+    documentId: string,
+    overrides: Record<string, any>,
+  ): Promise<SaveRowOverridesResponse> => {
+    const response = await api.post<SaveRowOverridesResponse>(
+      `${basePath}/${documentId}/overrides`,
+      { overrides },
+    );
+    return response.data;
+  },
+
+  excludeRows: async (documentId: string, rows: number[]): Promise<ExcludeRowsResponse> => {
+    const response = await api.post<ExcludeRowsResponse>(`${basePath}/${documentId}/exclusions`, {
+      rows,
     });
     return response.data;
   },

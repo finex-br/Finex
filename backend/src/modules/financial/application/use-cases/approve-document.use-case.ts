@@ -123,13 +123,22 @@ export class ApproveDocumentUseCase
       throw new Error('Documento não possui mapeamento de colunas');
     }
 
-    const mapping = columnMapping.toJSON();
+    const mapping = columnMapping.toJSON() as any;
+    const excludedRows: number[] = Array.isArray(mapping?.excludedRows) ? mapping.excludedRows : [];
     const transactions: any[] = [];
 
     // Percorre cada linha do raw_data
+    const rowNumbers: number[] | undefined = (rawData as any).rowNumbers;
+
     for (let i = 0; i < rawData.rows.length; i++) {
       const row = rawData.rows[i];
-      const rowNumber = i + 2; // +2 porque começa em 1 e primeira linha é header
+      const rowNumber = Array.isArray(rowNumbers) && rowNumbers[i]
+        ? rowNumbers[i]
+        : i + 2; // fallback
+
+      if (excludedRows.includes(rowNumber)) {
+        continue;
+      }
 
       // Verifica se esta linha tem erros na validação
       const hasErrors = validationResult?.errors?.some(err => err.row === rowNumber);
@@ -146,14 +155,17 @@ export class ApproveDocumentUseCase
         const typeIndex = rawData.headers.indexOf(mapping.type);
         const categoryIndex = rawData.headers.indexOf(mapping.category);
 
-        const dateValue = row[dateIndex];
-        const descriptionValue = row[descriptionIndex];
-        const amountValue = row[amountIndex];
-        const typeValue = row[typeIndex];
-        const categoryValue = row[categoryIndex];
+        const overridesForRow = mapping?.overrides?.[String(rowNumber)] || {};
+
+        const dateValue = overridesForRow.date !== undefined ? overridesForRow.date : row[dateIndex];
+        const descriptionValue =
+          overridesForRow.description !== undefined ? overridesForRow.description : row[descriptionIndex];
+        const amountValue = overridesForRow.amount !== undefined ? overridesForRow.amount : row[amountIndex];
+        const typeValue = overridesForRow.type !== undefined ? overridesForRow.type : row[typeIndex];
+        const categoryValue = overridesForRow.category !== undefined ? overridesForRow.category : row[categoryIndex];
 
         // Valida se todos os campos obrigatórios estão presentes
-        if (!dateValue || !amountValue) {
+        if (!dateValue || amountValue === null || amountValue === undefined || String(amountValue).trim() === '') {
           continue; // Pula linhas incompletas
         }
 
@@ -162,7 +174,7 @@ export class ApproveDocumentUseCase
           companyId: document.companyId,
           uploadId: document.id, // Rastreabilidade!
           description: descriptionValue || '',
-          amount: parseFloat(amountValue),
+          amount: typeof amountValue === 'number' ? amountValue : parseFloat(String(amountValue).replace(',', '.')),
           dateCompetence: this.parseDate(dateValue),
           datePayment: this.parseDate(dateValue), // Usa mesma data se não houver datePayment
           type: typeValue || 'RECEITA',
