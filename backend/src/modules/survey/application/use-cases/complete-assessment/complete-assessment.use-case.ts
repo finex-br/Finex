@@ -7,6 +7,7 @@ import { IAnswerRepository } from '../../../domain/repositories/answer.repositor
 
 export interface CompleteAssessmentRequest {
   assessmentId: string;
+  companyId: string;
 }
 
 export interface CompleteAssessmentResponse {
@@ -29,10 +30,15 @@ export class CompleteAssessmentUseCase {
       return Result.fail<CompleteAssessmentResponse>('Assessment ID is required');
     }
 
+    if (!request.companyId) {
+      return Result.fail<CompleteAssessmentResponse>('Company ID is required');
+    }
+
     const assessmentId = new UniqueEntityID(request.assessmentId);
+    const companyId = new UniqueEntityID(request.companyId);
 
     // 2. Get assessment
-    const assessment = await this.assessmentRepository.findById(assessmentId);
+    const assessment = await this.assessmentRepository.findByIdAndCompany(assessmentId, companyId);
     if (!assessment) {
       return Result.fail<CompleteAssessmentResponse>('Assessment not found');
     }

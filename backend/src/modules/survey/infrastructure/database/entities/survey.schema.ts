@@ -16,8 +16,8 @@ export class SurveySchema {
   @Column('varchar')
   title: string;
 
-  @Column('text')
-  description: string;
+  @Column('text', { nullable: true })
+  description?: string | null;
 
   @Column('boolean', { name: 'is_active', default: true })
   isActive: boolean;

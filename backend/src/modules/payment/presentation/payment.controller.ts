@@ -1,14 +1,19 @@
-import { Controller, Post, Get, Body, Param, Req } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Req, UseGuards, Headers, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
 import { CreateCheckoutUseCase } from '../application/use-cases/create-checkout.use-case';
 import { CreateCheckoutRequestDto } from './dtos/create-checkout-request.dto';
 import { CheckoutResponseDTO } from '../application/dtos/checkout-response.dto';
+import { JwtAuthGuard } from '../../authentication/presentation/http/guards/jwt-auth.guard';
+import { resolveCompanyContext } from '../../../shared/tenant/company-context';
 
 @ApiTags('payment')
 @Controller('payment')
+@UseGuards(JwtAuthGuard)
 export class PaymentController {
   constructor(
     private readonly createCheckoutUseCase: CreateCheckoutUseCase,
+    private readonly dataSource: DataSource,
   ) {}
 
   @Post('checkout')
@@ -22,9 +27,18 @@ export class PaymentController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createCheckout(
     @Body() dto: CreateCheckoutRequestDto,
+    @Headers('x-company-id') xCompanyId: string | undefined,
     @Req() req: any,
   ): Promise<CheckoutResponseDTO> {
-    const userId = req.user?.id || 'temp-user-id'; // TODO: Get from auth guard
+    const ctx = await resolveCompanyContext(this.dataSource, req, xCompanyId, {
+      requireCompanyIdForAdmin: true,
+    });
+
+    if (!ctx.companyId) {
+      throw new HttpException('Company context not resolved', HttpStatus.BAD_REQUEST);
+    }
+
+    const userId = ctx.userId;
 
     const result = await this.createCheckoutUseCase.execute({
       userId,

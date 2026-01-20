@@ -7,7 +7,7 @@ export class SurveyMapper {
     const surveyOrError = Survey.create(
       {
         title: schema.title,
-        description: schema.description,
+        description: schema.description ?? undefined,
         isActive: schema.isActive,
         createdAt: schema.createdAt,
         updatedAt: schema.updatedAt,
@@ -26,7 +26,7 @@ export class SurveyMapper {
     const schema = new SurveySchema();
     schema.id = survey.id.toString();
     schema.title = survey.title;
-    schema.description = survey.description;
+    schema.description = survey.description ?? null;
     schema.isActive = survey.isActive;
     schema.createdAt = survey.createdAt;
     schema.updatedAt = survey.updatedAt;

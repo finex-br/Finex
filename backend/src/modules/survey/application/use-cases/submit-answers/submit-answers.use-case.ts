@@ -16,6 +16,7 @@ export interface AnswerInput {
 
 export interface SubmitAnswersRequest {
   assessmentId: string;
+  companyId: string;
   answers: AnswerInput[];
 }
 
@@ -39,14 +40,19 @@ export class SubmitAnswersUseCase {
       return Result.fail<SubmitAnswersResponse>('Assessment ID is required');
     }
 
+    if (!request.companyId) {
+      return Result.fail<SubmitAnswersResponse>('Company ID is required');
+    }
+
     if (!request.answers || request.answers.length === 0) {
       return Result.fail<SubmitAnswersResponse>('At least one answer is required');
     }
 
     const assessmentId = new UniqueEntityID(request.assessmentId);
+    const companyId = new UniqueEntityID(request.companyId);
 
     // 2. Get assessment
-    const assessment = await this.assessmentRepository.findById(assessmentId);
+    const assessment = await this.assessmentRepository.findByIdAndCompany(assessmentId, companyId);
     if (!assessment) {
       return Result.fail<SubmitAnswersResponse>('Assessment not found');
     }

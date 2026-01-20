@@ -53,6 +53,7 @@ export const useAuthStore = create<AuthStore>()(
 
       // Set current company
       setCurrentCompanyId: (companyId: string) => {
+        localStorage.setItem('current_company_id', companyId);
         set({ currentCompanyId: companyId });
       },
 
@@ -61,6 +62,7 @@ export const useAuthStore = create<AuthStore>()(
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('current_company_id');
         set({ token: null, user: null, currentCompanyId: null });
       },
 

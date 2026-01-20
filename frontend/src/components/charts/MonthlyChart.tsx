@@ -22,7 +22,6 @@ interface MonthlyChartProps {
   globalFilter?: PeriodFilter;
   onFilterChange: (graphType: GraphType, filter: PeriodFilter | undefined) => void;
   onResetFilter: (graphType: GraphType) => void;
-  companyId?: string;
 }
 
 /**

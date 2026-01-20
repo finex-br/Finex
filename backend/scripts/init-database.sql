@@ -178,20 +178,6 @@ CREATE TABLE IF NOT EXISTS financial_data (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Tabela de Transações Financeiras (modelo atualizado)
-CREATE TABLE IF NOT EXISTS financial_transactions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_id VARCHAR(255) NOT NULL,
-  date TIMESTAMP NOT NULL,
-  description VARCHAR(500) NOT NULL,
-  amount_value DECIMAL(10,2) NOT NULL,
-  amount_currency VARCHAR(3) DEFAULT 'BRL',
-  type VARCHAR(20) NOT NULL, -- RECEITA, DESPESA
-  category_name VARCHAR(100) NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
 -- Tabela de Categorias Financeiras
 CREATE TABLE IF NOT EXISTS financial_categories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -288,11 +274,6 @@ CREATE INDEX IF NOT EXISTS idx_financial_data_type ON financial_data(type);
 CREATE INDEX IF NOT EXISTS idx_financial_uploads_status ON financial_uploads(status);
 CREATE INDEX IF NOT EXISTS idx_financial_uploads_company_status ON financial_uploads(company_id, status);
 
--- Índices para Financial Transactions
-CREATE INDEX IF NOT EXISTS idx_financial_transactions_company_id ON financial_transactions(company_id);
-CREATE INDEX IF NOT EXISTS idx_financial_transactions_date ON financial_transactions(date);
-CREATE INDEX IF NOT EXISTS idx_financial_transactions_company_date ON financial_transactions(company_id, date);
-
 -- Índices para Social Accounts
 CREATE INDEX IF NOT EXISTS idx_social_accounts_user_id ON social_accounts(user_id);
 CREATE INDEX IF NOT EXISTS idx_social_accounts_provider ON social_accounts(provider);
@@ -330,6 +311,23 @@ VALUES (
   'Tecnologia'
 )
 ON CONFLICT DO NOTHING;
+
+-- Vínculo do admin com a empresa demo (necessário para endpoints que usam company_members)
+DO $$
+DECLARE
+  v_user_id uuid;
+  v_company_id uuid;
+BEGIN
+  SELECT id INTO v_user_id FROM users WHERE email = 'admin@finex.com' LIMIT 1;
+  SELECT id INTO v_company_id FROM companies WHERE cnpj = '12.345.678/0001-90' LIMIT 1;
+
+  IF v_user_id IS NOT NULL AND v_company_id IS NOT NULL THEN
+    INSERT INTO company_members (user_id, company_id, role, is_active)
+    VALUES (v_user_id, v_company_id, 'OWNER', true)
+    ON CONFLICT (user_id, company_id) DO NOTHING;
+  END IF;
+END
+$$;
 
 DO $$
 BEGIN

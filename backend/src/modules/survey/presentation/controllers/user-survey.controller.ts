@@ -1,17 +1,31 @@
-import { Controller, Post, Get, Param, Query, Body, UseGuards, Headers, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Param,
+  Query,
+  Body,
+  UseGuards,
+  Request,
+  Headers,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { StartAssessmentUseCase } from '../../application/use-cases/start-assessment/start-assessment.use-case';
 import { GetQuestionsUseCase } from '../../application/use-cases/get-questions/get-questions.use-case';
 import { SubmitAnswersUseCase } from '../../application/use-cases/submit-answers/submit-answers.use-case';
 import { CompleteAssessmentUseCase } from '../../application/use-cases/complete-assessment/complete-assessment.use-case';
 import { GetPendingAssessmentsUseCase } from '../../application/use-cases/get-pending-assessments/get-pending-assessments.use-case';
-import { StartAssessmentDto } from '../dto/start-assessment.dto';
 import { SubmitAnswersDto } from '../dto/submit-answers.dto';
 import { DataSource } from 'typeorm';
+import { JwtAuthGuard } from '../../../authentication/presentation/http/guards/jwt-auth.guard';
+import { resolveCompanyContext } from '../../../../shared/tenant/company-context';
 
 @ApiTags('User - Surveys')
 @ApiBearerAuth()
 @Controller('surveys')
+@UseGuards(JwtAuthGuard)
 export class UserSurveyController {
   constructor(
     private readonly startAssessmentUseCase: StartAssessmentUseCase,
@@ -22,47 +36,34 @@ export class UserSurveyController {
     private readonly dataSource: DataSource,
   ) {}
 
-  private extractUserIdFromToken(authorization: string): string {
-    if (!authorization || !authorization.startsWith('Bearer ')) {
-      throw new UnauthorizedException('No token provided');
-    }
-
-    const token = authorization.substring(7);
-    try {
-      // Decode JWT without verification (temporary solution)
-      const base64Payload = token.split('.')[1];
-      const payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString());
-      // JWT usa 'sub' (subject) como campo padrao para userId
-      const userId = payload.sub || payload.userId;
-      return userId;
-    } catch (error) {
-      throw new UnauthorizedException('Invalid token');
-    }
+  private isSystemAdmin(req: any): boolean {
+    return String(req.user?.role || '').toUpperCase() === 'ADMIN';
   }
 
-  private async getCompanyIdForUser(userId: string): Promise<string> {
-    const result = await this.dataSource.query(
-      'SELECT company_id FROM company_members WHERE user_id = $1 AND is_active = true LIMIT 1',
-      [userId]
-    );
+  private async resolveCompanyId(req: any, requestedCompanyId?: string): Promise<string> {
+    const ctx = await resolveCompanyContext(this.dataSource, req, requestedCompanyId, {
+      requireCompanyIdForAdmin: true,
+    });
 
-    if (!result || result.length === 0) {
-      throw new Error('User is not associated with any company');
+    if (!ctx.companyId) {
+      throw new HttpException('Company context not resolved', HttpStatus.BAD_REQUEST);
     }
 
-    return result[0].company_id;
+    return ctx.companyId;
   }
 
   @Get('pending')
   @ApiOperation({ summary: 'Get pending surveys for company' })
-  async getPendingAssessments(@Headers('authorization') authorization: string) {
-    const userId = this.extractUserIdFromToken(authorization);
-    const companyId = await this.getCompanyIdForUser(userId);
+  async getPendingAssessments(
+    @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
+  ) {
+    const companyId = await this.resolveCompanyId(req, xCompanyId);
 
     const result = await this.getPendingAssessmentsUseCase.execute({ companyId });
 
     if (result.isFailure) {
-      throw new Error(result.error);
+      throw new HttpException(result.error ?? 'Failed to load pending assessments', HttpStatus.BAD_REQUEST);
     }
 
     return result.getValue();
@@ -72,10 +73,10 @@ export class UserSurveyController {
   @ApiOperation({ summary: 'Start or resume assessment' })
   async startAssessment(
     @Param('surveyId') surveyId: string,
-    @Headers('authorization') authorization: string,
+    @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
   ) {
-    const userId = this.extractUserIdFromToken(authorization);
-    const companyId = await this.getCompanyIdForUser(userId);
+    const companyId = await this.resolveCompanyId(req, xCompanyId);
 
     const result = await this.startAssessmentUseCase.execute({
       companyId,
@@ -83,7 +84,7 @@ export class UserSurveyController {
     });
 
     if (result.isFailure) {
-      throw new Error(result.error);
+      throw new HttpException(result.error ?? 'Failed to start assessment', HttpStatus.BAD_REQUEST);
     }
 
     return result.getValue();
@@ -94,16 +95,21 @@ export class UserSurveyController {
   async getQuestions(
     @Param('assessmentId') assessmentId: string,
     @Query('page') page: string,
+    @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
   ) {
     const pageNumber = parseInt(page, 10) || 1;
+
+    const companyId = await this.resolveCompanyId(req, xCompanyId);
     
     const result = await this.getQuestionsUseCase.execute({
       assessmentId,
+      companyId,
       page: pageNumber,
     });
 
     if (result.isFailure) {
-      throw new Error(result.error);
+      throw new HttpException(result.error ?? 'Failed to get questions', HttpStatus.BAD_REQUEST);
     }
 
     return result.getValue();
@@ -114,14 +120,19 @@ export class UserSurveyController {
   async submitAnswers(
     @Param('assessmentId') assessmentId: string,
     @Body() dto: SubmitAnswersDto,
+    @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
   ) {
+    const companyId = await this.resolveCompanyId(req, xCompanyId);
+
     const result = await this.submitAnswersUseCase.execute({
       assessmentId,
+      companyId,
       answers: dto.answers,
     });
 
     if (result.isFailure) {
-      throw new Error(result.error);
+      throw new HttpException(result.error ?? 'Failed to submit answers', HttpStatus.BAD_REQUEST);
     }
 
     return result.getValue();
@@ -129,11 +140,17 @@ export class UserSurveyController {
 
   @Post('assessments/:assessmentId/complete')
   @ApiOperation({ summary: 'Complete assessment' })
-  async completeAssessment(@Param('assessmentId') assessmentId: string) {
-    const result = await this.completeAssessmentUseCase.execute({ assessmentId });
+  async completeAssessment(
+    @Param('assessmentId') assessmentId: string,
+    @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
+  ) {
+    const companyId = await this.resolveCompanyId(req, xCompanyId);
+
+    const result = await this.completeAssessmentUseCase.execute({ assessmentId, companyId });
 
     if (result.isFailure) {
-      throw new Error(result.error);
+      throw new HttpException(result.error ?? 'Failed to complete assessment', HttpStatus.BAD_REQUEST);
     }
 
     return result.getValue();

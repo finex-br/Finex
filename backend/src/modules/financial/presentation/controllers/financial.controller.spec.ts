@@ -2,10 +2,12 @@ import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe, ExecutionContext } from '@nestjs/common';
 import request from 'supertest';
+import { DataSource } from 'typeorm';
 import { FinancialController } from './financial.controller';
 import { ProcessExcelUseCase } from '../../application/use-cases/process-excel.use-case';
 import { GetFinancialDataUseCase } from '../../application/use-cases/get-financial-data.use-case';
 import { PeriodType } from '../../application/dtos/financial.dto';
+import { JwtAuthGuard } from '../../../authentication/presentation/http/guards/jwt-auth.guard';
 
 describe('FinancialController (e2e)', () => {
   let app: INestApplication;
@@ -18,8 +20,8 @@ describe('FinancialController (e2e)', () => {
       const request = context.switchToHttp().getRequest();
       // Simula usuário autenticado
       request.user = {
-        id: 'user-123',
-        currentCompanyId: 'company-456',
+        sub: 'user-123',
+        role: 'ENTREPRENEUR',
       };
       return true;
     }),
@@ -35,6 +37,12 @@ describe('FinancialController (e2e)', () => {
       execute: jest.fn(),
     };
 
+    const mockDataSource = {
+      query: jest
+        .fn<(...args: any[]) => Promise<Array<{ company_id: string }>>>()
+        .mockResolvedValue([{ company_id: 'company-456' }]),
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [FinancialController],
       providers: [
@@ -46,9 +54,13 @@ describe('FinancialController (e2e)', () => {
           provide: GetFinancialDataUseCase,
           useValue: mockGetFinancialDataUseCase,
         },
+        {
+          provide: DataSource,
+          useValue: mockDataSource,
+        },
       ],
     })
-      .overrideGuard('JwtAuthGuard' as any)
+      .overrideGuard(JwtAuthGuard)
       .useValue(mockJwtAuthGuard)
       .compile();
 
@@ -94,122 +106,18 @@ describe('FinancialController (e2e)', () => {
   });
 
   describe('POST /financial/upload', () => {
-    it('deve fazer upload de Excel válido com sucesso', async () => {
-      const mockResponse = {
-        success: true,
-        totalTransactions: 10,
-        message: '10 transações processadas com sucesso',
-      };
-
-      processExcelUseCase.execute.mockResolvedValue(mockResponse);
-
-      // Criar um buffer fake de Excel
+    it('deve retornar 410 (Gone) e instruir a usar o fluxo de pending-documents', async () => {
       const fakeExcelBuffer = Buffer.from('fake-excel-content');
 
       const response = await request(app.getHttpServer())
         .post('/financial/upload')
         .attach('file', fakeExcelBuffer, 'test.xlsx')
-        .expect(201);
+        .expect(410);
 
-      expect(response.body).toEqual(mockResponse);
-      expect(processExcelUseCase.execute).toHaveBeenCalledWith({
-        companyId: 'default-user', // userId = companyId temporariamente
-        userId: 'default-user',
-        fileBuffer: expect.any(Buffer),
-        fileName: 'test.xlsx',
-      });
-    });
-
-    it('deve rejeitar upload sem arquivo', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/financial/upload')
-        .expect(400);
-
-      expect(response.body.message).toBe('Arquivo não enviado');
       expect(processExcelUseCase.execute).not.toHaveBeenCalled();
-    });
-
-    it('deve rejeitar arquivo com tipo inválido (PDF)', async () => {
-      const fakePdfBuffer = Buffer.from('fake-pdf-content');
-
-      const response = await request(app.getHttpServer())
-        .post('/financial/upload')
-        .attach('file', fakePdfBuffer, 'document.pdf')
-        .expect(400);
-
-      expect(response.body.message).toContain('Tipo de arquivo inválido');
-      expect(processExcelUseCase.execute).not.toHaveBeenCalled();
-    });
-
-    it('deve rejeitar arquivo .txt', async () => {
-      const fakeTxtBuffer = Buffer.from('fake-txt-content');
-
-      const response = await request(app.getHttpServer())
-        .post('/financial/upload')
-        .attach('file', fakeTxtBuffer, 'data.txt')
-        .expect(400);
-
-      expect(response.body.message).toContain('Tipo de arquivo inválido');
-      expect(processExcelUseCase.execute).not.toHaveBeenCalled();
-    });
-
-    it('deve propagar erro do Use Case', async () => {
-      processExcelUseCase.execute.mockRejectedValue(
-        new Error('Nenhuma transação válida encontrada no arquivo'),
+      expect(response.body.message).toEqual(
+        expect.stringContaining('/financial/pending-documents/upload'),
       );
-
-      const fakeExcelBuffer = Buffer.from('fake-excel-content');
-
-      const response = await request(app.getHttpServer())
-        .post('/financial/upload')
-        .attach('file', fakeExcelBuffer, 'empty.xlsx')
-        .expect(500);
-
-      expect(response.body.message).toContain('Nenhuma transação válida');
-    });
-
-    it('deve usar companyId do JWT (user.currentCompanyId)', async () => {
-      const mockResponse = {
-        success: true,
-        totalTransactions: 5,
-        message: '5 transações processadas com sucesso',
-      };
-
-      processExcelUseCase.execute.mockResolvedValue(mockResponse);
-
-      const fakeExcelBuffer = Buffer.from('fake-excel-content');
-
-      await request(app.getHttpServer())
-        .post('/financial/upload')
-        .attach('file', fakeExcelBuffer, 'test.xlsx')
-        .expect(201);
-
-      // Verificar que usou userId como companyId
-      expect(processExcelUseCase.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          companyId: 'default-user',
-          userId: 'default-user',
-        }),
-      );
-    });
-
-    it('deve processar arquivo .xls (formato antigo do Excel)', async () => {
-      const mockResponse = {
-        success: true,
-        totalTransactions: 3,
-        message: '3 transações processadas com sucesso',
-      };
-
-      processExcelUseCase.execute.mockResolvedValue(mockResponse);
-
-      const fakeXlsBuffer = Buffer.from('fake-xls-content');
-
-      await request(app.getHttpServer())
-        .post('/financial/upload')
-        .attach('file', fakeXlsBuffer, 'old-format.xls')
-        .expect(201);
-
-      expect(processExcelUseCase.execute).toHaveBeenCalled();
     });
   });
 
@@ -235,12 +143,12 @@ describe('FinancialController (e2e)', () => {
 
       expect(response.body).toEqual(mockResponse);
       expect(getFinancialDataUseCase.execute).toHaveBeenCalledWith({
-        companyId: 'default-user',
-        userId: 'default-user',
+        companyId: 'company-456',
+        userId: 'user-123',
       });
     });
 
-    it('deve usar companyId do JWT (user.currentCompanyId)', async () => {
+    it('deve usar companyId via company_members', async () => {
       const mockResponse = createMockFinancialDataResponse({
         summary: {
           totalRevenue: 0,
@@ -257,8 +165,8 @@ describe('FinancialController (e2e)', () => {
 
       // Verificar que usou userId como companyId
       expect(getFinancialDataUseCase.execute).toHaveBeenCalledWith({
-        companyId: 'default-user',
-        userId: 'default-user',
+        companyId: 'company-456',
+        userId: 'user-123',
       });
     });
 

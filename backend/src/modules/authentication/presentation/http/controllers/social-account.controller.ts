@@ -7,6 +7,7 @@ import {
   UseGuards,
   Inject,
   BadRequestException,
+  UnauthorizedException,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -22,7 +23,7 @@ import { UnlinkSocialAccountUseCase } from '../../../application/use-cases/unlin
 import { LinkSocialRequestDto } from '../dtos/link-social-request.dto';
 import { UnlinkSocialRequestDto } from '../dtos/unlink-social-request.dto';
 import { IOAuthProvider } from '../../../application/ports/oauth-provider.interface';
-import { SocialProvider } from '../../../domain/value-objects/social-provider';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 /**
  * Controller for managing social account connections
@@ -34,6 +35,7 @@ import { SocialProvider } from '../../../domain/value-objects/social-provider';
 @ApiTags('Social Account')
 @ApiBearerAuth('JWT-auth')
 @Controller('auth/social-account')
+@UseGuards(JwtAuthGuard)
 export class SocialAccountController {
   private readonly providers: Map<string, IOAuthProvider>;
 
@@ -96,6 +98,11 @@ export class SocialAccountController {
     @Request() req: any,
     @Body() dto: LinkSocialRequestDto,
   ): Promise<void> {
+    const userId = req.user?.sub || req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('User ID not found in token');
+    }
+
     const provider = this.providers.get(dto.provider.toLowerCase());
 
     if (!provider) {
@@ -105,7 +112,7 @@ export class SocialAccountController {
     try {
       // Link social account to user
       const result = await this.linkSocialAccountUseCase.execute({
-        userId: req.user.userId,
+        userId,
         provider: provider.getProvider(),
         code: dto.code,
         redirectUri: dto.redirectUri,
@@ -157,9 +164,14 @@ export class SocialAccountController {
     @Request() req: any,
     @Body() dto: UnlinkSocialRequestDto,
   ): Promise<void> {
+    const userId = req.user?.sub || req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('User ID not found in token');
+    }
+
     try {
       const result = await this.unlinkSocialAccountUseCase.execute({
-        userId: req.user.userId,
+        userId,
         provider: dto.provider,
       });
 

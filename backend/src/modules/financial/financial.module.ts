@@ -15,8 +15,8 @@ import { ExcelProcessorAdapter } from './infrastructure/adapters/excel-processor
 import { ExcelAnalyzerAdapter } from './infrastructure/adapters/excel-analyzer.adapter';
 import { TypeORMFinancialRepository } from './infrastructure/persistence/typeorm/typeorm-financial.repository';
 import { TypeORMFinancialUploadRepository } from './infrastructure/persistence/typeorm/typeorm-financial-upload.repository';
-import { FinancialTransactionSchema } from './infrastructure/persistence/typeorm/financial-transaction.schema';
 import { FinancialUploadSchema } from './infrastructure/persistence/typeorm/financial-upload.schema';
+import { FinancialDataSchema } from './infrastructure/persistence/typeorm/financial-data.schema';
 import { EnvService } from '../../shared/infra/env/env.service';
 
 /**
@@ -42,7 +42,7 @@ import { EnvService } from '../../shared/infra/env/env.service';
       }),
     }),
     TypeOrmModule.forFeature([
-      FinancialTransactionSchema,
+      FinancialDataSchema,
       FinancialUploadSchema, // Usando tabela existente financial_uploads
     ]),
   ],

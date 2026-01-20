@@ -49,37 +49,32 @@ export function DashboardView() {
 
   // Busca dados ao montar o componente ou quando periodFilter mudar
   useEffect(() => {
-    // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
-    const companyId = user?.id || 'default-user';
     console.log('[DashboardView] useEffect triggered:', { 
       userId: user?.id, 
       userName: user?.name,
-      companyId, 
       periodFilter 
     });
-    fetchFinancialData(companyId);
+    fetchFinancialData();
   }, [user?.id, periodFilter]);
 
   /**
    * NOVO (Lote 5): Handler para mudança de filtro individual de gráfico
    */
   const handleGraphFilterChange = async (graphType: GraphType, filter: any) => {
-    const companyId = user?.id || 'default-user';
     setGraphFilter(graphType, filter);
     
     // Busca dados apenas para o gráfico específico
-    await fetchGraphData(graphType, companyId, filter);
+    await fetchGraphData(graphType, filter);
   };
 
   /**
    * NOVO (Lote 5): Handler para resetar filtro de gráfico para o global
    */
   const handleResetGraphFilter = async (graphType: GraphType) => {
-    const companyId = user?.id || 'default-user';
     resetGraphFilter(graphType);
     
     // Busca dados com filtro global
-    await fetchGraphData(graphType, companyId, periodFilter);
+    await fetchGraphData(graphType, periodFilter);
   };
 
   // Formata valores em Real Brasileiro
@@ -114,7 +109,7 @@ export function DashboardView() {
           </CardHeader>
           <CardContent>
             <Button
-              onClick={() => fetchFinancialData(user?.id || 'default-user')}
+              onClick={() => fetchFinancialData()}
               variant="outline"
             >
               Tentar novamente
@@ -142,10 +137,10 @@ export function DashboardView() {
                 <FileSpreadsheet className="h-16 w-16 text-orange-500" />
               </div>
               <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                Bem-vindo ao Dashboard
+                Dashboard
               </CardTitle>
               <CardDescription className="text-base mt-2">
-                Importe sua planilha financeira para visualizar seus dados
+                sem dados para analise, importar arquivo primeiro
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -154,7 +149,7 @@ export function DashboardView() {
                 className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium"
                 size="lg"
               >
-                Importar Planilha
+                Importar arquivo
               </Button>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
                 Suportamos arquivos Excel (.xlsx, .xls)
@@ -255,7 +250,6 @@ export function DashboardView() {
             globalFilter={periodFilter}
             onFilterChange={handleGraphFilterChange}
             onResetFilter={handleResetGraphFilter}
-            companyId={user?.id || 'default-user'}
           />
 
           {/* Gráfico de Categorias */}
@@ -265,7 +259,6 @@ export function DashboardView() {
             globalFilter={periodFilter}
             onFilterChange={handleGraphFilterChange}
             onResetFilter={handleResetGraphFilter}
-            companyId={user?.id || 'default-user'}
           />
 
           {/* Gráfico Mensal */}
@@ -275,7 +268,6 @@ export function DashboardView() {
             globalFilter={periodFilter}
             onFilterChange={handleGraphFilterChange}
             onResetFilter={handleResetGraphFilter}
-            companyId={user?.id || 'default-user'}
           />
         </div>
 

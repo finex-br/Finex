@@ -104,19 +104,13 @@ export const financialService = {
    * Faz upload de arquivo Excel para o backend processar
    * 
    * @param file - Arquivo Excel
-   * @param companyId - ID da empresa (opcional, pode vir do JWT)
    * @returns Promise com resultado do processamento
    */
   uploadExcel: async (
     file: File,
-    companyId?: string,
   ): Promise<UploadExcelResponse> => {
     const formData = new FormData();
     formData.append('file', file);
-    
-    if (companyId) {
-      formData.append('companyId', companyId);
-    }
 
     const response = await api.post<UploadExcelResponse>(
       '/financial/upload',
@@ -134,19 +128,13 @@ export const financialService = {
   /**
    * Busca dados financeiros processados (summary + monthly data + category data + trend data)
    * 
-   * @param companyId - ID da empresa (opcional, pode vir do JWT)
    * @param periodFilter - Filtro de período (MENSAL, TRIMESTRAL, ANUAL, CUSTOM)
    * @returns Promise com dados agregados
    */
   getFinancialData: async (
-    companyId?: string,
     periodFilter?: PeriodFilter
   ): Promise<FinancialDataResponse> => {
     const params: Record<string, string> = {};
-    
-    if (companyId) {
-      params.companyId = companyId;
-    }
     
     if (periodFilter) {
       params.period = periodFilter.type;

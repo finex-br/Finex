@@ -12,6 +12,7 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DataSource } from 'typeorm';
@@ -24,6 +25,7 @@ import { ValidateDocumentUseCase } from '../../application/use-cases/validate-do
 import { ApproveDocumentUseCase } from '../../application/use-cases/approve-document.use-case';
 import { GetPendingDocumentsUseCase } from '../../application/use-cases/get-pending-documents.use-case';
 import { IPendingDocumentRepository } from '../../domain/ports/pending-document-repository.interface';
+import { resolveCompanyContext } from '../../../../shared/tenant/company-context';
 
 /**
  * PendingDocumentController - Presentation Layer
@@ -45,23 +47,14 @@ export class PendingDocumentController {
     private readonly pendingDocumentRepository: IPendingDocumentRepository,
   ) {}
 
-  /**
-   * Busca company_id do usuário na tabela company_members
-   */
-  private async getCompanyIdForUser(userId: string): Promise<string> {
-    const result = await this.dataSource.query(
-      'SELECT company_id FROM company_members WHERE user_id = $1 AND is_active = true LIMIT 1',
-      [userId]
-    );
-
-    if (!result || result.length === 0) {
-      throw new HttpException(
-        'User is not associated with any company. Create a company first and associate your user.',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-
-    return result[0].company_id;
+  private async resolveCompany(
+    req: any,
+    requestedCompanyId?: string,
+  ): Promise<{ userId: string; isAdmin: boolean; companyId?: string }> {
+    const ctx = await resolveCompanyContext(this.dataSource, req, requestedCompanyId, {
+      allowAllCompaniesForAdmin: true,
+    });
+    return { userId: ctx.userId, isAdmin: ctx.isSystemAdmin, companyId: ctx.companyId };
   }
 
   private isSystemAdmin(req: any): boolean {
@@ -158,6 +151,7 @@ export class PendingDocumentController {
   async uploadRawDocument(
     @UploadedFile() file: any,
     @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
   ) {
     try {
       console.log('[PendingDocumentController] Upload recebido:', {
@@ -184,15 +178,11 @@ export class PendingDocumentController {
         );
       }
 
-      // Extrai userId do JWT
-      const userId = req.user?.sub || req.user?.userId;
-      
-      if (!userId) {
-        throw new HttpException('User ID not found in token', HttpStatus.UNAUTHORIZED);
+      const { userId, companyId } = await this.resolveCompany(req, xCompanyId);
+
+      if (!companyId) {
+        throw new HttpException('X-Company-Id is required to upload a document', HttpStatus.BAD_REQUEST);
       }
-      
-      // Busca company_id do usuário
-      const companyId = await this.getCompanyIdForUser(userId);
 
       console.log('[PendingDocumentController] Processando com:', { companyId, userId });
 
@@ -236,18 +226,15 @@ export class PendingDocumentController {
   async getPendingDocuments(
     @Request() req: any,
     @Query('status') status?: string,
+    @Headers('x-company-id') xCompanyId?: string,
   ) {
     try {
-      const userId = req.user?.sub || req.user?.userId;
-      
-      if (!userId) {
-        throw new HttpException('User ID not found in token', HttpStatus.UNAUTHORIZED);
-      }
+      const { isAdmin, companyId } = await this.resolveCompany(req, xCompanyId);
 
       // ADMIN do sistema: pode listar documentos de qualquer empresa
-      if (this.isSystemAdmin(req)) {
+      if (isAdmin) {
         const all = await this.pendingDocumentRepository.findAll();
-        let filtered = all;
+        let filtered = companyId ? all.filter((d) => d.companyId === companyId) : all;
 
         if (status) {
           const statusResult = DocumentStatus.create(status as any);
@@ -278,7 +265,10 @@ export class PendingDocumentController {
       }
 
       // Usuário normal: lista documentos da sua empresa
-      const companyId = await this.getCompanyIdForUser(userId);
+      if (!companyId) {
+        throw new HttpException('Company context not resolved', HttpStatus.BAD_REQUEST);
+      }
+
       const result = await this.getPendingDocumentsUseCase.execute({ companyId, status: status as any });
       return result;
     } catch (error) {
@@ -299,16 +289,10 @@ export class PendingDocumentController {
   async getDocumentDetails(
     @Param('id') documentId: string,
     @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
   ) {
     try {
-      const userId = req.user?.sub || req.user?.userId;
-      
-      if (!userId) {
-        throw new HttpException('User ID not found in token', HttpStatus.UNAUTHORIZED);
-      }
-
-      const isAdmin = this.isSystemAdmin(req);
-      const companyId = isAdmin ? null : await this.getCompanyIdForUser(userId);
+      const { isAdmin, companyId } = await this.resolveCompany(req, xCompanyId);
 
       // Busca documento pelo repository
       const document = await this.pendingDocumentRepository.findById(documentId);
@@ -373,6 +357,7 @@ export class PendingDocumentController {
   async mapDocumentColumns(
     @Param('id') documentId: string,
     @Body() body: any,
+    @Headers('x-company-id') xCompanyId: string | undefined,
     @Request() req: any,
   ) {
     try {
@@ -383,13 +368,7 @@ export class PendingDocumentController {
         );
       }
 
-      const userId = req.user?.sub || req.user?.userId;
-      if (!userId) {
-        throw new HttpException('User ID not found in token', HttpStatus.UNAUTHORIZED);
-      }
-
-      const isAdmin = this.isSystemAdmin(req);
-      const companyId = isAdmin ? null : await this.getCompanyIdForUser(userId);
+      const { userId, isAdmin, companyId } = await this.resolveCompany(req, xCompanyId);
       const document = await this.pendingDocumentRepository.findById(documentId);
       if (!document) {
         throw new HttpException('Documento não encontrado', HttpStatus.NOT_FOUND);
@@ -589,16 +568,11 @@ export class PendingDocumentController {
   @Post(':id/validate')
   async validateDocument(
     @Param('id') documentId: string,
+    @Headers('x-company-id') xCompanyId: string | undefined,
     @Request() req: any,
   ) {
     try {
-      const userId = req.user?.sub || req.user?.userId;
-      if (!userId) {
-        throw new HttpException('User ID not found in token', HttpStatus.UNAUTHORIZED);
-      }
-
-      const isAdmin = this.isSystemAdmin(req);
-      const companyId = isAdmin ? null : await this.getCompanyIdForUser(userId);
+      const { userId, isAdmin, companyId } = await this.resolveCompany(req, xCompanyId);
       const document = await this.pendingDocumentRepository.findById(documentId);
       if (!document) {
         throw new HttpException('Documento não encontrado', HttpStatus.NOT_FOUND);

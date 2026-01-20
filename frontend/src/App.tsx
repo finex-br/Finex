@@ -32,14 +32,20 @@ const queryClient = new QueryClient();
  */
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireCompany?: boolean;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requireCompany }: ProtectedRouteProps) => {
   const token = localStorage.getItem('access_token');
+  const companyId = localStorage.getItem('current_company_id');
   
   if (!token) {
     // Redireciona para login se não houver token (replace evita loop no histórico)
     return <Navigate to="/login" replace />;
+  }
+
+  if (requireCompany && !companyId) {
+    return <Navigate to="/company/setup" replace />;
   }
   
   // Renderiza os filhos se o usuário estiver autenticado
@@ -85,7 +91,7 @@ const App = () => (
             <Route 
               path="/upload" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireCompany>
                   <UploadView />
                 </ProtectedRoute>
               } 
@@ -95,7 +101,7 @@ const App = () => (
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireCompany>
                   <DashboardView />
                 </ProtectedRoute>
               } 
@@ -105,7 +111,7 @@ const App = () => (
             <Route 
               path="/surveys" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireCompany>
                   <SurveysListView />
                 </ProtectedRoute>
               } 
@@ -115,7 +121,7 @@ const App = () => (
             <Route 
               path="/surveys/:assessmentId" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireCompany>
                   <SurveyQuestionnaireView />
                 </ProtectedRoute>
               } 
@@ -155,7 +161,7 @@ const App = () => (
             <Route
               path="/documents"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireCompany>
                   <MyDocumentsView />
                 </ProtectedRoute>
               }
@@ -163,7 +169,7 @@ const App = () => (
             <Route
               path="/documents/:id"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireCompany>
                   <MyDocumentDetailView />
                 </ProtectedRoute>
               }

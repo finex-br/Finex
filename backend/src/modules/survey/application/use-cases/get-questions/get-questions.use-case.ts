@@ -9,6 +9,7 @@ const QUESTIONS_PER_PAGE = 5;
 
 export interface GetQuestionsRequest {
   assessmentId: string;
+  companyId: string;
   page: number;
 }
 
@@ -46,14 +47,19 @@ export class GetQuestionsUseCase {
       return Result.fail<GetQuestionsResponse>('Assessment ID is required');
     }
 
+    if (!request.companyId) {
+      return Result.fail<GetQuestionsResponse>('Company ID is required');
+    }
+
     if (request.page < 1) {
       return Result.fail<GetQuestionsResponse>('Page must be greater than 0');
     }
 
     const assessmentId = new UniqueEntityID(request.assessmentId);
+    const companyId = new UniqueEntityID(request.companyId);
 
     // 2. Get assessment
-    const assessment = await this.assessmentRepository.findById(assessmentId);
+    const assessment = await this.assessmentRepository.findByIdAndCompany(assessmentId, companyId);
     if (!assessment) {
       return Result.fail<GetQuestionsResponse>('Assessment not found');
     }

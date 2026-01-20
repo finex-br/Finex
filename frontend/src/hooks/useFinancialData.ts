@@ -111,14 +111,14 @@ export const useFinancialData = () => {
   /**
    * Faz upload do Excel (delega para o backend)
    */
-  const uploadExcel = async (file: File, companyId?: string): Promise<boolean> => {
+  const uploadExcel = async (file: File): Promise<boolean> => {
     setIsUploading(true);
     setUploadError(null);
     setUploadSuccess(false);
 
     try {
-      console.log('[useFinancialData] Iniciando upload...', { fileName: file.name, companyId });
-      const result = await financialService.uploadExcel(file, companyId);
+      console.log('[useFinancialData] Iniciando upload...', { fileName: file.name });
+      const result = await financialService.uploadExcel(file);
       console.log('[useFinancialData] Resposta do backend:', result);
       
       // Verificar se o backend retornou sucesso
@@ -148,13 +148,13 @@ export const useFinancialData = () => {
   /**
    * Busca dados financeiros processados do backend
    */
-  const fetchFinancialData = async (companyId?: string): Promise<void> => {
+  const fetchFinancialData = async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log('[useFinancialData] Buscando dados...', { companyId, periodFilter });
-      const data = await financialService.getFinancialData(companyId, periodFilter);
+      console.log('[useFinancialData] Buscando dados...', { periodFilter });
+      const data = await financialService.getFinancialData(periodFilter);
       
       // Salvar dados
       setSummary(data.summary);
@@ -188,12 +188,11 @@ export const useFinancialData = () => {
    */
   const fetchGraphData = async (
     graphType: GraphType,
-    companyId?: string,
     filter?: PeriodFilter
   ): Promise<void> => {
     try {
       console.log('[useFinancialData] Buscando dados para gráfico:', { graphType, filter });
-      const data = await financialService.getFinancialData(companyId, filter);
+      const data = await financialService.getFinancialData(filter);
       
       // Atualizar apenas os dados do gráfico específico
       switch (graphType) {

@@ -53,8 +53,9 @@ export const useOAuthLogin = () => {
       // Limpa os parâmetros da URL
       oauthService.cleanUrlParams();
 
-      // Redireciona para o dashboard
-      navigate('/dashboard');
+      // Redireciona após login: exige seleção de empresa antes das rotas tenant
+      const companyId = localStorage.getItem('current_company_id');
+      navigate(companyId ? '/dashboard' : '/company/setup', { replace: true });
     } catch (err: unknown) {
       console.error('Erro no OAuth:', err);
       

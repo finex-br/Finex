@@ -6,28 +6,99 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
-import { companyService } from '@/services/companyService';
+import { companyService, CompanySummary } from '@/services/companyService';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAuthStore } from '@/store/authStore';
 
 export function CompanySetupView() {
   const navigate = useNavigate();
+  const setCurrentCompanyId = useAuthStore((s) => s.setCurrentCompanyId);
 
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const [companies, setCompanies] = useState<CompanySummary[] | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
+
   useEffect(() => {
     (async () => {
+      const storedCompanyId = localStorage.getItem('current_company_id') || undefined;
       try {
-        const me = await companyService.getMyCompany();
+        const me = await companyService.getMyCompany(storedCompanyId);
+
         if (me.company) {
-          navigate('/upload', { replace: true });
+          setCurrentCompanyId(me.company.id);
+          navigate('/dashboard', { replace: true });
+          return;
         }
-      } catch {
-        // ignore; user might not have membership yet
+
+        // No membership yet -> keep create flow
+        setCompanies([]);
+      } catch (err) {
+        const axiosError = err as AxiosError<{ message?: string }>;
+        const message = axiosError.response?.data?.message || '';
+
+        if (axiosError.response?.status === 403) {
+          localStorage.removeItem('current_company_id');
+        }
+
+        // Option B: if multiple companies, require explicit selection
+        if (axiosError.response?.status === 400 && message.toLowerCase().includes('multiple companies')) {
+          try {
+            const list = await companyService.listMyCompanies();
+            setCompanies(list.companies || []);
+
+            if (list.companies?.length === 1) {
+              setCurrentCompanyId(list.companies[0].id);
+              navigate('/dashboard', { replace: true });
+              return;
+            }
+          } catch {
+            setError('Erro ao carregar lista de empresas');
+          }
+          return;
+        }
+
+        // Otherwise: treat as no membership / other error
+        setCompanies([]);
       }
     })();
   }, [navigate]);
+
+  const handleSelectCompany = async () => {
+    setError(null);
+
+    if (!selectedCompanyId) {
+      setError('Selecione uma empresa para continuar');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Validate membership by calling /companies/me with header
+      const me = await companyService.getMyCompany(selectedCompanyId);
+      if (!me.company) {
+        setError('Empresa não encontrada para este usuário');
+        return;
+      }
+
+      setCurrentCompanyId(me.company.id);
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setError(axiosError.response?.data?.message || 'Erro ao selecionar empresa');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreate = async () => {
     setIsLoading(true);
@@ -37,7 +108,8 @@ export function CompanySetupView() {
     try {
       const result = await companyService.createCompany(companyName.trim());
       setSuccessMessage(result.message || 'Empresa criada com sucesso');
-      setTimeout(() => navigate('/upload', { replace: true }), 800);
+      setCurrentCompanyId(result.company.id);
+      setTimeout(() => navigate('/dashboard', { replace: true }), 800);
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
       setError(axiosError.response?.data?.message || 'Erro ao criar empresa');
@@ -52,9 +124,13 @@ export function CompanySetupView() {
         <div className="max-w-xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle>Criar empresa</CardTitle>
+              <CardTitle>
+                {companies && companies.length > 1 ? 'Selecionar empresa' : 'Criar empresa'}
+              </CardTitle>
               <CardDescription>
-                Para usar uploads e revisão de documentos, associe seu usuário a uma empresa.
+                {companies && companies.length > 1
+                  ? 'Você tem mais de uma empresa. Selecione uma para continuar.'
+                  : 'Para usar uploads e revisão de documentos, associe seu usuário a uma empresa.'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -70,22 +146,52 @@ export function CompanySetupView() {
                 </Alert>
               )}
 
-              <div className="space-y-2">
-                <div className="text-sm font-medium">Nome da empresa</div>
-                <Input
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Minha Empresa LTDA"
-                />
-              </div>
+              {companies && companies.length > 1 ? (
+                <>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Empresa</div>
+                    <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companies.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <Button
-                onClick={handleCreate}
-                disabled={isLoading || companyName.trim().length === 0}
-                className="w-full"
-              >
-                {isLoading ? 'Criando...' : 'Criar e continuar'}
-              </Button>
+                  <Button
+                    onClick={handleSelectCompany}
+                    disabled={isLoading || !selectedCompanyId}
+                    className="w-full"
+                  >
+                    {isLoading ? 'Entrando...' : 'Continuar'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Nome da empresa</div>
+                    <Input
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="Minha Empresa LTDA"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleCreate}
+                    disabled={isLoading || companyName.trim().length === 0}
+                    className="w-full"
+                  >
+                    {isLoading ? 'Criando...' : 'Criar e continuar'}
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

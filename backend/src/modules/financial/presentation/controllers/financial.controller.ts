@@ -6,13 +6,18 @@ import {
   UseInterceptors,
   UploadedFile,
   Request,
+  Headers,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { DataSource } from 'typeorm';
+import { JwtAuthGuard } from '../../../authentication/presentation/http/guards/jwt-auth.guard';
 import { ProcessExcelUseCase } from '../../application/use-cases/process-excel.use-case';
 import { GetFinancialDataUseCase } from '../../application/use-cases/get-financial-data.use-case';
 import { PeriodType } from '../../application/dtos/financial.dto';
+import { resolveCompanyContext } from '../../../../shared/tenant/company-context';
 
 /**
  * FinancialController - Presentation Layer
@@ -23,11 +28,28 @@ import { PeriodType } from '../../application/dtos/financial.dto';
  * TODO: Adicionar @UseGuards(JwtAuthGuard) após merge com branch de autenticação
  */
 @Controller('financial')
+@UseGuards(JwtAuthGuard)
 export class FinancialController {
   constructor(
     private readonly processExcelUseCase: ProcessExcelUseCase,
     private readonly getFinancialDataUseCase: GetFinancialDataUseCase,
+    private readonly dataSource: DataSource,
   ) {}
+
+  private async resolveCompanyId(
+    req: any,
+    requestedCompanyId?: string,
+  ): Promise<{ userId: string; companyId: string }> {
+    const ctx = await resolveCompanyContext(this.dataSource, req, requestedCompanyId, {
+      requireCompanyIdForAdmin: true,
+    });
+
+    if (!ctx.companyId) {
+      throw new HttpException('Company context not resolved', HttpStatus.BAD_REQUEST);
+    }
+
+    return { userId: ctx.userId, companyId: ctx.companyId };
+  }
 
   /**
    * POST /financial/upload
@@ -42,50 +64,15 @@ export class FinancialController {
   async uploadExcel(
     @UploadedFile() file: any,
     @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
   ) {
     try {
-      console.log('[FinancialController] Upload recebido:', {
-        hasFile: !!file,
-        filename: file?.originalname,
-        mimetype: file?.mimetype,
-        size: file?.size
-      });
-
-      if (!file) {
-        throw new HttpException('Arquivo não enviado', HttpStatus.BAD_REQUEST);
-      }
-
-      // Validar tipo de arquivo
-      const allowedMimeTypes = [
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      ];
-
-      if (!allowedMimeTypes.includes(file.mimetype)) {
-        throw new HttpException(
-          'Tipo de arquivo inválido. Use .xlsx ou .xls',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
-      // Isso isola dados por usuário (cada user vê apenas seus próprios dados)
-      const userId = req.user?.id || req.body?.userId || 'default-user';
-      const companyId = userId; // userId = companyId temporariamente
-
-      console.log('[FinancialController] Processando com:', { companyId, userId });
-
-      // Executar Use Case
-      const result = await this.processExcelUseCase.execute({
-        companyId,
-        userId,
-        fileBuffer: file.buffer,
-        fileName: file.originalname,
-      });
-
-      console.log('[FinancialController] Resultado:', result);
-
-      return result;
+      // Fluxo único: upload sempre entra como documento pendente e exige aprovação do ADMIN
+      // antes de entrar no dashboard (financial_data).
+      throw new HttpException(
+        'Este endpoint foi desativado. Use POST /financial/pending-documents/upload (fluxo com mapeamento/validação e aprovação do ADMIN).',
+        HttpStatus.GONE,
+      );
     } catch (error) {
       console.error('[FinancialController] Erro:', error);
       throw new HttpException(
@@ -120,13 +107,12 @@ export class FinancialController {
     @Query('period') period?: PeriodType,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
+    @Headers('x-company-id') xCompanyId?: string,
   ) {
     try {
       console.log('[FinancialController] GET /financial/data chamado:', { period, startDate, endDate });
       
-      // TEMPORÁRIO: Usa userId como companyId até implementar sistema de empresas
-      const userId = req.user?.id || 'default-user';
-      const companyId = userId; // userId = companyId temporariamente
+      const { userId, companyId } = await this.resolveCompanyId(req, xCompanyId);
 
       console.log('[FinancialController] CompanyId:', companyId, 'UserId:', userId);
 

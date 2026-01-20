@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpException,
   HttpStatus,
   Post,
@@ -24,30 +25,82 @@ export class CompanyController {
     return userId;
   }
 
-  @Get('me')
-  async getMyCompany(@Request() req: any) {
+  @Get()
+  async listMyCompanies(@Request() req: any) {
     const userId = await this.getUserId(req);
 
-    const result = await this.dataSource.query(
+    const rows = await this.dataSource.query(
       `SELECT cm.company_id, c.name as company_name, cm.role as member_role
        FROM company_members cm
        JOIN companies c ON c.id = cm.company_id
        WHERE cm.user_id = $1 AND cm.is_active = true
-       ORDER BY cm.created_at ASC
-       LIMIT 1`,
+       ORDER BY cm.created_at ASC`,
       [userId],
     );
 
-    if (!result || result.length === 0) {
+    return {
+      success: true,
+      companies: (rows || []).map((r: any) => ({
+        id: r.company_id,
+        name: r.company_name,
+        role: r.member_role,
+      })),
+      total: (rows || []).length,
+    };
+  }
+
+  @Get('me')
+  async getMyCompany(
+    @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
+  ) {
+    const userId = await this.getUserId(req);
+
+    const rows = await this.dataSource.query(
+      `SELECT cm.company_id, c.name as company_name, cm.role as member_role
+       FROM company_members cm
+       JOIN companies c ON c.id = cm.company_id
+       WHERE cm.user_id = $1 AND cm.is_active = true
+       ORDER BY cm.created_at ASC`,
+      [userId],
+    );
+
+    if (!rows || rows.length === 0) {
       return { success: true, company: null };
+    }
+
+    if (xCompanyId) {
+      const selected = rows.find((r: any) => String(r.company_id) === String(xCompanyId));
+      if (!selected) {
+        throw new HttpException(
+          'User is not a member of the requested company',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      return {
+        success: true,
+        company: {
+          id: selected.company_id,
+          name: selected.company_name,
+          role: selected.member_role,
+        },
+      };
+    }
+
+    if (rows.length > 1) {
+      throw new HttpException(
+        'Multiple companies found for user. Please send X-Company-Id to select one, or call GET /companies to list them.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     return {
       success: true,
       company: {
-        id: result[0].company_id,
-        name: result[0].company_name,
-        role: result[0].member_role,
+        id: rows[0].company_id,
+        name: rows[0].company_name,
+        role: rows[0].member_role,
       },
     };
   }

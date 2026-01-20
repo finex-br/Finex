@@ -26,6 +26,16 @@ export class TypeORMAssessmentRepository implements IAssessmentRepository {
     return schema ? AssessmentMapper.toDomain(schema) : null;
   }
 
+  async findByIdAndCompany(id: UniqueEntityID, companyId: UniqueEntityID): Promise<Assessment | null> {
+    const schema = await this.assessmentRepository.findOne({
+      where: {
+        id: id.toString(),
+        companyId: companyId.toString(),
+      },
+    });
+    return schema ? AssessmentMapper.toDomain(schema) : null;
+  }
+
   async findByCompanyAndSurveyVersion(
     companyId: UniqueEntityID,
     surveyVersionId: UniqueEntityID,

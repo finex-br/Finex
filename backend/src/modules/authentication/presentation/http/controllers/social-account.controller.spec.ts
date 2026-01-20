@@ -5,6 +5,7 @@ import { LinkSocialAccountUseCase } from '../../../application/use-cases/link-so
 import { UnlinkSocialAccountUseCase } from '../../../application/use-cases/unlink-social-account.use-case';
 import { LinkSocialRequestDto } from '../dtos/link-social-request.dto';
 import { UnlinkSocialRequestDto } from '../dtos/unlink-social-request.dto';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 describe('SocialAccountController', () => {
   let controller: SocialAccountController;
@@ -59,7 +60,10 @@ describe('SocialAccountController', () => {
           useValue: mockFacebookProvider,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<SocialAccountController>(SocialAccountController);
     linkSocialAccountUseCase = module.get(LinkSocialAccountUseCase);

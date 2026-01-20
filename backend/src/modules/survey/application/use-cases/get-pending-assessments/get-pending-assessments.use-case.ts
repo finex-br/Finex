@@ -63,7 +63,7 @@ export class GetPendingAssessmentsUseCase {
         pendingSurveys.push({
           surveyId: survey.id.toString(),
           title: survey.title,
-          description: survey.description,
+          description: survey.description ?? '',
           hasStarted: !!assessment,
           progress: assessment?.finalScore,
           assessmentId: assessment?.id.toString(),

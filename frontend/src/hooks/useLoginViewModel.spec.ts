@@ -43,7 +43,7 @@ describe('useLoginViewModel', () => {
   });
 
   describe('Login com Sucesso', () => {
-    it('deve fazer login, salvar token no localStorage e navegar para /dashboard', async () => {
+    it('deve fazer login, salvar token no localStorage e navegar para /company/setup quando não há empresa selecionada', async () => {
       // Arrange: Preparar o mock de resposta
       const mockAuthResponse: AuthResponse = {
         token: 'fake-jwt-token-12345',
@@ -82,12 +82,45 @@ describe('useLoginViewModel', () => {
       // Assert: Verificar que o token foi salvo no localStorage
       expect(localStorage.getItem('access_token')).toBe('fake-jwt-token-12345');
 
-      // Assert: Verificar que navegou para /dashboard
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+      // Assert: Verificar que navegou para /company/setup (sem current_company_id)
+      expect(mockNavigate).toHaveBeenCalledWith('/company/setup', { replace: true });
       expect(mockNavigate).toHaveBeenCalledTimes(1);
 
       // Assert: Verificar que não há erro
       expect(result.current.error).toBeNull();
+    });
+
+    it('deve navegar para /dashboard quando já existe empresa selecionada', async () => {
+      // Arrange
+      localStorage.setItem('current_company_id', 'company-1');
+
+      const mockAuthResponse: AuthResponse = {
+        token: 'fake-jwt-token-12345',
+        user: {
+          id: '1',
+          name: 'John Doe',
+          email: 'john@example.com',
+          role: 'user',
+        },
+      };
+
+      vi.mocked(authService.signIn).mockResolvedValueOnce(mockAuthResponse);
+
+      const { result } = renderHook(() => useLoginViewModel());
+
+      act(() => {
+        result.current.setEmail('john@example.com');
+        result.current.setPassword('password123');
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit({
+          preventDefault: vi.fn(),
+        } as any);
+      });
+
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
+      expect(mockNavigate).toHaveBeenCalledTimes(1);
     });
 
     it('deve salvar os dados do usuário no localStorage', async () => {

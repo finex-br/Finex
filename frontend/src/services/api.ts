@@ -28,10 +28,16 @@ api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Busca o token do localStorage
     const token = localStorage.getItem('access_token');
+    const companyId = localStorage.getItem('current_company_id');
 
     // Se o token existir, adiciona no header Authorization
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Se existir empresa selecionada, propaga para a API (multi-tenant)
+    if (companyId) {
+      config.headers['x-company-id'] = companyId;
     }
 
     return config;
@@ -62,6 +68,43 @@ api.interceptors.response.use(
       // Redireciona para a página de login
       // Usamos window.location.href pois funciona melhor em interceptors
       window.location.href = '/login';
+    }
+
+    // Se a API exigir seleção de empresa (multi-tenant), redireciona para setup
+    if (error.response?.status === 400) {
+      const data: any = error.response?.data;
+      const message = typeof data?.message === 'string' ? data.message : '';
+      const lower = message.toLowerCase();
+
+      const looksLikeTenantSelectionError =
+        lower.includes('multiple companies found') ||
+        (lower.includes('x-company-id') && (lower.includes('required') || lower.includes('select')));
+
+      if (looksLikeTenantSelectionError && window.location.pathname !== '/company/setup') {
+        window.location.href = '/company/setup';
+      }
+    }
+
+    // Se o usuário tentar acessar uma empresa que não pertence (ou não tem empresa),
+    // limpamos a seleção atual para evitar loop e redirecionamos para setup.
+    if (error.response?.status === 403) {
+      const data: any = error.response?.data;
+      const message = typeof data?.message === 'string' ? data.message : '';
+      const lower = message.toLowerCase();
+
+      const looksLikeInvalidCompanyContext =
+        lower.includes('not associated with the selected company') ||
+        lower.includes('not associated with any company') ||
+        lower.includes('not a member of the requested company') ||
+        (lower.includes('company') && lower.includes('not associated'));
+
+      if (looksLikeInvalidCompanyContext) {
+        localStorage.removeItem('current_company_id');
+
+        if (window.location.pathname !== '/company/setup') {
+          window.location.href = '/company/setup';
+        }
+      }
     }
 
     // Propaga o erro para ser tratado onde a requisição foi chamada

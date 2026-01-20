@@ -88,8 +88,9 @@ export const useLoginViewModel = (): UseLoginViewModelReturn => {
       // Salva autenticação no store (localStorage + Zustand)
       setAuth(response.token, response.user);
 
-      // Redireciona para dashboard após login
-      navigate('/dashboard');
+      // Redireciona após login: exige seleção de empresa antes das rotas tenant
+      const companyId = localStorage.getItem('current_company_id');
+      navigate(companyId ? '/dashboard' : '/company/setup', { replace: true });
     } catch (err) {
       // Tratamento de erro com mensagem amigável
       const axiosError = err as AxiosError<{ message?: string }>;

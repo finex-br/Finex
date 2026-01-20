@@ -5,6 +5,18 @@ export interface MyCompanyResponse {
   company: { id: string; name: string; role: string } | null;
 }
 
+export interface CompanySummary {
+  id: string;
+  name: string;
+  role: string;
+}
+
+export interface ListMyCompaniesResponse {
+  success: boolean;
+  companies: CompanySummary[];
+  total: number;
+}
+
 export interface CreateCompanyResponse {
   success: boolean;
   message: string;
@@ -12,8 +24,15 @@ export interface CreateCompanyResponse {
 }
 
 export const companyService = {
-  getMyCompany: async (): Promise<MyCompanyResponse> => {
-    const res = await api.get<MyCompanyResponse>('/companies/me');
+  getMyCompany: async (companyId?: string): Promise<MyCompanyResponse> => {
+    const res = await api.get<MyCompanyResponse>('/companies/me', {
+      headers: companyId ? { 'x-company-id': companyId } : undefined,
+    });
+    return res.data;
+  },
+
+  listMyCompanies: async (): Promise<ListMyCompaniesResponse> => {
+    const res = await api.get<ListMyCompaniesResponse>('/companies');
     return res.data;
   },
 

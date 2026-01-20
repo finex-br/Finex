@@ -4,6 +4,7 @@ import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 export interface IAssessmentRepository {
   save(assessment: Assessment): Promise<void>;
   findById(id: UniqueEntityID): Promise<Assessment | null>;
+  findByIdAndCompany(id: UniqueEntityID, companyId: UniqueEntityID): Promise<Assessment | null>;
   findByCompanyAndSurveyVersion(
     companyId: UniqueEntityID,
     surveyVersionId: UniqueEntityID,
