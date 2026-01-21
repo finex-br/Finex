@@ -3,12 +3,13 @@ import { SocialProvider } from './social-provider';
 
 describe('SocialProvider Value Object', () => {
   describe('create', () => {
-    it('should create a valid GOOGLE provider', () => {
-      const providerOrError = SocialProvider.create('GOOGLE');
-      
-      expect(providerOrError.isSuccess).toBe(true);
-      expect(providerOrError.getValue().value).toBe('GOOGLE');
-    });
+    // DISABLED: Google OAuth tests
+    // it('should create a valid GOOGLE provider', () => {
+    //   const providerOrError = SocialProvider.create('GITHUB');
+    //   
+    //   expect(providerOrError.isSuccess).toBe(true);
+    //   expect(providerOrError.getValue().value).toBe('GITHUB');
+    // });
 
     it('should create a valid GITHUB provider', () => {
       const providerOrError = SocialProvider.create('GITHUB');
@@ -24,12 +25,13 @@ describe('SocialProvider Value Object', () => {
       expect(providerOrError.getValue().value).toBe('FACEBOOK');
     });
 
-    it('should be case-insensitive for GOOGLE', () => {
-      const providerOrError = SocialProvider.create('google');
-      
-      expect(providerOrError.isSuccess).toBe(true);
-      expect(providerOrError.getValue().value).toBe('GOOGLE');
-    });
+    // DISABLED: Google OAuth test
+    // it('should be case-insensitive for GOOGLE', () => {
+    //   const providerOrError = SocialProvider.create('GITHUB');
+    //   
+    //   expect(providerOrError.isSuccess).toBe(true);
+    //   expect(providerOrError.getValue().value).toBe('GITHUB');
+    // });
 
     it('should be case-insensitive for mixed case', () => {
       const providerOrError = SocialProvider.create('GiThUb');
@@ -75,17 +77,19 @@ describe('SocialProvider Value Object', () => {
   });
 
   describe('helper methods', () => {
-    it('should identify GOOGLE provider with isGoogle()', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      
-      expect(provider.isGoogle()).toBe(true);
-      expect(provider.isGitHub()).toBe(false);
-    });
+    // DISABLED: Google OAuth tests
+    // it('should identify GOOGLE provider with isGoogle()', () => {
+    //   const provider = SocialProvider.create('GITHUB').getValue();
+    //   
+    //   expect(provider.isGoogle()).toBe(true);
+    //   expect(provider.isGitHub()).toBe(false);
+    // });
 
     it('should identify GITHUB provider with isGitHub()', () => {
       const provider = SocialProvider.create('GITHUB').getValue();
       
-      expect(provider.isGoogle()).toBe(false);
+      // DISABLED: isGoogle() method
+      // expect(provider.isGoogle()).toBe(false);
       expect(provider.isGitHub()).toBe(true);
     });
   });

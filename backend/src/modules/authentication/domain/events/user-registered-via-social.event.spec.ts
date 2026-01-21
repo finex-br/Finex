@@ -5,8 +5,8 @@ import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 describe('UserRegisteredViaSocialEvent', () => {
   it('should create a valid event', () => {
     const userId = new UniqueEntityID('user-123');
-    const provider = 'GOOGLE';
-    const providerId = 'google123';
+    const provider = 'GITHUB';
+    const providerId = 'github123';
     const email = 'user@gmail.com';
     const name = 'John Doe';
 

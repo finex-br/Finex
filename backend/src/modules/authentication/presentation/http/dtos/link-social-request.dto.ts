@@ -5,20 +5,20 @@ import { IsString, IsOptional } from 'class-validator';
  * DTO for linking a social account to existing user
  * @example
  * {
- *   "provider": "GOOGLE",
+ *   "provider": "GITHUB",
  *   "code": "4/0AY0e-g7...",
  *   "redirectUri": "https://example.com/callback"
  * }
  */
 export class LinkSocialRequestDto {
   /**
-   * OAuth provider name (GOOGLE, GITHUB, FACEBOOK)
-   * @example "GOOGLE"
+   * OAuth provider name (GITHUB, FACEBOOK)
+   * @example "GITHUB"
    */
   @ApiProperty({
     description: 'OAuth provider name',
-    example: 'GOOGLE',
-    enum: ['GOOGLE', 'GITHUB', 'FACEBOOK'],
+    example: 'GITHUB',
+    enum: ['GITHUB', 'FACEBOOK'],
     required: true,
   })
   @IsString()

@@ -263,9 +263,9 @@ describe('User Entity', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const providerId = SocialAccountId.create('google123').getValue();
-      const socialEmail = Email.create('user@gmail.com').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
+      const providerId = SocialAccountId.create('github123').getValue();
+      const socialEmail = Email.create('user@github.com').getValue();
       const socialAccount = SocialAccount.create({
         userId: user.id,
         provider,
@@ -294,9 +294,9 @@ describe('User Entity', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const providerId = SocialAccountId.create('google123').getValue();
-      const socialEmail = Email.create('user@gmail.com').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
+      const providerId = SocialAccountId.create('github123').getValue();
+      const socialEmail = Email.create('user@github.com').getValue();
       
       const socialAccount1 = SocialAccount.create({
         userId: user.id,
@@ -309,7 +309,7 @@ describe('User Entity', () => {
       const socialAccount2 = SocialAccount.create({
         userId: user.id,
         provider,
-        providerId: SocialAccountId.create('google456').getValue(),
+        providerId: SocialAccountId.create('github456').getValue(),
         email: socialEmail,
         displayName: 'John Doe',
       }).getValue();
@@ -335,17 +335,9 @@ describe('User Entity', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const googleProvider = SocialProvider.create('GOOGLE').getValue();
       const githubProvider = SocialProvider.create('GITHUB').getValue();
+      const facebookProvider = SocialProvider.create('FACEBOOK').getValue();
       const socialEmail = Email.create('user@example.com').getValue();
-
-      const googleAccount = SocialAccount.create({
-        userId: user.id,
-        provider: googleProvider,
-        providerId: SocialAccountId.create('google123').getValue(),
-        email: socialEmail,
-        displayName: 'John Doe',
-      }).getValue();
 
       const githubAccount = SocialAccount.create({
         userId: user.id,
@@ -355,8 +347,16 @@ describe('User Entity', () => {
         displayName: 'John Doe',
       }).getValue();
 
-      user.linkSocialAccount(googleAccount);
+      const facebookAccount = SocialAccount.create({
+        userId: user.id,
+        provider: facebookProvider,
+        providerId: SocialAccountId.create('facebook123').getValue(),
+        email: socialEmail,
+        displayName: 'John Doe',
+      }).getValue();
+
       user.linkSocialAccount(githubAccount);
+      user.linkSocialAccount(facebookAccount);
 
       expect(user.socialAccounts).toHaveLength(2);
     });
@@ -376,9 +376,9 @@ describe('User Entity', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const providerId = SocialAccountId.create('google123').getValue();
-      const socialEmail = Email.create('user@gmail.com').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
+      const providerId = SocialAccountId.create('github123').getValue();
+      const socialEmail = Email.create('user@github.com').getValue();
       const socialAccount = SocialAccount.create({
         userId: user.id,
         provider,
@@ -407,7 +407,7 @@ describe('User Entity', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
       const result = user.unlinkSocialAccount(provider);
 
       expect(result.isFailure).toBe(true);
@@ -429,9 +429,9 @@ describe('User Entity', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const providerId = SocialAccountId.create('google123').getValue();
-      const socialEmail = Email.create('user@gmail.com').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
+      const providerId = SocialAccountId.create('github123').getValue();
+      const socialEmail = Email.create('user@github.com').getValue();
       const socialAccount = SocialAccount.create({
         userId: user.id,
         provider,
@@ -458,7 +458,7 @@ describe('User Entity', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
 
       expect(user.hasSocialAccount(provider)).toBe(false);
     });

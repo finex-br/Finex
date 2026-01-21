@@ -12,8 +12,8 @@ describe('SocialAccountController', () => {
   let linkSocialAccountUseCase: jest.Mocked<LinkSocialAccountUseCase>;
   let unlinkSocialAccountUseCase: jest.Mocked<UnlinkSocialAccountUseCase>;
 
-  const mockGoogleProvider = {
-    getProvider: jest.fn().mockReturnValue('GOOGLE'),
+  const mockgithubProvider = {
+    getProvider: jest.fn().mockReturnValue('GITHUB'),
     exchangeCodeForProfile: jest.fn(),
   };
 
@@ -49,7 +49,7 @@ describe('SocialAccountController', () => {
         },
         {
           provide: 'GOOGLE_OAUTH_PROVIDER',
-          useValue: mockGoogleProvider,
+          useValue: mockgithubProvider,
         },
         {
           provide: 'GITHUB_OAUTH_PROVIDER',
@@ -77,9 +77,9 @@ describe('SocialAccountController', () => {
       },
     };
 
-    it('should link Google account', async () => {
+    it('should link GitHub account', async () => {
       const dto: LinkSocialRequestDto = {
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code-123',
         redirectUri: 'https://example.com/callback',
       };
@@ -95,7 +95,7 @@ describe('SocialAccountController', () => {
 
       expect(linkSocialAccountUseCase.execute).toHaveBeenCalledWith({
         userId: 'user-123',
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code-123',
         redirectUri: 'https://example.com/callback',
       });
@@ -132,7 +132,7 @@ describe('SocialAccountController', () => {
 
     it('should throw error when already linked', async () => {
       const dto: LinkSocialRequestDto = {
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code',
       };
 
@@ -156,9 +156,9 @@ describe('SocialAccountController', () => {
       },
     };
 
-    it('should unlink Google account', async () => {
+    it('should unlink GitHub account', async () => {
       const dto: UnlinkSocialRequestDto = {
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       };
 
       unlinkSocialAccountUseCase.execute.mockResolvedValue({
@@ -172,7 +172,7 @@ describe('SocialAccountController', () => {
 
       expect(unlinkSocialAccountUseCase.execute).toHaveBeenCalledWith({
         userId: 'user-123',
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       });
     });
 
@@ -205,7 +205,7 @@ describe('SocialAccountController', () => {
 
     it('should throw error when account not linked', async () => {
       const dto: UnlinkSocialRequestDto = {
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       };
 
       unlinkSocialAccountUseCase.execute.mockResolvedValue({

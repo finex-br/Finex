@@ -2,9 +2,8 @@ import { Result } from '../../../../shared/core/result';
 import { ValueObject } from '../../../../shared/core/value-object';
 
 export enum SocialProviderEnum {
-  GOOGLE = 'GOOGLE',
-  GITHUB = 'GITHUB',
-  FACEBOOK = 'FACEBOOK',
+  // ALL OAUTH PROVIDERS DISABLED - Only email/password login active
+  // Keeping enum structure for backward compatibility but no active providers
 }
 
 interface SocialProviderProps {
@@ -21,32 +20,22 @@ export class SocialProvider extends ValueObject<SocialProviderProps> {
   }
 
   public static create(provider: string): Result<SocialProvider> {
-    if (!provider || provider.trim().length === 0) {
-      return Result.fail<SocialProvider>('Social provider is required');
-    }
-
-    const normalizedProvider = provider.trim().toUpperCase();
-
-    if (!Object.values(SocialProviderEnum).includes(normalizedProvider as SocialProviderEnum)) {
-      return Result.fail<SocialProvider>(
-        `Invalid social provider. Valid providers: ${Object.values(SocialProviderEnum).join(', ')}`
-      );
-    }
-
-    return Result.ok<SocialProvider>(
-      new SocialProvider({ value: normalizedProvider })
+    // ALL OAUTH PROVIDERS DISABLED - Only email/password login active
+    return Result.fail<SocialProvider>(
+      'OAuth authentication is currently disabled. Please use email/password login.'
     );
   }
 
-  public isGoogle(): boolean {
-    return this.props.value === SocialProviderEnum.GOOGLE;
-  }
+  // ALL OAUTH METHODS DISABLED
+  // public isGoogle(): boolean {
+  //   return this.props.value === 'GOOGLE';
+  // }
 
-  public isGitHub(): boolean {
-    return this.props.value === SocialProviderEnum.GITHUB;
-  }
+  // public isGitHub(): boolean {
+  //   return this.props.value === 'GITHUB';
+  // }
 
-  public isFacebook(): boolean {
-    return this.props.value === SocialProviderEnum.FACEBOOK;
-  }
+  // public isFacebook(): boolean {
+  //   return this.props.value === 'FACEBOOK';
+  // }
 }

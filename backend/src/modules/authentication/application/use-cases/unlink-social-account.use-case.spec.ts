@@ -52,8 +52,8 @@ describe('UnlinkSocialAccountUseCase', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const providerId = SocialAccountId.create('google123').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
+      const providerId = SocialAccountId.create('github123').getValue();
       const socialAccount = SocialAccount.create({
         userId: user.id,
         provider,
@@ -69,7 +69,7 @@ describe('UnlinkSocialAccountUseCase', () => {
 
       const result = await useCase.execute({
         userId: user.id.toString(),
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       });
 
       expect(result.isSuccess).toBe(true);
@@ -120,7 +120,7 @@ describe('UnlinkSocialAccountUseCase', () => {
 
       const result = await useCase.execute({
         userId: 'non-existent-user',
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       });
 
       expect(result.isFailure).toBe(true);
@@ -145,7 +145,7 @@ describe('UnlinkSocialAccountUseCase', () => {
 
       const result = await useCase.execute({
         userId: user.id.toString(),
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       });
 
       expect(result.isFailure).toBe(true);

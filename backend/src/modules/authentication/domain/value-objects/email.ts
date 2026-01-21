@@ -30,6 +30,11 @@ export class Email extends ValueObject<EmailProps> {
       return Result.fail<Email>('Email is required');
     }
 
+    // Check if email is a string
+    if (typeof email !== 'string') {
+      return Result.fail<Email>('Email must be a string');
+    }
+
     // Normalize: trim and lowercase
     const normalizedEmail = email.trim().toLowerCase();
 

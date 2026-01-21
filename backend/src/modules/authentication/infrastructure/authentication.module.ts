@@ -20,7 +20,8 @@ import { UnlinkSocialAccountUseCase } from '../application/use-cases/unlink-soci
 import { AuthController } from '../presentation/http/controllers/auth.controller';
 import { OAuthController } from '../presentation/http/controllers/oauth.controller';
 import { SocialAccountController } from '../presentation/http/controllers/social-account.controller';
-import { GoogleOAuthProvider } from './oauth/google-oauth.provider';
+// DISABLED: Google OAuth
+// import { GoogleOAuthProvider } from './oauth/google-oauth.provider';
 import { GitHubOAuthProvider } from './oauth/github-oauth.provider';
 import { FacebookOAuthProvider } from './oauth/facebook-oauth.provider';
 import { OAuthProviderFactory } from './oauth/oauth-provider.factory';
@@ -47,38 +48,40 @@ import { EnvService } from '../../../shared/infra/env';
     CompanyRepository,
     CompanyMemberRepository,
     JwtTokenService,
-    {
-      provide: 'GOOGLE_OAUTH_PROVIDER',
-      useFactory: (envService: EnvService) => {
-        const httpClient = {
-          post: async (url: string, data: any) => axios.post(url, data),
-          get: async (url: string, config?: any) => axios.get(url, config),
-        };
-        return new GoogleOAuthProvider(
-          httpClient,
-          envService.get('GOOGLE_CLIENT_ID') || '',
-          envService.get('GOOGLE_CLIENT_SECRET') || '',
-        );
-      },
-      inject: [EnvService],
-    },
-    {
-      provide: 'GITHUB_OAUTH_PROVIDER',
-      useFactory: (envService: EnvService) => {
-        const httpClient = {
-          post: async (url: string, data: any) => axios.post(url, data),
-          get: async (url: string, config?: any) => axios.get(url, config),
-        };
-        return new GitHubOAuthProvider(
-          httpClient,
-          envService.get('GITHUB_CLIENT_ID') || '',
-          envService.get('GITHUB_CLIENT_SECRET') || '',
-        );
-      },
-      inject: [EnvService],
-    },
-    {
-      provide: 'FACEBOOK_OAUTH_PROVIDER',
+    // DISABLED: Google OAuth Provider
+    // {
+    //   provide: 'GOOGLE_OAUTH_PROVIDER',
+    //   useFactory: (envService: EnvService) => {
+    //     const httpClient = {
+    //       post: async (url: string, data: any) => axios.post(url, data),
+    //       get: async (url: string, config?: any) => axios.get(url, config),
+    //     };
+    //     return new GoogleOAuthProvider(
+    //       httpClient,
+    //       envService.get('GOOGLE_CLIENT_ID') || '',
+    //       envService.get('GOOGLE_CLIENT_SECRET') || '',
+    //     );
+    //   },
+    //   inject: [EnvService],
+    // },
+    // ALL OAUTH PROVIDERS DISABLED - Only email/password login active
+    // {
+    //   provide: 'GITHUB_OAUTH_PROVIDER',
+    //   useFactory: (envService: EnvService) => {
+    //     const httpClient = {
+    //       post: async (url: string, data: any) => axios.post(url, data),
+    //       get: async (url: string, config?: any) => axios.get(url, config),
+    //     };
+    //     return new GitHubOAuthProvider(
+    //       httpClient,
+    //       envService.get('GITHUB_CLIENT_ID') || '',
+    //       envService.get('GITHUB_CLIENT_SECRET') || '',
+    //     );
+    //   },
+    //   inject: [EnvService],
+    // },
+    // {
+    //   provide: 'FACEBOOK_OAUTH_PROVIDER',
       useFactory: (envService: EnvService) => {
         const httpClient = {
           post: async (url: string, data: any) => axios.post(url, data),
@@ -124,47 +127,48 @@ import { EnvService } from '../../../shared/infra/env';
       },
       inject: [UserRepository, JwtTokenService],
     },
-    {
-      provide: AuthenticateWithSocialUseCase,
-      useFactory: (
-        userRepo: UserRepository,
-        socialAccountRepo: SocialAccountRepository,
-        googleProvider: any,
-        tokenService: JwtTokenService,
-      ) => {
-        return new AuthenticateWithSocialUseCase(
-          userRepo,
-          socialAccountRepo,
-          googleProvider,
-          tokenService,
-        );
-      },
-      inject: [
-        UserRepository,
-        SocialAccountRepository,
-        'GOOGLE_OAUTH_PROVIDER',
-        JwtTokenService,
-      ],
-    },
-    {
-      provide: LinkSocialAccountUseCase,
-      useFactory: (
-        userRepo: UserRepository,
-        socialAccountRepo: SocialAccountRepository,
-        googleProvider: any,
-      ) => {
-        return new LinkSocialAccountUseCase(
-          userRepo,
-          socialAccountRepo,
-          googleProvider,
-        );
-      },
-      inject: [
-        UserRepository,
-        SocialAccountRepository,
-        'GOOGLE_OAUTH_PROVIDER',
-      ],
-    },
+    // ALL OAUTH USE CASES DISABLED
+    // {
+    //   provide: AuthenticateWithSocialUseCase,
+    //   useFactory: (
+    //     userRepo: UserRepository,
+    //     socialAccountRepo: SocialAccountRepository,
+    //     googleProvider: any,
+    //     tokenService: JwtTokenService,
+    //   ) => {
+    //     return new AuthenticateWithSocialUseCase(
+    //       userRepo,
+    //       socialAccountRepo,
+    //       googleProvider,
+    //       tokenService,
+    //     );
+    //   },
+    //   inject: [
+    //     UserRepository,
+    //     SocialAccountRepository,
+    //     'GOOGLE_OAUTH_PROVIDER',
+    //     JwtTokenService,
+    //   ],
+    // },
+    // {
+    //   provide: LinkSocialAccountUseCase,
+    //   useFactory: (
+    //     userRepo: UserRepository,
+    //     socialAccountRepo: SocialAccountRepository,
+    //     googleProvider: any,
+    //   ) => {
+    //     return new LinkSocialAccountUseCase(
+    //       userRepo,
+    //       socialAccountRepo,
+    //       googleProvider,
+    //     );
+    //   },
+    //   inject: [
+    //     UserRepository,
+    //     SocialAccountRepository,
+    //     'GOOGLE_OAUTH_PROVIDER',
+    //   ],
+    // },
     {
       provide: UnlinkSocialAccountUseCase,
       useFactory: (

@@ -7,17 +7,19 @@ export class OAuthProviderFactory {
   private readonly providers: Map<string, IOAuthProvider>;
 
   constructor(
-    @Inject('GOOGLE_OAUTH_PROVIDER')
-    googleProvider: IOAuthProvider,
-    @Inject('GITHUB_OAUTH_PROVIDER')
-    githubProvider: IOAuthProvider,
-    @Inject('FACEBOOK_OAUTH_PROVIDER')
-    facebookProvider: IOAuthProvider,
+    // ALL OAUTH PROVIDERS DISABLED - Only email/password login active
+    // @Inject('GOOGLE_OAUTH_PROVIDER')
+    // googleProvider: IOAuthProvider,
+    // @Inject('GITHUB_OAUTH_PROVIDER')
+    // githubProvider: IOAuthProvider,
+    // @Inject('FACEBOOK_OAUTH_PROVIDER')
+    // facebookProvider: IOAuthProvider,
   ) {
     this.providers = new Map([
-      ['GOOGLE', googleProvider],
-      ['GITHUB', githubProvider],
-      ['FACEBOOK', facebookProvider],
+      // ALL OAUTH PROVIDERS DISABLED
+      // ['GOOGLE', googleProvider],
+      // ['GITHUB', githubProvider],
+      // ['FACEBOOK', facebookProvider],
     ]);
   }
 

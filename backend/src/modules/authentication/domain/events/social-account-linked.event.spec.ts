@@ -5,8 +5,8 @@ import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 describe('SocialAccountLinkedEvent', () => {
   it('should create a valid event', () => {
     const userId = new UniqueEntityID('user-123');
-    const provider = 'GOOGLE';
-    const providerId = 'google123';
+    const provider = 'GITHUB';
+    const providerId = 'github123';
     const email = 'user@gmail.com';
 
     const event = new SocialAccountLinkedEvent(userId, provider, providerId, email);
@@ -33,7 +33,7 @@ describe('SocialAccountLinkedEvent', () => {
   it('should have different timestamps for different events', async () => {
     const userId = new UniqueEntityID('user-123');
     
-    const event1 = new SocialAccountLinkedEvent(userId, 'GOOGLE', 'google123', 'user@gmail.com');
+    const event1 = new SocialAccountLinkedEvent(userId, 'FACEBOOK', 'facebook123', 'user@facebook.com');
     
     // Small delay to ensure different timestamp
     await new Promise(resolve => setTimeout(resolve, 10));

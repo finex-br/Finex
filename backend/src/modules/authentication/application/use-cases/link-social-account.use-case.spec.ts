@@ -37,7 +37,7 @@ describe('LinkSocialAccountUseCase', () => {
 
     oauthProvider = {
       exchangeCodeForProfile: jest.fn(),
-      getProvider: jest.fn().mockReturnValue('GOOGLE'),
+      getProvider: jest.fn().mockReturnValue('GITHUB'),
     } as any;
 
     useCase = new LinkSocialAccountUseCase(
@@ -62,11 +62,11 @@ describe('LinkSocialAccountUseCase', () => {
       }).getValue();
 
       const socialProfile = {
-        id: 'google123',
-        email: 'user@gmail.com',
+        id: 'github123',
+        email: 'user@github.com',
         displayName: 'John Doe',
         avatarUrl: 'https://example.com/avatar.jpg',
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       };
 
       userRepository.findById.mockResolvedValue(user);
@@ -76,7 +76,7 @@ describe('LinkSocialAccountUseCase', () => {
 
       const result = await useCase.execute({
         userId: user.id.toString(),
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code-123',
       });
 
@@ -131,7 +131,7 @@ describe('LinkSocialAccountUseCase', () => {
 
       const result = await useCase.execute({
         userId: 'non-existent-user',
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code',
       });
 
@@ -152,8 +152,8 @@ describe('LinkSocialAccountUseCase', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const providerId = SocialAccountId.create('google123').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
+      const providerId = SocialAccountId.create('github123').getValue();
       const existingAccount = SocialAccount.create({
         userId: user.id,
         provider,
@@ -167,7 +167,7 @@ describe('LinkSocialAccountUseCase', () => {
 
       const result = await useCase.execute({
         userId: user.id.toString(),
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code',
       });
 
@@ -188,8 +188,8 @@ describe('LinkSocialAccountUseCase', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const providerId = SocialAccountId.create('google123').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
+      const providerId = SocialAccountId.create('github123').getValue();
       const otherUserAccount = SocialAccount.create({
         userId: new UniqueEntityID('other-user'),
         provider,
@@ -199,10 +199,10 @@ describe('LinkSocialAccountUseCase', () => {
       }).getValue();
 
       const socialProfile = {
-        id: 'google123',
-        email: 'user@gmail.com',
+        id: 'github123',
+        email: 'user@github.com',
         displayName: 'John Doe',
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       };
 
       userRepository.findById.mockResolvedValue(user);
@@ -212,7 +212,7 @@ describe('LinkSocialAccountUseCase', () => {
 
       const result = await useCase.execute({
         userId: user.id.toString(),
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code',
       });
 

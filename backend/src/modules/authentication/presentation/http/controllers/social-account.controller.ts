@@ -42,17 +42,19 @@ export class SocialAccountController {
   constructor(
     private readonly linkSocialAccountUseCase: LinkSocialAccountUseCase,
     private readonly unlinkSocialAccountUseCase: UnlinkSocialAccountUseCase,
-    @Inject('GOOGLE_OAUTH_PROVIDER')
-    private readonly googleProvider: IOAuthProvider,
-    @Inject('GITHUB_OAUTH_PROVIDER')
-    private readonly githubProvider: IOAuthProvider,
-    @Inject('FACEBOOK_OAUTH_PROVIDER')
-    private readonly facebookProvider: IOAuthProvider,
+    // ALL OAUTH PROVIDERS DISABLED - Only email/password login active
+    // @Inject('GOOGLE_OAUTH_PROVIDER')
+    // private readonly googleProvider: IOAuthProvider,
+    // @Inject('GITHUB_OAUTH_PROVIDER')
+    // private readonly githubProvider: IOAuthProvider,
+    // @Inject('FACEBOOK_OAUTH_PROVIDER')
+    // private readonly facebookProvider: IOAuthProvider,
   ) {
     this.providers = new Map([
-      ['google', this.googleProvider],
-      ['github', this.githubProvider],
-      ['facebook', this.facebookProvider],
+      // ALL OAUTH PROVIDERS DISABLED
+      // ['google', this.googleProvider],
+      // ['github', this.githubProvider],
+      // ['facebook', this.facebookProvider],
     ]);
   }
 
@@ -68,7 +70,7 @@ export class SocialAccountController {
    * POST /auth/social-account/link
    * Headers: { "Authorization": "Bearer <jwt_token>" }
    * Body: {
-   *   "provider": "GOOGLE",
+   *   "provider": "GITHUB",
    *   "code": "4/0AY0e-g7...",
    *   "redirectUri": "https://example.com/callback"
    * }
@@ -137,7 +139,7 @@ export class SocialAccountController {
    * @example
    * DELETE /auth/social-account/unlink
    * Headers: { "Authorization": "Bearer <jwt_token>" }
-   * Body: { "provider": "GOOGLE" }
+   * Body: { "provider": "GITHUB" }
    * 
    * @throws BadRequestException if provider is not supported or account is not linked
    */

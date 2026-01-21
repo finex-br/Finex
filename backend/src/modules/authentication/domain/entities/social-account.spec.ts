@@ -8,9 +8,9 @@ import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 describe('SocialAccount Entity', () => {
   describe('create', () => {
     it('should create a valid social account', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123456789').getValue();
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
 
       const accountOrError = SocialAccount.create({
         userId: new UniqueEntityID('user-123'),
@@ -23,9 +23,9 @@ describe('SocialAccount Entity', () => {
       expect(accountOrError.isSuccess).toBe(true);
       const account = accountOrError.getValue();
       expect(account.userId.toString()).toBe('user-123');
-      expect(account.provider.value).toBe('GOOGLE');
+      expect(account.provider.value).toBe('GITHUB');
       expect(account.providerId.value).toBe('123456789');
-      expect(account.email.value).toBe('user@gmail.com');
+      expect(account.email.value).toBe('user@github.com');
       expect(account.displayName).toBe('John Doe');
       expect(account.avatarUrl).toBeUndefined();
     });
@@ -72,9 +72,9 @@ describe('SocialAccount Entity', () => {
     });
 
     it('should fail without userId', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123').getValue();
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
 
       const accountOrError = SocialAccount.create({
         userId: null as any,
@@ -90,7 +90,7 @@ describe('SocialAccount Entity', () => {
 
     it('should fail without provider', () => {
       const providerId = SocialAccountId.create('123').getValue();
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
 
       const accountOrError = SocialAccount.create({
         userId: new UniqueEntityID('user-123'),
@@ -105,8 +105,8 @@ describe('SocialAccount Entity', () => {
     });
 
     it('should fail without providerId', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const email = Email.create('user@gmail.com').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
+      const email = Email.create('user@github.com').getValue();
 
       const accountOrError = SocialAccount.create({
         userId: new UniqueEntityID('user-123'),
@@ -121,7 +121,7 @@ describe('SocialAccount Entity', () => {
     });
 
     it('should fail without email', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123').getValue();
 
       const accountOrError = SocialAccount.create({
@@ -137,9 +137,9 @@ describe('SocialAccount Entity', () => {
     });
 
     it('should fail without displayName', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123').getValue();
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
 
       const accountOrError = SocialAccount.create({
         userId: new UniqueEntityID('user-123'),
@@ -154,9 +154,9 @@ describe('SocialAccount Entity', () => {
     });
 
     it('should fail with displayName less than 2 characters', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123').getValue();
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
 
       const accountOrError = SocialAccount.create({
         userId: new UniqueEntityID('user-123'),
@@ -173,9 +173,9 @@ describe('SocialAccount Entity', () => {
 
   describe('methods', () => {
     it('should update avatar url', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123').getValue();
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
 
       const account = SocialAccount.create({
         userId: new UniqueEntityID('user-123'),
@@ -191,9 +191,9 @@ describe('SocialAccount Entity', () => {
     });
 
     it('should update display name', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123').getValue();
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
 
       const account = SocialAccount.create({
         userId: new UniqueEntityID('user-123'),
@@ -210,9 +210,9 @@ describe('SocialAccount Entity', () => {
     });
 
     it('should fail to update display name with invalid value', () => {
-      const provider = SocialProvider.create('GOOGLE').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123').getValue();
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
 
       const account = SocialAccount.create({
         userId: new UniqueEntityID('user-123'),

@@ -9,8 +9,8 @@ describe('OAuthController', () => {
   let controller: OAuthController;
   let authenticateWithSocialUseCase: jest.Mocked<AuthenticateWithSocialUseCase>;
 
-  const mockGoogleProvider = {
-    getProvider: jest.fn().mockReturnValue('GOOGLE'),
+  const mockgithubProvider = {
+    getProvider: jest.fn().mockReturnValue('GITHUB'),
     exchangeCodeForProfile: jest.fn(),
   };
 
@@ -38,7 +38,7 @@ describe('OAuthController', () => {
         },
         {
           provide: 'GOOGLE_OAUTH_PROVIDER',
-          useValue: mockGoogleProvider,
+          useValue: mockgithubProvider,
         },
         {
           provide: 'GITHUB_OAUTH_PROVIDER',
@@ -56,7 +56,7 @@ describe('OAuthController', () => {
   });
 
   describe('callback', () => {
-    it('should authenticate with Google', async () => {
+    it('should authenticate with GitHub', async () => {
       const callbackDto: OAuthCallbackDto = {
         code: 'auth-code-123',
         redirectUri: 'https://example.com/callback',
@@ -75,12 +75,12 @@ describe('OAuthController', () => {
         error: null,
       } as any);
 
-      const result = await controller.callback('google', callbackDto);
+      const result = await controller.callback('GITHUB', callbackDto);
 
       expect(result.accessToken).toBe('jwt-token');
       expect(result.userId).toBe('user-id');
       expect(authenticateWithSocialUseCase.execute).toHaveBeenCalledWith({
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code-123',
         redirectUri: 'https://example.com/callback',
       });
@@ -160,7 +160,7 @@ describe('OAuthController', () => {
       } as any);
 
       await expect(
-        controller.callback('google', callbackDto),
+        controller.callback('GITHUB', callbackDto),
       ).rejects.toThrow('Invalid authorization code');
     });
   });

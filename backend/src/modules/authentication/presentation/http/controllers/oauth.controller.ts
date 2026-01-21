@@ -25,7 +25,8 @@ import { SocialProvider } from '../../../domain/value-objects/social-provider';
 
 /**
  * Controller for OAuth authentication callbacks
- * Handles authentication via Google, GitHub, and Facebook OAuth providers
+ * Handles authentication via GitHub and Facebook OAuth providers
+ * NOTE: Google OAuth is currently disabled
  * 
  * @tag Authentication
  */
@@ -36,17 +37,19 @@ export class OAuthController {
 
   constructor(
     private readonly authenticateWithSocialUseCase: AuthenticateWithSocialUseCase,
-    @Inject('GOOGLE_OAUTH_PROVIDER')
-    private readonly googleProvider: IOAuthProvider,
-    @Inject('GITHUB_OAUTH_PROVIDER')
-    private readonly githubProvider: IOAuthProvider,
-    @Inject('FACEBOOK_OAUTH_PROVIDER')
-    private readonly facebookProvider: IOAuthProvider,
+    // ALL OAUTH PROVIDERS DISABLED - Only email/password login active
+    // @Inject('GOOGLE_OAUTH_PROVIDER')
+    // private readonly googleProvider: IOAuthProvider,
+    // @Inject('GITHUB_OAUTH_PROVIDER')
+    // private readonly githubProvider: IOAuthProvider,
+    // @Inject('FACEBOOK_OAUTH_PROVIDER')
+    // private readonly facebookProvider: IOAuthProvider,
   ) {
     this.providers = new Map([
-      ['google', this.googleProvider],
-      ['github', this.githubProvider],
-      ['facebook', this.facebookProvider],
+      // ALL OAUTH PROVIDERS DISABLED
+      // ['google', this.googleProvider],
+      // ['github', this.githubProvider],
+      // ['facebook', this.facebookProvider],
     ]);
   }
 
@@ -54,7 +57,7 @@ export class OAuthController {
    * OAuth callback endpoint
    * Receives authorization code from OAuth provider and authenticates/registers user
    * 
-   * @param provider - OAuth provider name (google, github, facebook)
+   * @param provider - OAuth provider name (github, facebook)
    * @param callbackDto - Authorization code and optional redirect URI
    * @returns Access token and user information
    * 
@@ -81,8 +84,8 @@ export class OAuthController {
   @ApiParam({
     name: 'provider',
     description: 'OAuth provider name',
-    enum: ['google', 'github', 'facebook'],
-    example: 'google',
+    enum: ['github', 'facebook'],
+    example: 'github',
   })
   @ApiBody({ type: OAuthCallbackDto })
   @ApiResponse({
@@ -149,7 +152,7 @@ export class OAuthController {
   @ApiParam({
     name: 'provider',
     description: 'OAuth provider name',
-    enum: ['google', 'github', 'facebook'],
+    enum: ['github', 'facebook'],
   })
   @ApiResponse({
     status: 200,

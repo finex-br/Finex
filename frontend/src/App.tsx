@@ -84,8 +84,8 @@ const App = () => (
             {/* Rota Pública - Cadastro */}
             <Route path="/signup" element={<SignUpView />} />
             
-            {/* Rota Pública - Google OAuth Callback */}
-            <Route path="/auth/google/callback" element={<GoogleCallbackView />} />
+            {/* OAuth DESABILITADO - Rota de callback removida */}
+            {/* <Route path="/auth/google/callback" element={<GoogleCallbackView />} /> */}
             
             {/* Rota Protegida - Upload */}
             <Route 

@@ -40,7 +40,7 @@ describe('AuthenticateWithSocialUseCase', () => {
 
     oauthProvider = {
       exchangeCodeForProfile: jest.fn(),
-      getProvider: jest.fn().mockReturnValue('GOOGLE'),
+      getProvider: jest.fn().mockReturnValue('GITHUB'),
     } as any;
 
     tokenService = {
@@ -59,14 +59,14 @@ describe('AuthenticateWithSocialUseCase', () => {
   describe('when user exists with linked social account', () => {
     it('should authenticate successfully', async () => {
       const socialProfile = {
-        id: 'google123',
-        email: 'user@gmail.com',
+        id: 'github123',
+        email: 'user@github.com',
         displayName: 'John Doe',
         avatarUrl: 'https://example.com/avatar.jpg',
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       };
 
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
       const phoneNumber = PhoneNumber.create('11987654321').getValue();
       const user = User.create({
@@ -78,8 +78,8 @@ describe('AuthenticateWithSocialUseCase', () => {
         updatedAt: new Date(),
       }).getValue();
 
-      const provider = SocialProvider.create('GOOGLE').getValue();
-      const providerId = SocialAccountId.create('google123').getValue();
+      const provider = SocialProvider.create('GITHUB').getValue();
+      const providerId = SocialAccountId.create('github123').getValue();
       const socialAccount = SocialAccount.create({
         userId: user.id,
         provider,
@@ -94,7 +94,7 @@ describe('AuthenticateWithSocialUseCase', () => {
       tokenService.generateToken.mockResolvedValue('access-token');
 
       const result = await useCase.execute({
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code-123',
       });
 
@@ -109,11 +109,11 @@ describe('AuthenticateWithSocialUseCase', () => {
   describe('when new user registers via social', () => {
     it('should create user and link social account', async () => {
       const socialProfile = {
-        id: 'google456',
-        email: 'newuser@gmail.com',
+        id: 'github456',
+        email: 'newuser@github.com',
         displayName: 'Jane Doe',
         avatarUrl: 'https://example.com/avatar2.jpg',
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
       };
 
       oauthProvider.exchangeCodeForProfile.mockResolvedValue(socialProfile);
@@ -122,7 +122,7 @@ describe('AuthenticateWithSocialUseCase', () => {
       tokenService.generateToken.mockResolvedValue('new-access-token');
 
       const result = await useCase.execute({
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'auth-code-456',
       });
 
@@ -137,12 +137,12 @@ describe('AuthenticateWithSocialUseCase', () => {
     it('should link social account to existing user', async () => {
       const socialProfile = {
         id: 'github789',
-        email: 'user@gmail.com',
+        email: 'user@github.com',
         displayName: 'John Doe',
         provider: 'GITHUB',
       };
 
-      const email = Email.create('user@gmail.com').getValue();
+      const email = Email.create('user@github.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
       const phoneNumber = PhoneNumber.create('11987654321').getValue();
       const existingUser = User.create({
@@ -188,7 +188,7 @@ describe('AuthenticateWithSocialUseCase', () => {
       );
 
       const result = await useCase.execute({
-        provider: 'GOOGLE',
+        provider: 'GITHUB',
         code: 'invalid-code',
       });
 
