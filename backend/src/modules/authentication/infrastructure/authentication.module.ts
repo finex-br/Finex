@@ -82,19 +82,19 @@ import { EnvService } from '../../../shared/infra/env';
     // },
     // {
     //   provide: 'FACEBOOK_OAUTH_PROVIDER',
-      useFactory: (envService: EnvService) => {
-        const httpClient = {
-          post: async (url: string, data: any) => axios.post(url, data),
-          get: async (url: string, config?: any) => axios.get(url, config),
-        };
-        return new FacebookOAuthProvider(
-          httpClient,
-          envService.get('FACEBOOK_CLIENT_ID') || '',
-          envService.get('FACEBOOK_CLIENT_SECRET') || '',
-        );
-      },
-      inject: [EnvService],
-    },
+    //   useFactory: (envService: EnvService) => {
+    //     const httpClient = {
+    //       post: async (url: string, data: any) => axios.post(url, data),
+    //       get: async (url: string, config?: any) => axios.get(url, config),
+    //     };
+    //     return new FacebookOAuthProvider(
+    //       httpClient,
+    //       envService.get('FACEBOOK_CLIENT_ID') || '',
+    //       envService.get('FACEBOOK_CLIENT_SECRET') || '',
+    //     );
+    //   },
+    //   inject: [EnvService],
+    // },
     OAuthProviderFactory,
     {
       provide: 'IUserRepository',
