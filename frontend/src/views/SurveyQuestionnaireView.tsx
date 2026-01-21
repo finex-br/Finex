@@ -27,6 +27,7 @@ export const SurveyQuestionnaireView = () => {
     loading,
     saving,
     error,
+    savedQuestionIds,
     updateAnswer,
     saveAnswers,
     nextPage,
@@ -148,6 +149,7 @@ export const SurveyQuestionnaireView = () => {
             questionNumber={startIndex + index + 1}
             value={answers[question.id]?.value}
             comment={answers[question.id]?.comment}
+            isSaved={savedQuestionIds.has(question.id)}
             onChange={(value, comment) => updateAnswer(question.id, value, comment)}
           />
         ))}

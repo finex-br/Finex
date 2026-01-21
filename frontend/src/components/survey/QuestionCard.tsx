@@ -11,6 +11,7 @@ interface QuestionCardProps {
   questionNumber: number;
   value?: any;
   comment?: string;
+  isSaved?: boolean;
   onChange: (value: any, comment?: string) => void;
 }
 
@@ -19,6 +20,7 @@ export const QuestionCard = ({
   questionNumber,
   value,
   comment,
+  isSaved = false,
   onChange,
 }: QuestionCardProps) => {
   const renderQuestion = () => {
@@ -78,7 +80,7 @@ export const QuestionCard = ({
       <CardHeader>
         <CardTitle className="text-lg">
           Pergunta {questionNumber}
-          {question.currentAnswer && (
+          {(question.currentAnswer || isSaved) && (
             <span className="ml-2 text-sm font-normal text-green-600">✓ Respondida</span>
           )}
         </CardTitle>

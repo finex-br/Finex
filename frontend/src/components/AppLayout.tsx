@@ -105,8 +105,18 @@ export function AppLayout({ children }: AppLayoutProps) {
     setIsMobileMenuOpen(false);
   };
 
-  const isActive = (path: string) =>
-    location.pathname === path || location.pathname.startsWith(`${path}/`);
+  const isActive = (path: string) => {
+    // Exact match
+    if (location.pathname === path) return true;
+    
+    // For /admin route, only match exactly to avoid highlighting both buttons
+    if (path === '/admin') {
+      return location.pathname === '/admin';
+    }
+    
+    // For other routes, match if pathname starts with path
+    return location.pathname.startsWith(`${path}/`);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">

@@ -26,7 +26,7 @@ export class SurveyMapper {
     const schema = new SurveySchema();
     schema.id = survey.id.toString();
     schema.title = survey.title;
-    schema.description = survey.description ?? null;
+    schema.description = survey.description ?? '';
     schema.isActive = survey.isActive;
     schema.createdAt = survey.createdAt;
     schema.updatedAt = survey.updatedAt;

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { surveyService } from '../services/surveyService';
 import type { Assessment, QuestionsPage, AnswerInput } from '../types/survey.types';
 
@@ -13,6 +13,9 @@ export const useSurveyAssessment = ({ assessmentId }: UseSurveyAssessmentProps) 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [savedQuestionIds, setSavedQuestionIds] = useState<Set<string>>(new Set());
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasPendingSave = useRef(false);
 
   // Carregar perguntas da página
   const loadQuestions = useCallback(async (page: number) => {
@@ -23,6 +26,9 @@ export const useSurveyAssessment = ({ assessmentId }: UseSurveyAssessmentProps) 
       setQuestionsPage(data);
       setCurrentPage(page);
 
+      // Limpar IDs salvos localmente (nova página = nova sincronização)
+      setSavedQuestionIds(new Set());
+      
       // Preencher respostas existentes
       const existingAnswers: Record<string, AnswerInput> = {};
       data.questions.forEach((q) => {
@@ -47,27 +53,36 @@ export const useSurveyAssessment = ({ assessmentId }: UseSurveyAssessmentProps) 
     loadQuestions(1);
   }, [loadQuestions]);
 
-  // Atualizar resposta
-  const updateAnswer = useCallback((questionId: string, value: any, comment?: string) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: { questionId, value, comment },
-    }));
+  // Cleanup do timeout ao desmontar
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, []);
 
-  // Salvar respostas (auto-save)
-  const saveAnswers = useCallback(async () => {
+  // Salvar respostas
+  const saveAnswers = useCallback(async (silent = false) => {
     if (Object.keys(answers).length === 0) return;
 
     setSaving(true);
-    setError(null);
+    if (!silent) setError(null);
+    
     try {
       const answersArray = Object.values(answers);
       const response = await surveyService.submitAnswers(assessmentId, {
         answers: answersArray,
       });
 
-      // Atualizar progresso
+      // Marcar questões como salvas localmente (feedback visual imediato)
+      setSavedQuestionIds((prev) => {
+        const newSet = new Set(prev);
+        answersArray.forEach((ans) => newSet.add(ans.questionId));
+        return newSet;
+      });
+
+      // Atualizar apenas o progresso (sem reload)
       if (questionsPage) {
         setQuestionsPage({
           ...questionsPage,
@@ -77,35 +92,96 @@ export const useSurveyAssessment = ({ assessmentId }: UseSurveyAssessmentProps) 
 
       return response;
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao salvar respostas');
+      if (!silent) {
+        setError(err.response?.data?.error || 'Erro ao salvar respostas');
+      }
       throw err;
     } finally {
       setSaving(false);
     }
   }, [assessmentId, answers, questionsPage]);
 
+  // Trigger para auto-save
+  const triggerAutoSave = useCallback(async () => {
+    if (Object.keys(answers).length > 0) {
+      try {
+        await saveAnswers(true); // silent save
+      } catch (err) {
+        console.error('Erro no auto-save:', err);
+      }
+    }
+  }, [answers, saveAnswers]);
+
+  // Atualizar resposta
+  const updateAnswer = useCallback((questionId: string, value: any, comment?: string) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: { questionId, value, comment },
+    }));
+    
+    // Marcar que há save pendente
+    hasPendingSave.current = true;
+    
+    // Auto-save após 1.5s de inatividade (não interfere na digitação)
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      hasPendingSave.current = false;
+      // Trigger save via effect
+      triggerAutoSave();
+    }, 1500);
+  }, [triggerAutoSave]);
+
   // Navegar para próxima página
   const nextPage = useCallback(async () => {
     if (!questionsPage || currentPage >= questionsPage.totalPages) return;
 
+    // Cancelar timeout pendente e salvar imediatamente
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    
     // Salvar respostas antes de navegar
-    await saveAnswers();
+    if (Object.keys(answers).length > 0) {
+      await saveAnswers();
+    }
+    
     await loadQuestions(currentPage + 1);
-  }, [questionsPage, currentPage, saveAnswers, loadQuestions]);
+  }, [questionsPage, currentPage, answers, saveAnswers, loadQuestions]);
 
   // Navegar para página anterior
   const previousPage = useCallback(async () => {
     if (currentPage <= 1) return;
 
+    // Cancelar timeout pendente e salvar imediatamente
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    
     // Salvar respostas antes de navegar
-    await saveAnswers();
+    if (Object.keys(answers).length > 0) {
+      await saveAnswers();
+    }
+    
     await loadQuestions(currentPage - 1);
-  }, [currentPage, saveAnswers, loadQuestions]);
+  }, [currentPage, answers, saveAnswers, loadQuestions]);
 
   // Completar assessment
   const completeAssessment = useCallback(async () => {
+    // Cancelar timeout pendente e salvar imediatamente
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    
     // Salvar respostas pendentes
-    await saveAnswers();
+    if (Object.keys(answers).length > 0) {
+      await saveAnswers();
+    }
 
     try {
       const response = await surveyService.completeAssessment(assessmentId);
@@ -114,7 +190,7 @@ export const useSurveyAssessment = ({ assessmentId }: UseSurveyAssessmentProps) 
       setError(err.response?.data?.error || 'Erro ao completar questionário');
       throw err;
     }
-  }, [assessmentId, saveAnswers]);
+  }, [assessmentId, answers, saveAnswers]);
 
   return {
     questionsPage,
@@ -123,6 +199,7 @@ export const useSurveyAssessment = ({ assessmentId }: UseSurveyAssessmentProps) 
     loading,
     saving,
     error,
+    savedQuestionIds,
     updateAnswer,
     saveAnswers,
     nextPage,

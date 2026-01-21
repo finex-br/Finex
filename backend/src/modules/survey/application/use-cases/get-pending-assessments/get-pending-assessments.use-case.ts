@@ -66,7 +66,7 @@ export class GetPendingAssessmentsUseCase {
           description: survey.description ?? '',
           hasStarted: !!assessment,
           progress: assessment?.finalScore,
-          assessmentId: assessment?.id.toString(),
+          assessmentId: assessment?.id.toString() ?? '',
         });
       }
     }
