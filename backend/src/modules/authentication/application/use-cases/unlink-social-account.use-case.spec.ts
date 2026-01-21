@@ -11,6 +11,17 @@ import { SocialAccountId } from '../../domain/value-objects/social-account-id';
 import { SocialAccount } from '../../domain/entities/social-account';
 
 describe('UnlinkSocialAccountUseCase', () => {
+  describe('OAuth Disabled', () => {
+    it('should fail when trying to unlink social account', () => {
+      const result = SocialProvider.create('FACEBOOK');
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
+    });
+  });
+
+  // NOTE: The following tests are kept for documentation purposes
+  // but will be skipped since OAuth is currently disabled
+  describe.skip('OAuth enabled tests (SKIPPED)', () => {
   let useCase: UnlinkSocialAccountUseCase;
   let userRepository: jest.Mocked<IUserRepository>;
   let socialAccountRepository: jest.Mocked<ISocialAccountRepository>;
@@ -175,5 +186,6 @@ describe('UnlinkSocialAccountUseCase', () => {
       expect(result.isFailure).toBe(true);
       expect(result.error).toContain('Invalid provider');
     });
+  });
   });
 });

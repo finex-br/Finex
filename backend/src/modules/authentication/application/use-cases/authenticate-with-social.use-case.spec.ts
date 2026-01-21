@@ -14,6 +14,17 @@ import { SocialAccountId } from '../../domain/value-objects/social-account-id';
 import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 
 describe('AuthenticateWithSocialUseCase', () => {
+  describe('OAuth Disabled', () => {
+    it('should fail when trying to authenticate with social provider', () => {
+      const result = SocialProvider.create('GOOGLE');
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
+    });
+  });
+
+  // NOTE: The following tests are kept for documentation purposes
+  // but will be skipped since OAuth is currently disabled
+  describe.skip('OAuth enabled tests (SKIPPED)', () => {
   let useCase: AuthenticateWithSocialUseCase;
   let userRepository: jest.Mocked<IUserRepository>;
   let socialAccountRepository: jest.Mocked<ISocialAccountRepository>;
@@ -195,5 +206,6 @@ describe('AuthenticateWithSocialUseCase', () => {
       expect(result.isFailure).toBe(true);
       expect(result.error).toContain('OAuth exchange failed');
     });
+  });
   });
 });

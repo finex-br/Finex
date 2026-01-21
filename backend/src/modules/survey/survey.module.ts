@@ -10,6 +10,8 @@ import { QuestionSchema } from './infrastructure/database/entities/question.sche
 import { AssessmentSchema } from './infrastructure/database/entities/assessment.schema';
 import { AnswerSchema } from './infrastructure/database/entities/answer.schema';
 import { UserSchema } from '../authentication/infrastructure/persistence/typeorm/entities/user.schema';
+import { CompanySchema } from '../../shared/infra/database/typeorm/entities/company.schema';
+import { CompanyMemberSchema } from '../../shared/infra/database/typeorm/entities/company-member.schema';
 
 // Repositories
 import { TypeORMSurveyRepository } from './infrastructure/database/repositories/typeorm-survey.repository';
@@ -17,14 +19,18 @@ import { TypeORMSurveyVersionRepository } from './infrastructure/database/reposi
 import { TypeORMQuestionRepository } from './infrastructure/database/repositories/typeorm-question.repository';
 import { TypeORMAssessmentRepository } from './infrastructure/database/repositories/typeorm-assessment.repository';
 import { TypeORMAnswerRepository } from './infrastructure/database/repositories/typeorm-answer.repository';
+import { CompanyRepository } from '../../shared/infra/database/typeorm/repositories/company.repository';
 import { ISurveyRepository } from './domain/repositories/survey.repository.interface';
 import { ISurveyVersionRepository } from './domain/repositories/survey-version.repository.interface';
 import { IQuestionRepository } from './domain/repositories/question.repository.interface';
 import { IAssessmentRepository } from './domain/repositories/assessment.repository.interface';
 import { IAnswerRepository } from './domain/repositories/answer.repository.interface';
+import { ICompanyRepository } from '../../shared/domain/repositories/company-repository.interface';
 
 // Use Cases
 import { CreateSurveyUseCase as AdminCreateSurveyUseCase } from './application/use-cases/admin/create-survey.use-case';
+import { GetAllSurveysUseCase } from './application/use-cases/admin/get-all-surveys.use-case';
+import { GetCompletedAssessmentsUseCase } from './application/use-cases/admin/get-completed-assessments.use-case';
 import { CreateSurveyVersionUseCase } from './application/use-cases/create-survey-version/create-survey-version.use-case';
 import { StartAssessmentUseCase } from './application/use-cases/start-assessment/start-assessment.use-case';
 import { GetQuestionsUseCase } from './application/use-cases/get-questions/get-questions.use-case';
@@ -46,6 +52,8 @@ import { UserSurveyController } from './presentation/controllers/user-survey.con
       AssessmentSchema,
       AnswerSchema,
       UserSchema,
+      CompanySchema,
+      CompanyMemberSchema,
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
@@ -76,6 +84,10 @@ import { UserSurveyController } from './presentation/controllers/user-survey.con
       provide: 'IAnswerRepository',
       useClass: TypeORMAnswerRepository,
     },
+    {
+      provide: 'ICompanyRepository',
+      useClass: CompanyRepository,
+    },
     
     // Use Cases
     {
@@ -87,6 +99,25 @@ import { UserSurveyController } from './presentation/controllers/user-survey.con
         return new AdminCreateSurveyUseCase(surveyRepo, versionRepo);
       },
       inject: ['ISurveyRepository', 'ISurveyVersionRepository'],
+    },
+    {
+      provide: GetAllSurveysUseCase,
+      useFactory: (surveyRepo: ISurveyRepository) => {
+        return new GetAllSurveysUseCase(surveyRepo);
+      },
+      inject: ['ISurveyRepository'],
+    },
+    {
+      provide: GetCompletedAssessmentsUseCase,
+      useFactory: (
+        assessmentRepo: IAssessmentRepository,
+        surveyRepo: ISurveyRepository,
+        versionRepo: ISurveyVersionRepository,
+        companyRepo: ICompanyRepository,
+      ) => {
+        return new GetCompletedAssessmentsUseCase(assessmentRepo, surveyRepo, versionRepo, companyRepo);
+      },
+      inject: ['IAssessmentRepository', 'ISurveyRepository', 'ISurveyVersionRepository', 'ICompanyRepository'],
     },
     {
       provide: CreateSurveyVersionUseCase,

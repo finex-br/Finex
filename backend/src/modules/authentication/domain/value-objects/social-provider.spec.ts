@@ -2,7 +2,39 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { SocialProvider } from './social-provider';
 
 describe('SocialProvider Value Object', () => {
-  describe('create', () => {
+  describe('OAuth Disabled', () => {
+    it('should fail to create any provider (GITHUB)', () => {
+      const result = SocialProvider.create('GITHUB');
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
+    });
+
+    it('should fail to create any provider (GOOGLE)', () => {
+      const result = SocialProvider.create('GOOGLE');
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
+    });
+
+    it('should fail to create any provider (FACEBOOK)', () => {
+      const result = SocialProvider.create('FACEBOOK');
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
+    });
+
+    it('should fail with any input when OAuth is disabled', () => {
+      const testCases = ['GITHUB', 'FACEBOOK', 'INVALID', '', null, undefined, '   '];
+      
+      testCases.forEach(testCase => {
+        const result = SocialProvider.create(testCase as any);
+        expect(result.isFailure).toBe(true);
+        expect(result.error).toContain('OAuth authentication is currently disabled');
+      });
+    });
+  });
+
+  // NOTE: The following tests are kept for documentation purposes
+  // but will be skipped since OAuth is currently disabled
+  describe.skip('create (OAuth enabled - SKIPPED)', () => {
     // DISABLED: Google OAuth tests
     // it('should create a valid GOOGLE provider', () => {
     //   const providerOrError = SocialProvider.create('GITHUB');
@@ -76,7 +108,8 @@ describe('SocialProvider Value Object', () => {
     });
   });
 
-  describe('helper methods', () => {
+  // NOTE: OAuth disabled - these helper tests are kept for documentation
+  describe.skip('helper methods (OAuth disabled)', () => {
     // DISABLED: Google OAuth tests
     // it('should identify GOOGLE provider with isGoogle()', () => {
     //   const provider = SocialProvider.create('GITHUB').getValue();
@@ -85,12 +118,11 @@ describe('SocialProvider Value Object', () => {
     //   expect(provider.isGitHub()).toBe(false);
     // });
 
-    it('should identify GITHUB provider with isGitHub()', () => {
-      const provider = SocialProvider.create('GITHUB').getValue();
+    it('should fail to create any provider (OAuth disabled)', () => {
+      const result = SocialProvider.create('GITHUB');
       
-      // DISABLED: isGoogle() method
-      // expect(provider.isGoogle()).toBe(false);
-      expect(provider.isGitHub()).toBe(true);
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
     });
   });
 });

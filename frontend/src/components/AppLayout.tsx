@@ -75,7 +75,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     ? [
         {
           id: 'admin',
-          label: 'Admin',
+          label: 'Questionários',
           icon: Shield,
           path: '/admin',
         },

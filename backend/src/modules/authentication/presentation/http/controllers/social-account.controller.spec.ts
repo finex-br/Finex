@@ -6,8 +6,19 @@ import { UnlinkSocialAccountUseCase } from '../../../application/use-cases/unlin
 import { LinkSocialRequestDto } from '../dtos/link-social-request.dto';
 import { UnlinkSocialRequestDto } from '../dtos/unlink-social-request.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { SocialProvider } from '../../../domain/value-objects/social-provider';
 
 describe('SocialAccountController', () => {
+  describe('OAuth Disabled', () => {
+    it('should fail when trying to create social provider', () => {
+      const result = SocialProvider.create('FACEBOOK');
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
+    });
+  });
+
+  // NOTE: OAuth disabled - these tests are kept for documentation
+  describe.skip('Controller tests (OAuth disabled)', () => {
   let controller: SocialAccountController;
   let linkSocialAccountUseCase: jest.Mocked<LinkSocialAccountUseCase>;
   let unlinkSocialAccountUseCase: jest.Mocked<UnlinkSocialAccountUseCase>;
@@ -219,5 +230,6 @@ describe('SocialAccountController', () => {
         controller.unlinkSocialAccount(mockRequest, dto),
       ).rejects.toThrow('Social account not found');
     });
+  });
   });
 });

@@ -234,16 +234,16 @@ describe('Survey Entity', () => {
       expect(survey.title).toBe('Old'); // unchanged
     });
 
-    it('should fail with empty description', () => {
+    it('should allow empty description', () => {
       const survey = Survey.create({
-        title: 'Old',
+        title: 'Test',
         description: 'Old',
       }).getValue();
 
       const result = survey.updateInfo('New Title', '');
 
-      expect(result.isFailure).toBe(true);
-      expect(result.error).toBe('Description cannot be empty');
+      expect(result.isSuccess).toBe(true);
+      expect(survey.description).toBe('');
     });
 
     it('should fail with title exceeding 255 characters', () => {

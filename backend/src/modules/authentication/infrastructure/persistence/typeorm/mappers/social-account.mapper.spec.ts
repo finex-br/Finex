@@ -8,6 +8,16 @@ import { Email } from '../../../../domain/value-objects/email';
 import { UniqueEntityID } from '../../../../../../shared/core/unique-entity-id';
 
 describe('SocialAccountMapper', () => {
+  describe('OAuth Disabled', () => {
+    it('should fail when trying to create social provider', () => {
+      const result = SocialProvider.create('GITHUB');
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
+    });
+  });
+
+  // NOTE: OAuth disabled - these tests are kept for documentation
+  describe.skip('Mapper tests (OAuth disabled)', () => {
   describe('toDomain', () => {
     it('should map schema to domain entity', () => {
       const schema: SocialAccountSchema = {
@@ -166,5 +176,6 @@ describe('SocialAccountMapper', () => {
         expect(schema.provider).toBe(providerName);
       });
     });
+  });
   });
 });

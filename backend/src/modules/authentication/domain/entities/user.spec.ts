@@ -249,7 +249,8 @@ describe('User Entity', () => {
     });
   });
 
-  describe('linkSocialAccount', () => {
+  // NOTE: OAuth disabled - these tests are kept for documentation
+  describe.skip('linkSocialAccount (OAuth disabled)', () => {
     it('should link a social account successfully', async () => {
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
@@ -361,8 +362,9 @@ describe('User Entity', () => {
       expect(user.socialAccounts).toHaveLength(2);
     });
   });
-
-  describe('unlinkSocialAccount', () => {
+  
+  // NOTE: OAuth disabled - these tests are kept for documentation
+  describe.skip('unlinkSocialAccount (OAuth disabled)', () => {
     it('should unlink a social account successfully', async () => {
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();
@@ -415,7 +417,8 @@ describe('User Entity', () => {
     });
   });
 
-  describe('hasSocialAccount', () => {
+  // NOTE: OAuth disabled - these tests are kept for documentation
+  describe.skip('hasSocialAccount (OAuth disabled)', () => {
     it('should return true when provider is linked', async () => {
       const email = Email.create('user@example.com').getValue();
       const password = (await Password.create('StrongPass123!')).getValue();

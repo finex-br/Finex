@@ -32,6 +32,32 @@ export interface QuestionResponse {
   createdAt: string;
 }
 
+export interface GetAllSurveysResponse {
+  surveys: Array<{
+    id: string;
+    title: string;
+    description: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+}
+
+export interface CompletedAssessment {
+  id: string;
+  companyId: string;
+  companyName: string;
+  surveyId: string;
+  surveyTitle: string;
+  progress: number;
+  completedAt: string;
+  status: string;
+}
+
+export interface GetCompletedAssessmentsResponse {
+  assessments: CompletedAssessment[];
+}
+
 class AdminSurveyService {
   /**
    * Create a new survey
@@ -54,6 +80,31 @@ class AdminSurveyService {
     const response = await api.post<QuestionResponse>(
       `/admin/surveys/versions/${surveyVersionId}/questions`,
       data
+    );
+    return response.data;
+  }
+
+  /**
+   * Get all surveys
+   */
+  async getAllSurveys(): Promise<GetAllSurveysResponse> {
+    const response = await api.get<GetAllSurveysResponse>('/admin/surveys');
+    return response.data;
+  }
+
+  /**
+   * Get completed assessments with filters
+   */
+  async getCompletedAssessments(filters?: {
+    companyId?: string;
+    surveyId?: string;
+  }): Promise<GetCompletedAssessmentsResponse> {
+    const params = new URLSearchParams();
+    if (filters?.companyId) params.append('companyId', filters.companyId);
+    if (filters?.surveyId) params.append('surveyId', filters.surveyId);
+
+    const response = await api.get<GetCompletedAssessmentsResponse>(
+      `/admin/surveys/assessments/completed?${params.toString()}`
     );
     return response.data;
   }

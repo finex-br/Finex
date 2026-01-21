@@ -1,9 +1,11 @@
 import { Controller, Post, Body, Get, Patch, Param, Query, UseGuards, Inject } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../authentication/presentation/http/guards/jwt-auth.guard';
 import { AdminGuard } from '../../../authentication/presentation/http/guards/admin.guard';
 import { CreateSurveyDto } from '../dtos/create-survey.dto';
 import { CreateSurveyUseCase } from '../../application/use-cases/admin/create-survey.use-case';
+import { GetAllSurveysUseCase } from '../../application/use-cases/admin/get-all-surveys.use-case';
+import { GetCompletedAssessmentsUseCase } from '../../application/use-cases/admin/get-completed-assessments.use-case';
 import { CreateSurveyVersionUseCase } from '../../application/use-cases/create-survey-version/create-survey-version.use-case';
 import { AddQuestionUseCase } from '../../application/use-cases/admin/add-question.use-case';
 import { CreateSurveyVersionDto } from '../dto/create-survey-version.dto';
@@ -17,6 +19,8 @@ export class AdminSurveyController {
   constructor(
     @Inject('AdminCreateSurveyUseCase')
     private readonly createSurveyUseCase: CreateSurveyUseCase,
+    private readonly getAllSurveysUseCase: GetAllSurveysUseCase,
+    private readonly getCompletedAssessmentsUseCase: GetCompletedAssessmentsUseCase,
     private readonly createSurveyVersionUseCase: CreateSurveyVersionUseCase,
     private readonly addQuestionUseCase: AddQuestionUseCase,
   ) {}
@@ -66,8 +70,33 @@ export class AdminSurveyController {
   @Get()
   @ApiOperation({ summary: 'Get all surveys' })
   async getAllSurveys() {
-    // TODO: Implement GetAllSurveysUseCase
-    throw new Error('Not implemented yet');
+    const result = await this.getAllSurveysUseCase.execute();
+
+    if (result.isFailure) {
+      throw new Error(result.error);
+    }
+
+    return result.getValue();
+  }
+
+  @Get('assessments/completed')
+  @ApiOperation({ summary: 'Get completed assessments with filters' })
+  @ApiQuery({ name: 'companyId', required: false })
+  @ApiQuery({ name: 'surveyId', required: false })
+  async getCompletedAssessments(
+    @Query('companyId') companyId?: string,
+    @Query('surveyId') surveyId?: string,
+  ) {
+    const result = await this.getCompletedAssessmentsUseCase.execute({
+      companyId,
+      surveyId,
+    });
+
+    if (result.isFailure) {
+      throw new Error(result.error);
+    }
+
+    return result.getValue();
   }
 
   @Get(':id')

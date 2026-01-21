@@ -6,6 +6,16 @@ import { OAuthCallbackDto } from '../dtos/oauth-callback.dto';
 import { SocialProvider } from '../../../domain/value-objects/social-provider';
 
 describe('OAuthController', () => {
+  describe('OAuth Disabled', () => {
+    it('should fail when trying to create social provider', () => {
+      const result = SocialProvider.create('GITHUB');
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
+    });
+  });
+
+  // NOTE: OAuth disabled - these tests are kept for documentation
+  describe.skip('Controller tests (OAuth disabled)', () => {
   let controller: OAuthController;
   let authenticateWithSocialUseCase: jest.Mocked<AuthenticateWithSocialUseCase>;
 
@@ -163,5 +173,6 @@ describe('OAuthController', () => {
         controller.callback('GITHUB', callbackDto),
       ).rejects.toThrow('Invalid authorization code');
     });
+  });
   });
 });

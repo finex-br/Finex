@@ -3,18 +3,20 @@ import { AppLayout } from '../components/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { CreateSurveyForm } from '../components/admin/CreateSurveyForm';
-import { PlusCircle } from 'lucide-react';
+import { SurveysList } from '../components/admin/SurveysList';
+import { CompletedAssessmentsList } from '../components/admin/CompletedAssessmentsList';
+import { PlusCircle, FileText, CheckSquare } from 'lucide-react';
 
 /**
  * AdminPanelView
  * 
- * Painel de administração para gerenciar questionários.
+ * Central de administração de questionários.
  * Apenas usuários com role ADMIN podem acessar.
  * 
  * Abas:
  * - Criar Questionário: Formulário para criar novo questionário com perguntas
- * - Listar Questionários: (TODO) Lista de todos os questionários criados
- * - Configurações: (TODO) Configurações gerais do sistema
+ * - Questionários Criados: Lista de todos os questionários criados
+ * - Questionários Respondidos: Lista de respostas com filtros por empresa e questionário
  */
 export function AdminPanelView() {
   const [activeTab, setActiveTab] = useState('create-survey');
@@ -26,10 +28,10 @@ export function AdminPanelView() {
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Painel de Administração
+              Gerenciamento de Questionários
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mt-2">
-              Gerencie questionários e configurações do sistema
+              Crie, visualize e gerencie questionários e suas respostas
             </p>
           </div>
 
@@ -38,16 +40,18 @@ export function AdminPanelView() {
             <TabsList className="grid w-full grid-cols-3 lg:w-auto">
               <TabsTrigger value="create-survey" className="flex items-center gap-2">
                 <PlusCircle className="w-4 h-4" />
-                <span className="hidden sm:inline">Criar Questionário</span>
+                <span className="hidden sm:inline">Criar</span>
                 <span className="sm:hidden">Criar</span>
               </TabsTrigger>
-              <TabsTrigger value="list-surveys">
-                <span className="hidden sm:inline">Listar Questionários</span>
-                <span className="sm:hidden">Listar</span>
+              <TabsTrigger value="list-surveys" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                <span className="hidden sm:inline">Questionários</span>
+                <span className="sm:hidden">Lista</span>
               </TabsTrigger>
-              <TabsTrigger value="settings">
-                <span className="hidden sm:inline">Configurações</span>
-                <span className="sm:hidden">Config</span>
+              <TabsTrigger value="responses" className="flex items-center gap-2">
+                <CheckSquare className="w-4 h-4" />
+                <span className="hidden sm:inline">Respostas</span>
+                <span className="sm:hidden">Resp</span>
               </TabsTrigger>
             </TabsList>
 
@@ -76,26 +80,22 @@ export function AdminPanelView() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12 text-slate-500">
-                    Funcionalidade em desenvolvimento...
-                  </div>
+                  <SurveysList />
                 </CardContent>
               </Card>
             </TabsContent>
 
             {/* Tab: Settings */}
-            <TabsContent value="settings" className="space-y-0">
+            <TabsContent value="responses" className="space-y-0">
               <Card>
                 <CardHeader>
-                  <CardTitle>Configurações do Sistema</CardTitle>
+                  <CardTitle>Questionários Respondidos</CardTitle>
                   <CardDescription>
-                    Configure parâmetros gerais e integrações
+                    Visualize e filtre as respostas dos questionários por empresa e questionário
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12 text-slate-500">
-                    Funcionalidade em desenvolvimento...
-                  </div>
+                  <CompletedAssessmentsList />
                 </CardContent>
               </Card>
             </TabsContent>

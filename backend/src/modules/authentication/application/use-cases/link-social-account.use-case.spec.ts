@@ -13,6 +13,17 @@ import { SocialAccount } from '../../domain/entities/social-account';
 import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 
 describe('LinkSocialAccountUseCase', () => {
+  describe('OAuth Disabled', () => {
+    it('should fail when trying to link social account', () => {
+      const result = SocialProvider.create('GITHUB');
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('OAuth authentication is currently disabled');
+    });
+  });
+
+  // NOTE: The following tests are kept for documentation purposes
+  // but will be skipped since OAuth is currently disabled
+  describe.skip('OAuth enabled tests (SKIPPED)', () => {
   let useCase: LinkSocialAccountUseCase;
   let userRepository: jest.Mocked<IUserRepository>;
   let socialAccountRepository: jest.Mocked<ISocialAccountRepository>;
@@ -244,5 +255,6 @@ describe('LinkSocialAccountUseCase', () => {
       expect(result.isFailure).toBe(true);
       expect(result.error).toContain('Invalid provider');
     });
+  });
   });
 });

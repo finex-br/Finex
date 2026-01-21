@@ -6,7 +6,28 @@ import { Email } from '../value-objects/email';
 import { UniqueEntityID } from '../../../../shared/core/unique-entity-id';
 
 describe('SocialAccount Entity', () => {
-  describe('create', () => {
+  describe('OAuth Disabled', () => {
+    it('should fail to create social account when OAuth is disabled', () => {
+      const providerResult = SocialProvider.create('GITHUB');
+      
+      expect(providerResult.isFailure).toBe(true);
+      expect(providerResult.error).toContain('OAuth authentication is currently disabled');
+    });
+
+    it('should fail with any provider when OAuth is disabled', () => {
+      const providers = ['GOOGLE', 'GITHUB', 'FACEBOOK'];
+      
+      providers.forEach(providerName => {
+        const result = SocialProvider.create(providerName);
+        expect(result.isFailure).toBe(true);
+        expect(result.error).toContain('OAuth authentication is currently disabled');
+      });
+    });
+  });
+
+  // NOTE: The following tests are kept for documentation purposes
+  // but will be skipped since OAuth is currently disabled
+  describe.skip('create (OAuth enabled - SKIPPED)', () => {
     it('should create a valid social account', () => {
       const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123456789').getValue();
@@ -171,7 +192,8 @@ describe('SocialAccount Entity', () => {
     });
   });
 
-  describe('methods', () => {
+  // NOTE: OAuth disabled - these method tests are kept for documentation
+  describe.skip('methods (OAuth disabled)', () => {
     it('should update avatar url', () => {
       const provider = SocialProvider.create('GITHUB').getValue();
       const providerId = SocialAccountId.create('123').getValue();
