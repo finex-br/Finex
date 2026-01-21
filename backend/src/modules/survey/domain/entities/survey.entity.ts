@@ -67,13 +67,9 @@ export class Survey extends Entity<SurveyProps> {
     return Result.ok<void>();
   }
 
-  public updateInfo(title: string, description: string): Result<void> {
+  public updateInfo(title: string, description?: string): Result<void> {
     if (!title || title.trim().length === 0) {
       return Result.fail<void>('Title cannot be empty');
-    }
-
-    if (!description || description.trim().length === 0) {
-      return Result.fail<void>('Description cannot be empty');
     }
 
     if (title.trim().length > 255) {
@@ -81,7 +77,7 @@ export class Survey extends Entity<SurveyProps> {
     }
 
     this.props.title = title.trim();
-    this.props.description = description.trim();
+    this.props.description = description?.trim();
     this.props.updatedAt = new Date();
     return Result.ok<void>();
   }

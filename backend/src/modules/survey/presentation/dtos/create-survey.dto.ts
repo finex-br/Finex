@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSurveyDto {
@@ -8,8 +8,8 @@ export class CreateSurveyDto {
   @MaxLength(255)
   title: string;
 
-  @ApiProperty({ example: 'Questionário completo de diagnóstico empresarial' })
+  @ApiProperty({ example: 'Questionário completo de diagnóstico empresarial', required: false })
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsOptional()
+  description?: string;
 }
