@@ -96,10 +96,11 @@ export const SurveyQuestionnaireView = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl">
-      {/* Header */}
-      <div className="mb-6">
-        <Button
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-6">
+            <Button
           variant="ghost"
           onClick={() => navigate('/surveys')}
           className="mb-4"
@@ -215,6 +216,7 @@ export const SurveyQuestionnaireView = () => {
           </div>
         </div>
       )}
+        </div>
       </div>
     </AppLayout>
   );
