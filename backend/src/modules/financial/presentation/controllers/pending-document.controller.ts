@@ -226,6 +226,7 @@ export class PendingDocumentController {
   async getPendingDocuments(
     @Request() req: any,
     @Query('status') status?: string,
+    @Query('companyId') companyIdQuery?: string,
     @Headers('x-company-id') xCompanyId?: string,
   ) {
     try {
@@ -234,7 +235,10 @@ export class PendingDocumentController {
       // ADMIN do sistema: pode listar documentos de qualquer empresa
       if (isAdmin) {
         const all = await this.pendingDocumentRepository.findAll();
-        let filtered = companyId ? all.filter((d) => d.companyId === companyId) : all;
+        const normalizedCompanyIdQuery = String(companyIdQuery || '').trim();
+        let filtered = normalizedCompanyIdQuery
+          ? all.filter((d) => d.companyId === normalizedCompanyIdQuery)
+          : all;
 
         if (status) {
           const statusResult = DocumentStatus.create(status as any);
@@ -242,7 +246,7 @@ export class PendingDocumentController {
             throw new HttpException(statusResult.error || 'Status inválido', HttpStatus.BAD_REQUEST);
           }
           const wanted = statusResult.getValue().value;
-          filtered = all.filter((d) => d.status.value === wanted);
+          filtered = filtered.filter((d) => d.status.value === wanted);
         }
 
         return {
