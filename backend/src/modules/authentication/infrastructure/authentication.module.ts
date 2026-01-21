@@ -41,7 +41,7 @@ import { EnvService } from '../../../shared/infra/env';
       }),
     }),
   ],
-  controllers: [AuthController, OAuthController, SocialAccountController],
+  controllers: [AuthController], // OAuth controllers disabled
   providers: [
     UserRepository,
     SocialAccountRepository,

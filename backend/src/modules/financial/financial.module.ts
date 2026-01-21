@@ -17,6 +17,7 @@ import { TypeORMFinancialRepository } from './infrastructure/persistence/typeorm
 import { TypeORMFinancialUploadRepository } from './infrastructure/persistence/typeorm/typeorm-financial-upload.repository';
 import { FinancialUploadSchema } from './infrastructure/persistence/typeorm/financial-upload.schema';
 import { FinancialDataSchema } from './infrastructure/persistence/typeorm/financial-data.schema';
+import { UserSchema } from '../authentication/infrastructure/persistence/typeorm/entities/user.schema';
 import { EnvService } from '../../shared/infra/env/env.service';
 
 /**
@@ -44,6 +45,7 @@ import { EnvService } from '../../shared/infra/env/env.service';
     TypeOrmModule.forFeature([
       FinancialDataSchema,
       FinancialUploadSchema, // Usando tabela existente financial_uploads
+      UserSchema, // Necessário para JwtAuthGuard
     ]),
   ],
   controllers: [

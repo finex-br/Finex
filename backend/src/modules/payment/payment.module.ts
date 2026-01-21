@@ -9,10 +9,11 @@ import { CreateCheckoutUseCase } from './application/use-cases/create-checkout.u
 import { PaymentController } from './presentation/payment.controller';
 import { AsaasWebhookController } from './presentation/asaas-webhook.controller';
 import { JwtAuthGuard } from '../authentication/presentation/http/guards/jwt-auth.guard';
+import { UserSchema } from '../authentication/infrastructure/persistence/typeorm/entities/user.schema';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CheckoutSchema]),
+    TypeOrmModule.forFeature([CheckoutSchema, UserSchema]),
     ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

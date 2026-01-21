@@ -9,6 +9,7 @@ import { SurveyVersionSchema } from './infrastructure/database/entities/survey-v
 import { QuestionSchema } from './infrastructure/database/entities/question.schema';
 import { AssessmentSchema } from './infrastructure/database/entities/assessment.schema';
 import { AnswerSchema } from './infrastructure/database/entities/answer.schema';
+import { UserSchema } from '../authentication/infrastructure/persistence/typeorm/entities/user.schema';
 
 // Repositories
 import { TypeORMSurveyRepository } from './infrastructure/database/repositories/typeorm-survey.repository';
@@ -44,6 +45,7 @@ import { UserSurveyController } from './presentation/controllers/user-survey.con
       QuestionSchema,
       AssessmentSchema,
       AnswerSchema,
+      UserSchema,
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
