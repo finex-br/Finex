@@ -10,12 +10,16 @@ import {
   Menu,
   X,
   FileText,
-  Shield
+  Shield,
+  Moon,
+  Sun,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -36,6 +40,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { user, clearAuth } = useAuthStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const isSystemAdmin = user?.role === 'ADMIN';
 
@@ -142,35 +147,39 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Sidebar Desktop */}
       <aside
         className={cn(
-          'hidden lg:flex fixed left-0 top-0 h-screen bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col transition-all duration-300 z-40',
+          'hidden lg:flex fixed left-0 top-0 h-screen border-r flex-col transition-all duration-300 z-40',
           isCollapsed ? 'w-20' : 'w-64'
         )}
+        style={{ 
+          backgroundColor: theme === 'dark' ? '#0b0b14' : '#fafafa',
+          borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb'
+        }}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="h-16 flex items-center justify-between px-4 border-b" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
           {!isCollapsed && (
-            <h1 className="text-2xl font-bold text-orange-600">FinEx</h1>
+            <h1 className="text-2xl font-bold" style={{ color: '#ff6600' }}>FinEx</h1>
           )}
           {isCollapsed && (
-            <span className="text-2xl font-bold text-orange-600 mx-auto">F</span>
+            <span className="text-2xl font-bold mx-auto" style={{ color: '#ff6600' }}>F</span>
           )}
         </div>
 
         {/* User Info */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="p-4 border-b" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center flex-shrink-0">
-              <span className="text-orange-600 dark:text-orange-400 font-semibold text-lg">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#ff6600' }}>
+              <span className="font-semibold text-lg" style={{ color: '#ffffff' }}>
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </span>
             </div>
             {!isCollapsed && (
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                  {user?.name || 'Usuário'}
+                <p className="text-sm font-bold truncate" style={{ color: theme === 'dark' ? '#ffffff' : '#0e172a' }}>
+                  Singular Tech
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  {user?.email || 'email@example.com'}
+                <p className="text-xs truncate" style={{ color: '#77849a' }}>
+                  {user?.name || 'Usuário'}
                 </p>
               </div>
             )}
@@ -180,8 +189,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {!isCollapsed && (
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-3">
-              Menu
+            <p className="text-xs font-semibold uppercase tracking-wider mb-3 px-3" style={{ color: '#77849a' }}>
+              Módulos
             </p>
           )}
           {menuItems.map((item) => {
@@ -193,12 +202,25 @@ export function AppLayout({ children }: AppLayoutProps) {
                 key={item.id}
                 onClick={() => handleNavigation(item.path)}
                 className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-                  'hover:bg-slate-100 dark:hover:bg-slate-700',
-                  active && 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-medium',
-                  !active && 'text-slate-700 dark:text-slate-300',
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group',
+                  active && 'border-l-2 font-medium',
                   isCollapsed && 'justify-center'
                 )}
+                style={{
+                  color: active ? '#f96403' : '#77849a',
+                  borderColor: active ? '#f96403' : 'transparent',
+                  backgroundColor: active ? (theme === 'dark' ? '#211315' : '#fff3ed') : 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 {!isCollapsed && <span>{item.label}</span>}
@@ -210,7 +232,13 @@ export function AppLayout({ children }: AppLayoutProps) {
           {isAdmin && adminMenuItems.length > 0 && (
             <>
               {!isCollapsed && (
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-3 mt-6">
+                <div className="mt-6 mb-3 px-3">
+                  <div className="border-t" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}></div>
+                </div>
+              )}
+              {isCollapsed && <div className="my-3"></div>}
+              {!isCollapsed && (
+                <p className="text-xs font-semibold uppercase tracking-wider mb-3 px-3" style={{ color: '#77849a' }}>
                   Administração
                 </p>
               )}
@@ -224,11 +252,24 @@ export function AppLayout({ children }: AppLayoutProps) {
                     onClick={() => handleNavigation(item.path)}
                     className={cn(
                       'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-                      'hover:bg-slate-100 dark:hover:bg-slate-700',
-                      active && 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-medium',
-                      !active && 'text-slate-700 dark:text-slate-300',
+                      active && 'border-l-2 font-medium',
                       isCollapsed && 'justify-center'
                     )}
+                    style={{
+                      color: active ? '#f96403' : '#77849a',
+                      borderColor: active ? '#f96403' : 'transparent',
+                      backgroundColor: active ? (theme === 'dark' ? '#211315' : '#fff3ed') : 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     {!isCollapsed && <span>{item.label}</span>}
@@ -240,22 +281,64 @@ export function AppLayout({ children }: AppLayoutProps) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-700 space-y-2">
-          <div className={cn('flex items-center', isCollapsed ? 'justify-center' : 'gap-2')}>
-            {!isCollapsed && <span className="text-sm text-slate-600 dark:text-slate-400">Tema</span>}
-            <ThemeToggle />
-          </div>
+        <div className="p-3 border-t space-y-1" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className={cn(
+              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
+              isCollapsed && 'justify-center'
+            )}
+            style={{ color: '#77849a' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            {theme === "dark" ? (
+              <Sun className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <Moon className="w-5 h-5 flex-shrink-0" />
+            )}
+            {!isCollapsed && <span>{theme === "dark" ? "Modo Claro" : "Modo Escuro"}</span>}
+          </button>
+
+          <button
+            className={cn(
+              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
+              isCollapsed && 'justify-center'
+            )}
+            style={{ color: '#77849a' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <Bell className="w-5 h-5 flex-shrink-0" />
+            {!isCollapsed && (
+              <>
+                <span>Notificações</span>
+                <span className="ml-auto text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ff6600', color: '#ffffff' }}>
+                  3
+                </span>
+              </>
+            )}
+          </button>
           
           <Button
             variant="ghost"
             onClick={handleLogout}
             className={cn(
-              'w-full text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950',
-              isCollapsed && 'px-0'
+              'w-full hover:bg-red-500/10 flex items-center gap-3 px-3 py-2.5',
+              isCollapsed && 'justify-center px-0'
             )}
+            style={{ color: '#ee6d70' }}
           >
-            <LogOut className="w-5 h-5" />
-            {!isCollapsed && <span className="ml-3">Sair</span>}
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            {!isCollapsed && <span>Sair</span>}
           </Button>
 
           {/* Collapse Button */}
@@ -264,6 +347,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             size="icon"
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="w-full"
+            style={{ color: '#77849a' }}
           >
             {isCollapsed ? (
               <ChevronRight className="w-5 h-5" />
@@ -288,24 +372,28 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Mobile Sidebar */}
       <aside
         className={cn(
-          'lg:hidden fixed left-0 top-16 bottom-0 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-transform duration-300 z-40',
+          'lg:hidden fixed left-0 top-16 bottom-0 w-64 border-r flex flex-col transition-transform duration-300 z-40',
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
+        style={{ 
+          backgroundColor: theme === 'dark' ? '#0b0b14' : '#fafafa',
+          borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb'
+        }}
       >
         {/* User Info */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="p-4 border-b" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
-              <span className="text-orange-600 dark:text-orange-400 font-semibold text-lg">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#ff6600' }}>
+              <span className="font-semibold text-lg" style={{ color: '#ffffff' }}>
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                {user?.name || 'Usuário'}
+              <p className="text-sm font-bold truncate" style={{ color: theme === 'dark' ? '#ffffff' : '#0e172a' }}>
+                Singular Tech
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                {user?.email || 'email@example.com'}
+              <p className="text-xs truncate" style={{ color: '#77849a' }}>
+                {user?.name || 'Usuário'}
               </p>
             </div>
           </div>
@@ -313,8 +401,8 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-3">
-            Menu
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3 px-3" style={{ color: '#77849a' }}>
+            Módulos
           </p>
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -324,12 +412,23 @@ export function AppLayout({ children }: AppLayoutProps) {
               <button
                 key={item.id}
                 onClick={() => handleNavigation(item.path)}
-                className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-                  'hover:bg-slate-100 dark:hover:bg-slate-700',
-                  active && 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-medium',
-                  !active && 'text-slate-700 dark:text-slate-300'
-                )}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-2"
+                style={{
+                  color: active ? '#f96403' : '#77849a',
+                  borderColor: active ? '#f96403' : 'transparent',
+                  backgroundColor: active ? (theme === 'dark' ? '#211315' : '#fff3ed') : 'transparent',
+                  fontWeight: active ? '500' : '400'
+                }}
+                onMouseEnter={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
               >
                 <Icon className="w-5 h-5" />
                 <span>{item.label}</span>
@@ -340,7 +439,10 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Admin Section - Only for ADMIN role */}
           {isAdmin && adminMenuItems.length > 0 && (
             <>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-3 mt-6">
+              <div className="mt-6 mb-3 px-3">
+                <div className="border-t" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}></div>
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-3 px-3" style={{ color: '#77849a' }}>
                 Administração
               </p>
               {adminMenuItems.map((item) => {
@@ -351,12 +453,23 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <button
                     key={item.id}
                     onClick={() => handleNavigation(item.path)}
-                    className={cn(
-                      'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-                      'hover:bg-slate-100 dark:hover:bg-slate-700',
-                      active && 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-medium',
-                      !active && 'text-slate-700 dark:text-slate-300'
-                    )}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-2"
+                    style={{
+                      color: active ? '#f96403' : '#77849a',
+                      borderColor: active ? '#f96403' : 'transparent',
+                      backgroundColor: active ? (theme === 'dark' ? '#211315' : '#fff3ed') : 'transparent',
+                      fontWeight: active ? '500' : '400'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
                   >
                     <Icon className="w-5 h-5" />
                     <span>{item.label}</span>
@@ -367,12 +480,49 @@ export function AppLayout({ children }: AppLayoutProps) {
           )}
         </nav>
 
-        {/* Logout Button */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-700">
+        {/* Bottom Buttons */}
+        <div className="p-3 border-t space-y-1" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
+            style={{ color: '#77849a' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            {theme === "dark" ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+            <span>{theme === "dark" ? "Modo Claro" : "Modo Escuro"}</span>
+          </button>
+
+          <button
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
+            style={{ color: '#77849a' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <Bell className="w-5 h-5" />
+            <span>Notificações</span>
+            <span className="ml-auto text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ff6600', color: '#ffffff' }}>
+              3
+            </span>
+          </button>
+
           <Button
             variant="ghost"
             onClick={handleLogout}
-            className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+            className="w-full justify-start hover:bg-red-500/10 px-3 py-2.5"
+            style={{ color: '#ee6d70' }}
           >
             <LogOut className="w-5 h-5 mr-3" />
             Sair
