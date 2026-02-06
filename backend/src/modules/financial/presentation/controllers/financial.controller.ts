@@ -16,6 +16,7 @@ import { DataSource } from 'typeorm';
 import { JwtAuthGuard } from '../../../authentication/presentation/http/guards/jwt-auth.guard';
 import { ProcessExcelUseCase } from '../../application/use-cases/process-excel.use-case';
 import { GetFinancialDataUseCase } from '../../application/use-cases/get-financial-data.use-case';
+import { GetVendingMachineMetricsUseCase } from '../../application/use-cases/get-vending-machine-metrics.use-case';
 import { PeriodType } from '../../application/dtos/financial.dto';
 import { resolveCompanyContext } from '../../../../shared/tenant/company-context';
 
@@ -33,6 +34,7 @@ export class FinancialController {
   constructor(
     private readonly processExcelUseCase: ProcessExcelUseCase,
     private readonly getFinancialDataUseCase: GetFinancialDataUseCase,
+    private readonly getVendingMachineMetricsUseCase: GetVendingMachineMetricsUseCase,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -162,6 +164,67 @@ export class FinancialController {
       console.error('[FinancialController] Erro ao buscar dados:', error);
       throw new HttpException(
         error.message || 'Erro ao buscar dados financeiros',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * GET /financial/vending-metrics?startDate=2024-01-01&endDate=2024-12-31
+   * 
+   * Busca métricas operacionais de máquinas de vending (café):
+   * - Sales Volume by Machine (total vendas por dispositivo)
+   * - Product Mix Performance (performance por blend: qCafe1, qCafe2, qCafe3)
+   * - Hardware Health Status (nivelGalao por máquina)
+   * - Average Ticket Trend (ticket médio ao longo do tempo)
+   * 
+   * Query Params:
+   * - startDate: YYYY-MM-DD (opcional)
+   * - endDate: YYYY-MM-DD (opcional)
+   * 
+   * @param req - Request com user autenticado (JWT)
+   * @param startDate - Data inicial (opcional)
+   * @param endDate - Data final (opcional)
+   */
+  @Get('vending-metrics')
+  @UseGuards(JwtAuthGuard)
+  async getVendingMachineMetrics(
+    @Request() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Headers('x-company-id') xCompanyId?: string,
+  ) {
+    try {
+      console.log('[FinancialController] GET /financial/vending-metrics chamado:', { startDate, endDate });
+      
+      const { userId, companyId } = await this.resolveCompanyId(req, xCompanyId);
+
+      console.log('[FinancialController] CompanyId:', companyId, 'UserId:', userId);
+
+      // Converter datas de string para Date (se fornecidas)
+      const parsedStartDate = startDate ? new Date(startDate as string) : undefined;
+      const parsedEndDate = endDate ? new Date(endDate as string) : undefined;
+
+      // Executar Use Case
+      const result = await this.getVendingMachineMetricsUseCase.execute({
+        companyId,
+        userId,
+        startDate: parsedStartDate,
+        endDate: parsedEndDate,
+      });
+
+      console.log('[FinancialController] Métricas retornadas:', {
+        totalMachines: result.summary.totalMachines,
+        totalSales: result.summary.totalSales,
+        healthyMachines: result.summary.healthyMachines,
+        criticalMachines: result.summary.criticalMachines,
+      });
+
+      return result;
+    } catch (error) {
+      console.error('[FinancialController] Erro ao buscar métricas de vending:', error);
+      throw new HttpException(
+        error.message || 'Erro ao buscar métricas de máquinas de vending',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

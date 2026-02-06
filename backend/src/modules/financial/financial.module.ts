@@ -11,6 +11,7 @@ import { MapDocumentColumnsUseCase } from './application/use-cases/map-document-
 import { ValidateDocumentUseCase } from './application/use-cases/validate-document.use-case';
 import { ApproveDocumentUseCase } from './application/use-cases/approve-document.use-case';
 import { GetPendingDocumentsUseCase } from './application/use-cases/get-pending-documents.use-case';
+import { GetVendingMachineMetricsUseCase } from './application/use-cases/get-vending-machine-metrics.use-case';
 import { ExcelProcessorAdapter } from './infrastructure/adapters/excel-processor.adapter';
 import { ExcelAnalyzerAdapter } from './infrastructure/adapters/excel-analyzer.adapter';
 import { TypeORMFinancialRepository } from './infrastructure/persistence/typeorm/typeorm-financial.repository';
@@ -85,6 +86,13 @@ import { EnvService } from '../../shared/infra/env/env.service';
       provide: GetFinancialDataUseCase,
       useFactory: (repository) => {
         return new GetFinancialDataUseCase(repository);
+      },
+      inject: ['IFinancialRepository'],
+    },
+    {
+      provide: GetVendingMachineMetricsUseCase,
+      useFactory: (repository) => {
+        return new GetVendingMachineMetricsUseCase(repository);
       },
       inject: ['IFinancialRepository'],
     },

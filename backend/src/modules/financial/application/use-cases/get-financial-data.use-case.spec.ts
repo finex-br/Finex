@@ -25,6 +25,10 @@ describe('GetFinancialDataUseCase', () => {
       getTrendData: jest.fn(),
       getDateRange: jest.fn(),
       countAll: jest.fn(),
+      getSalesVolumeByMachine: jest.fn(),
+      getProductMixPerformance: jest.fn(),
+      getHardwareHealthStatus: jest.fn(),
+      getAverageTicketTrend: jest.fn(),
     } as jest.Mocked<IFinancialRepository>;
 
     // Mock padrão do getDateRange para todos os testes
