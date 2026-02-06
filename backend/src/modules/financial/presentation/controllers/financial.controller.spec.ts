@@ -6,6 +6,7 @@ import { DataSource } from 'typeorm';
 import { FinancialController } from './financial.controller';
 import { ProcessExcelUseCase } from '../../application/use-cases/process-excel.use-case';
 import { GetFinancialDataUseCase } from '../../application/use-cases/get-financial-data.use-case';
+import { GetVendingMachineMetricsUseCase } from '../../application/use-cases/get-vending-machine-metrics.use-case';
 import { PeriodType } from '../../application/dtos/financial.dto';
 import { JwtAuthGuard } from '../../../authentication/presentation/http/guards/jwt-auth.guard';
 
@@ -37,6 +38,10 @@ describe('FinancialController (e2e)', () => {
       execute: jest.fn(),
     };
 
+    const mockGetVendingMachineMetricsUseCase = {
+      execute: jest.fn(),
+    };
+
     const mockDataSource = {
       query: jest
         .fn<(...args: any[]) => Promise<Array<{ company_id: string }>>>()
@@ -53,6 +58,10 @@ describe('FinancialController (e2e)', () => {
         {
           provide: GetFinancialDataUseCase,
           useValue: mockGetFinancialDataUseCase,
+        },
+        {
+          provide: GetVendingMachineMetricsUseCase,
+          useValue: mockGetVendingMachineMetricsUseCase,
         },
         {
           provide: DataSource,
