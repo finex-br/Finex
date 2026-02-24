@@ -4,17 +4,32 @@ import { surveyService } from '../services/surveyService';
 import { Button } from '../components/ui/button';
 import { Progress } from '../components/ui/progress';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Loader2, FileText, PlayCircle } from 'lucide-react';
+import { Loader2, FileText, PlayCircle, Info } from 'lucide-react';
 import { AppLayout } from '../components/AppLayout';
 import { PageHeader } from '../components/PageHeader';
+import { useAuthStore } from '../store/authStore';
 import type { Survey } from '../types/survey.types';
 
 export const SurveysListView = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startingId, setStartingId] = useState<string | null>(null);
+  const [showIntroBanner, setShowIntroBanner] = useState(false);
+
+  useEffect(() => {
+    if (user?.id) {
+      const firstLoginKey = `finex-first-login-${user.id}`;
+      const completedSurveysKey = `finex-surveys-intro-dismissed-${user.id}`;
+      const isFirstLogin = localStorage.getItem(firstLoginKey);
+      const dismissed = localStorage.getItem(completedSurveysKey);
+      if (isFirstLogin && !dismissed) {
+        setShowIntroBanner(true);
+      }
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     loadSurveys();
@@ -66,6 +81,29 @@ export const SurveysListView = () => {
             title="Questionários"
             subtitle="Complete os questionários disponíveis para sua empresa"
           />
+
+          {/* First Access Intro Banner */}
+          {showIntroBanner && (
+            <Alert className="bg-primary/10 border-primary/30">
+              <Info className="h-4 w-4 text-primary" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>Antes de prosseguir, responda a estas breves perguntas para que possamos conhecer melhor sua empresa.</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-4 shrink-0"
+                  onClick={() => {
+                    if (user?.id) {
+                      localStorage.setItem(`finex-surveys-intro-dismissed-${user.id}`, 'true');
+                    }
+                    setShowIntroBanner(false);
+                  }}
+                >
+                  Fechar
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Error Alert */}
           {error && (
