@@ -1,0 +1,3 @@
+- questionario inicial apenas para o dono da empresa.
+- melhorar a forma de apresentar as perguntas dos questionarios para o usuario.
+- 

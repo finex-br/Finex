@@ -24,7 +24,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function PendingDocumentsAdminView() {
-  const { isLoading, error, documents, total, fetchPendingDocuments } =
+  const { isLoading, error, documents, total, companyNames, fetchPendingDocuments } =
     usePendingDocumentsViewModel();
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function PendingDocumentsAdminView() {
                 <TableBody>
                   {documents.map((doc) => (
                     <TableRow key={doc.id} className="border-border">
-                      <TableCell className="text-muted-foreground truncate max-w-[120px]">{doc.companyId || '—'}</TableCell>
+                      <TableCell className="text-muted-foreground truncate max-w-[120px]">{companyNames[doc.companyId] || doc.companyId || '—'}</TableCell>
                       <TableCell className="font-medium text-foreground">{doc.fileName}</TableCell>
                       <TableCell>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">

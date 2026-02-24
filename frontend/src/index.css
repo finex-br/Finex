@@ -125,6 +125,11 @@
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, sans-serif;
   }
+
+  body[data-scroll-locked] {
+    overflow: auto !important;
+    margin-right: 0 !important;
+  }
 }
 
 @layer components {

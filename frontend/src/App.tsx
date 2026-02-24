@@ -12,6 +12,7 @@ import { DashboardView } from "./views/DashboardView";
 import { GoogleCallbackView } from "./views/GoogleCallbackView";
 import { SurveysListView } from "./views/SurveysListView";
 import { SurveyQuestionnaireView } from "./views/SurveyQuestionnaireView";
+import { SurveyResponsesView } from "./views/SurveyResponsesView";
 import { AdminPanelView } from "./views/AdminPanelView";
 import { PendingDocumentsAdminView } from "./views/PendingDocumentsAdminView";
 import { PendingDocumentAdminDetailView } from "./views/PendingDocumentAdminDetailView";
@@ -123,14 +124,24 @@ const App = () => (
               } 
             />
             
+            {/* Rota Protegida - Ver Respostas (must be before :assessmentId) */}
+            <Route
+              path="/surveys/:assessmentId/responses"
+              element={
+                <ProtectedRoute requireCompany>
+                  <SurveyResponsesView />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Rota Protegida - Questionário */}
-            <Route 
-              path="/surveys/:assessmentId" 
+            <Route
+              path="/surveys/:assessmentId"
               element={
                 <ProtectedRoute requireCompany>
                   <SurveyQuestionnaireView />
                 </ProtectedRoute>
-              } 
+              }
             />
 
             {/* Rota Protegida - Admin Pending Documents */}

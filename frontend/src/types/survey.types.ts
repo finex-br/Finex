@@ -60,3 +60,18 @@ export interface CompleteAssessmentResponse {
   finalScore: number;
   completedAt: Date;
 }
+
+export interface CompletedAssessment {
+  id: string;
+  title: string;
+  finalScore: number;
+  completedAt: string;
+}
+
+export interface AssessmentResponse {
+  questionText: string;
+  questionType: QuestionType;
+  orderIndex: number;
+  value: any;
+  comment: string | null;
+}

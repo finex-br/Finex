@@ -4,16 +4,17 @@ import { surveyService } from '../services/surveyService';
 import { Button } from '../components/ui/button';
 import { Progress } from '../components/ui/progress';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Loader2, FileText, PlayCircle, Info } from 'lucide-react';
+import { Loader2, FileText, PlayCircle, Info, CheckCircle, Eye } from 'lucide-react';
 import { AppLayout } from '../components/AppLayout';
 import { PageHeader } from '../components/PageHeader';
 import { useAuthStore } from '../store/authStore';
-import type { Survey } from '../types/survey.types';
+import type { Survey, CompletedAssessment } from '../types/survey.types';
 
 export const SurveysListView = () => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const [surveys, setSurveys] = useState<Survey[]>([]);
+  const [completedAssessments, setCompletedAssessments] = useState<CompletedAssessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startingId, setStartingId] = useState<string | null>(null);
@@ -39,8 +40,12 @@ export const SurveysListView = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await surveyService.getPendingSurveys();
-      setSurveys(data);
+      const [pendingData, completedData] = await Promise.all([
+        surveyService.getPendingSurveys(),
+        surveyService.getCompletedAssessments().catch(() => []),
+      ]);
+      setSurveys(pendingData);
+      setCompletedAssessments(completedData);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erro ao carregar questionários');
     } finally {
@@ -113,7 +118,7 @@ export const SurveysListView = () => {
           )}
 
           {/* Empty State */}
-          {surveys.length === 0 ? (
+          {surveys.length === 0 && completedAssessments.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
@@ -121,54 +126,95 @@ export const SurveysListView = () => {
               </p>
             </div>
           ) : (
-            /* Surveys Grid */
-            <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-              {surveys.map((survey) => (
-                <div key={survey.surveyId} className="glass-card-hover p-6 space-y-4">
-                  <div>
-                    <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                      <FileText className="h-5 w-5 flex-shrink-0 text-primary" />
-                      <span className="line-clamp-2">{survey.title}</span>
-                    </h3>
-                    {survey.description && (
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {survey.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {survey.hasStarted && survey.progress !== undefined ? (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Progresso</span>
-                        <span className="font-medium text-foreground">
-                          {survey.progress}%
-                        </span>
+            <>
+              {/* Pending Surveys Grid */}
+              {surveys.length > 0 && (
+                <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+                  {surveys.map((survey) => (
+                    <div key={survey.surveyId} className="glass-card-hover p-6 space-y-4">
+                      <div>
+                        <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                          <FileText className="h-5 w-5 flex-shrink-0 text-primary" />
+                          <span className="line-clamp-2">{survey.title}</span>
+                        </h3>
+                        {survey.description && (
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                            {survey.description}
+                          </p>
+                        )}
                       </div>
-                      <Progress value={survey.progress} className="h-2" />
-                    </div>
-                  ) : null}
 
-                  <Button
-                    onClick={() => handleStartSurvey(survey)}
-                    disabled={startingId === survey.surveyId}
-                    className="w-full"
-                  >
-                    {startingId === survey.surveyId ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Carregando...
-                      </>
-                    ) : (
-                      <>
-                        <PlayCircle className="h-4 w-4 mr-2" />
-                        {survey.hasStarted ? 'Continuar' : 'Iniciar'}
-                      </>
-                    )}
-                  </Button>
+                      {survey.hasStarted && survey.progress !== undefined ? (
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Progresso</span>
+                            <span className="font-medium text-foreground">
+                              {survey.progress}%
+                            </span>
+                          </div>
+                          <Progress value={survey.progress} className="h-2" />
+                        </div>
+                      ) : null}
+
+                      <Button
+                        onClick={() => handleStartSurvey(survey)}
+                        disabled={startingId === survey.surveyId}
+                        className="w-full"
+                      >
+                        {startingId === survey.surveyId ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Carregando...
+                          </>
+                        ) : (
+                          <>
+                            <PlayCircle className="h-4 w-4 mr-2" />
+                            {survey.hasStarted ? 'Continuar' : 'Iniciar'}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+
+              {/* Completed Assessments */}
+              {completedAssessments.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-foreground">Questionários Respondidos</h2>
+                  <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+                    {completedAssessments.map((assessment) => (
+                      <div key={assessment.id} className="glass-card p-6 space-y-4">
+                        <div>
+                          <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                            <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500" />
+                            <span className="line-clamp-2">{assessment.title}</span>
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Respondido em {new Date(assessment.completedAt).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+
+                        {assessment.finalScore > 0 && (
+                          <div className="text-sm text-muted-foreground">
+                            Pontuação: <span className="font-medium text-foreground">{assessment.finalScore.toFixed(1)}</span>
+                          </div>
+                        )}
+
+                        <Button
+                          variant="outline"
+                          onClick={() => navigate(`/surveys/${assessment.id}/responses`)}
+                          className="w-full"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Ver Respostas
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

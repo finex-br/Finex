@@ -139,7 +139,7 @@ export function UploadView() {
             subtitle="Envie seu arquivo Excel para revisão"
           />
 
-          <div className="glass-card p-6 space-y-6 max-w-2xl">
+          <div className="glass-card p-6 space-y-6 max-w-2xl mx-auto">
             {/* Upload Area */}
             <div
               onClick={handleClickUpload}
@@ -218,13 +218,7 @@ export function UploadView() {
               <div>
                 <p className="text-xs text-foreground font-medium mb-1">Campos obrigatórios:</p>
                 <p className="text-xs text-muted-foreground">
-                  {REQUIRED_COLUMNS.join(', ')}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-foreground font-medium mb-1">Campos opcionais:</p>
-                <p className="text-xs text-muted-foreground">
-                  {OPTIONAL_COLUMNS.join(', ')}
+                  {MODEL_COLUMNS.join(', ')}
                 </p>
               </div>
               <p className="text-xs text-muted-foreground">

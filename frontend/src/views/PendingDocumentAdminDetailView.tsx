@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
@@ -22,7 +22,9 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { usePendingDocumentDetailViewModel } from '@/hooks/usePendingDocumentDetailViewModel';
+import { companyService } from '@/services/companyService';
 import { HelpCircle } from 'lucide-react';
 
 const NONE = '__NONE__';
@@ -61,6 +63,16 @@ export function PendingDocumentAdminDetailView() {
     reject,
     actionMessage,
   } = usePendingDocumentDetailViewModel(documentId);
+
+  const [companyNameDisplay, setCompanyNameDisplay] = useState<string>('');
+
+  useEffect(() => {
+    if (document?.companyId) {
+      companyService.getCompanyName(document.companyId)
+        .then(setCompanyNameDisplay)
+        .catch(() => {});
+    }
+  }, [document?.companyId]);
 
   const previewRows = useMemo(() => document?.rawData.sampleRows || [], [document]);
 
@@ -113,7 +125,7 @@ export function PendingDocumentAdminDetailView() {
                 {document.companyId && (
                   <div>
                     <span className="font-medium text-foreground">Empresa:</span>{' '}
-                    <span className="text-muted-foreground">{document.companyId}</span>
+                    <span className="text-muted-foreground">{companyNameDisplay || document.companyId}</span>
                   </div>
                 )}
                 <div>
@@ -288,45 +300,92 @@ export function PendingDocumentAdminDetailView() {
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button onClick={saveMapping} disabled={isSavingMapping || !documentId || !isSystemAdmin}>
-                    {isSavingMapping ? 'Salvando...' : 'Salvar mapeamento'}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Salva a associação de colunas atual para uso na validação.</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    onClick={validate}
-                    disabled={isValidating || !documentId || !isSystemAdmin}
-                  >
-                    {isValidating ? 'Validando...' : 'Validar'}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Verifica quantas linhas são válidas com o mapeamento atual.</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={approve}
-                    disabled={isApproving || !documentId || !canApprove}
-                  >
-                    {isApproving ? 'Aprovando...' : 'Aprovar e importar'}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Importa as linhas válidas para o sistema. Esta ação não pode ser desfeita.</p>
-                </TooltipContent>
-              </Tooltip>
+            <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-1">
+                <Button onClick={saveMapping} disabled={isSavingMapping || !documentId || !isSystemAdmin}>
+                  {isSavingMapping ? 'Salvando...' : 'Salvar mapeamento'}
+                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="hidden sm:inline-flex items-center justify-center w-6 h-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                      <HelpCircle className="w-4 h-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Salva a associação de colunas atual para uso na validação.</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="sm:hidden inline-flex items-center justify-center w-6 h-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                      <HelpCircle className="w-4 h-4" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="text-sm">
+                    Salva a associação de colunas atual para uso na validação.
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  onClick={validate}
+                  disabled={isValidating || !documentId || !isSystemAdmin}
+                >
+                  {isValidating ? 'Validando...' : 'Validar'}
+                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="hidden sm:inline-flex items-center justify-center w-6 h-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                      <HelpCircle className="w-4 h-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Verifica quantas linhas são válidas com o mapeamento atual.</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="sm:hidden inline-flex items-center justify-center w-6 h-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                      <HelpCircle className="w-4 h-4" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="text-sm">
+                    Verifica quantas linhas são válidas com o mapeamento atual.
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={approve}
+                  disabled={isApproving || !documentId || !canApprove}
+                >
+                  {isApproving ? 'Aprovando...' : 'Aprovar e importar'}
+                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="hidden sm:inline-flex items-center justify-center w-6 h-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                      <HelpCircle className="w-4 h-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Importa as linhas válidas para o sistema. Esta ação não pode ser desfeita.</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="sm:hidden inline-flex items-center justify-center w-6 h-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                      <HelpCircle className="w-4 h-4" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="text-sm">
+                    Importa as linhas válidas para o sistema. Esta ação não pode ser desfeita.
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
             {validation && (

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/store/authStore';
+import { companyService } from '@/services/companyService';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -50,8 +51,20 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [companyName, setCompanyName] = useState(
+    () => localStorage.getItem('finex-company-name') || 'FinEx'
+  );
 
   const isSystemAdmin = user?.role === 'ADMIN';
+
+  useEffect(() => {
+    companyService.getMyCompany().then(res => {
+      if (res.company) {
+        setCompanyName(res.company.name);
+        localStorage.setItem('finex-company-name', res.company.name);
+      }
+    }).catch(() => {});
+  }, []);
 
   // Apply preferred theme on mount
   useEffect(() => {
@@ -137,7 +150,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     return location.pathname.startsWith(`${path}/`);
   };
 
-  const companyInitial = user?.name?.charAt(0).toUpperCase() || 'U';
+  const companyInitial = 'F';
 
   const renderNavItems = (items: typeof menuItems, collapsed: boolean) =>
     items.map((item) => {
@@ -216,7 +229,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">{companyInitial}</span>
             </div>
-            <span className="text-lg font-bold text-foreground">Singular Tech</span>
+            <span className="text-lg font-bold text-foreground">{companyName}</span>
           </div>
         </div>
       </header>
@@ -239,13 +252,10 @@ export function AppLayout({ children }: AppLayoutProps) {
               isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
             )}>
               <h1 className="text-base font-bold text-foreground truncate">
-                Singular Tech
+                {companyName}
               </h1>
-              <p className="text-xs text-foreground truncate">
-                {user?.name || 'Usuário'}
-              </p>
               <p className="text-xs text-muted-foreground truncate">
-                {user?.email || 'email@example.com'}
+                {user?.name?.split(' ')[0] || 'Usuário'}
               </p>
             </div>
           </div>
@@ -316,13 +326,10 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-foreground truncate">
-                Singular Tech
-              </p>
-              <p className="text-xs text-foreground truncate">
-                {user?.name || 'Usuário'}
+                {companyName}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {user?.email || 'email@example.com'}
+                {user?.name?.split(' ')[0] || 'Usuário'}
               </p>
             </div>
           </div>

@@ -34,8 +34,8 @@ export function LoginView() {
   const { loginWithGoogle } = useOAuthLogin();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900 p-4">
-      <Card className="w-full max-w-md shadow-2xl bg-white/95 backdrop-blur-sm">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900 dark:from-slate-950 dark:via-slate-900 dark:to-orange-950 p-4">
+      <Card className="w-full max-w-md shadow-2xl bg-white/95 dark:bg-card/95 backdrop-blur-sm">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-bold text-orange-600">
             FinEx
@@ -112,7 +112,7 @@ export function LoginView() {
           {/* OAuth DESABILITADO - Apenas login com email/senha */}
 
           {/* Link adicional (opcional) */}
-          <div className="mt-4 text-center text-sm text-slate-600">
+          <div className="mt-4 text-center text-sm text-slate-600 dark:text-slate-400">
             <p>
               Não tem uma conta?{' '}
               <Link 
