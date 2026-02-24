@@ -1,7 +1,7 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, ShieldCheck, TrendingUp, ArrowRight } from 'lucide-react';
+import { BarChart3, ShieldCheck, ArrowRight } from 'lucide-react';
 
 /**
  * LandingView - Landing Page Institucional do FinEx
@@ -88,7 +88,7 @@ export function LandingView() {
           </div>
 
           {/* Grid de Cards */}
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
             {/* Card 1: Clareza Total */}
             <Card className="border-2 hover:border-orange-200 transition-all duration-200 hover:shadow-lg">
               <CardHeader className="text-center">
@@ -104,7 +104,7 @@ export function LandingView() {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-slate-700">
-                  Consolidação de fluxo de caixa e DRE em tempo real. 
+                  Consolidação de fluxo de caixa e DRE em tempo real.
                   Entenda suas operações com dashboards intuitivos e insights acionáveis.
                 </p>
               </CardContent>
@@ -125,29 +125,8 @@ export function LandingView() {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-slate-700">
-                  Avalie a governança corporativa e reduza riscos operacionais. 
+                  Avalie a governança corporativa e reduza riscos operacionais.
                   Frameworks validados para elevar a maturidade do seu negócio.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Card 3: Valor Invisível */}
-            <Card className="border-2 hover:border-orange-200 transition-all duration-200 hover:shadow-lg">
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
-                  <TrendingUp className="w-8 h-8 text-orange-600" />
-                </div>
-                <CardTitle className="text-xl font-bold text-slate-900">
-                  Valor Invisível
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Descubra o valor real do negócio
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-slate-700">
-                  Descubra quanto sua empresa realmente vale. 
-                  Metodologias de valuation para fundraising, M&A e planejamento estratégico.
                 </p>
               </CardContent>
             </Card>
@@ -187,25 +166,27 @@ export function LandingView() {
 
             {/* Copyright */}
             <p className="text-sm text-slate-600">
-              © 2025 Singular. Todos os direitos reservados.
+              © 2025 FinEx. Todos os direitos reservados.
             </p>
 
-            {/* Social Links ou Menu (Opcional) */}
+            {/* Links */}
             <div className="flex items-center space-x-6">
-              <a 
-                href="#" 
+              <Link
+                to="/privacy"
                 className="text-sm text-slate-600 hover:text-orange-600 transition-colors"
               >
                 Privacidade
-              </a>
-              <a 
-                href="#" 
+              </Link>
+              <Link
+                to="/terms"
                 className="text-sm text-slate-600 hover:text-orange-600 transition-colors"
               >
                 Termos
-              </a>
-              <a 
-                href="#" 
+              </Link>
+              <a
+                href="https://wa.me/5561961740440"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-sm text-slate-600 hover:text-orange-600 transition-colors"
               >
                 Contato

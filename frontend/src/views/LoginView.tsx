@@ -34,8 +34,8 @@ export function LoginView() {
   const { loginWithGoogle } = useOAuthLogin();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900 p-4">
+      <Card className="w-full max-w-md shadow-2xl bg-white/95 backdrop-blur-sm">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-bold text-orange-600">
             FinEx

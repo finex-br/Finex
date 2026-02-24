@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent } from '../ui/card';
 import { DropdownQuestion } from './DropdownQuestion';
 import { TextQuestion } from './TextQuestion';
 import { CNPJQuestion } from './CNPJQuestion';
@@ -30,7 +30,6 @@ export const QuestionCard = ({
           <DropdownQuestion
             question={question}
             value={value}
-            comment={comment}
             onChange={onChange}
           />
         );
@@ -39,7 +38,6 @@ export const QuestionCard = ({
           <TextQuestion
             question={question}
             value={value}
-            comment={comment}
             onChange={onChange}
           />
         );
@@ -48,7 +46,6 @@ export const QuestionCard = ({
           <CNPJQuestion
             question={question}
             value={value}
-            comment={comment}
             onChange={onChange}
           />
         );
@@ -57,7 +54,6 @@ export const QuestionCard = ({
           <NumberQuestion
             question={question}
             value={value}
-            comment={comment}
             onChange={onChange}
           />
         );
@@ -66,7 +62,6 @@ export const QuestionCard = ({
           <FileUploadQuestion
             question={question}
             value={value}
-            comment={comment}
             onChange={onChange}
           />
         );
@@ -77,15 +72,12 @@ export const QuestionCard = ({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">
-          Pergunta {questionNumber}
-          {(question.currentAnswer || isSaved) && (
-            <span className="ml-2 text-sm font-normal text-green-600">✓ Respondida</span>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>{renderQuestion()}</CardContent>
+      <CardContent className="pt-6">
+        {isSaved && (
+          <span className="text-sm font-normal text-green-600 mb-2 block">✓ Respondida</span>
+        )}
+        {renderQuestion()}
+      </CardContent>
     </Card>
   );
 };

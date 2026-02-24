@@ -18,6 +18,8 @@ import { PendingDocumentAdminDetailView } from "./views/PendingDocumentAdminDeta
 import { CompanySetupView } from "./views/CompanySetupView";
 import { MyDocumentsView } from "./views/MyDocumentsView";
 import { MyDocumentDetailView } from "./views/MyDocumentDetailView";
+import { PrivacyView } from "./views/PrivacyView";
+import { TermsView } from "./views/TermsView";
 import { useAuthStore } from "./store/authStore";
 
 const queryClient = new QueryClient();
@@ -83,6 +85,10 @@ const App = () => (
             
             {/* Rota Pública - Cadastro */}
             <Route path="/signup" element={<SignUpView />} />
+
+            {/* Rotas Públicas - Privacidade e Termos */}
+            <Route path="/privacy" element={<PrivacyView />} />
+            <Route path="/terms" element={<TermsView />} />
             
             {/* OAuth DESABILITADO - Rota de callback removida */}
             {/* <Route path="/auth/google/callback" element={<GoogleCallbackView />} /> */}

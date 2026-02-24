@@ -22,7 +22,7 @@
     --secondary-foreground: 222 47% 11%;
 
     --muted: 217 33% 95%;
-    --muted-foreground: 215 20% 45%;
+    --muted-foreground: 215 20% 35%;
 
     --accent: 217 33% 93%;
     --accent-foreground: 222 47% 11%;
@@ -36,8 +36,8 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --border: 217 33% 85%;
-    --input: 217 33% 85%;
+    --border: 217 33% 75%;
+    --input: 217 33% 75%;
     --ring: 24 100% 50%;
 
     --radius: 0.75rem;
@@ -51,7 +51,7 @@
     --glow-primary: 0 0 30px hsl(24 100% 50% / 0.2);
     --glow-ai: 0 0 40px hsl(280 65% 60% / 0.2);
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 220 14% 93%;
     --sidebar-foreground: 222 47% 11%;
     --sidebar-primary: 24 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
