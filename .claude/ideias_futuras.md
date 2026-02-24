@@ -1,3 +1,3 @@
-- questionario inicial apenas para o dono da empresa.
+- questionario inicial aparecer primeira coisa na tela apenas para o dono da empresa. aparecer como uma pagina mesmo
 - melhorar a forma de apresentar as perguntas dos questionarios para o usuario.
 - 
