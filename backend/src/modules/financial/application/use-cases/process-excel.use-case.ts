@@ -13,7 +13,7 @@ import {
  * 1. Valida permissões do usuário
  * 2. Processa o Excel (extrai transações)
  * 3. Valida regras de negócio
- * 4. Persiste no DuckDB em lote
+ * 4. Persiste no banco em lote
  */
 export class ProcessExcelUseCase
   implements IUseCase<ProcessExcelRequestDTO, ProcessExcelResponseDTO>
@@ -47,7 +47,7 @@ export class ProcessExcelUseCase
       throw new Error('Nenhuma transação válida encontrada no arquivo');
     }
 
-    // 3. Persistir em lote no DuckDB (performance)
+    // 3. Persistir em lote no banco (performance)
     await this.financialRepository.saveBatch(transactions);
 
     // 4. Retornar sucesso

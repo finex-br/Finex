@@ -29,6 +29,32 @@ export class CompanyController {
   async listMyCompanies(@Request() req: any) {
     const userId = await this.getUserId(req);
 
+    // Check if user is system admin
+    const userRows = await this.dataSource.query(
+      `SELECT role FROM users WHERE id = $1`,
+      [userId],
+    );
+    const isAdmin = userRows?.[0]?.role === 'ADMIN';
+
+    // If admin, return ALL companies in the system
+    if (isAdmin) {
+      const allCompanies = await this.dataSource.query(
+        `SELECT id, name, created_at
+         FROM companies
+         ORDER BY name ASC`,
+      );
+
+      return {
+        success: true,
+        companies: (allCompanies || []).map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          role: 'ADMIN',
+        })),
+        total: (allCompanies || []).length,
+      };
+    }
+
     const rows = await this.dataSource.query(
       `SELECT cm.company_id, c.name as company_name, cm.role as member_role
        FROM company_members cm

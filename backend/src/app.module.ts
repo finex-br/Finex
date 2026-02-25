@@ -6,6 +6,7 @@ import { CompanyModule } from './modules/company/company.module';
 import { FinancialModule } from './modules/financial/financial.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { SurveyModule } from './modules/survey/survey.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Controller()
 export class AppController {
@@ -39,6 +40,7 @@ export class AppController {
     FinancialModule,
     PaymentModule,
     SurveyModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
 })

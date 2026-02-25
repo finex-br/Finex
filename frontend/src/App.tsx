@@ -18,6 +18,11 @@ import { PendingDocumentAdminDetailView } from "./views/PendingDocumentAdminDeta
 import { CompanySetupView } from "./views/CompanySetupView";
 import { MyDocumentsView } from "./views/MyDocumentsView";
 import { MyDocumentDetailView } from "./views/MyDocumentDetailView";
+import { DatasetManagementView } from "./views/admin/DatasetManagementView";
+import { ChartBuilderView } from "./views/admin/ChartBuilderView";
+import { DashboardListView } from "./views/admin/DashboardListView";
+import { DashboardConfigView } from "./views/admin/DashboardConfigView";
+import { DynamicDashboardView } from "./views/DynamicDashboardView";
 import { useAuthStore } from "./store/authStore";
 
 const queryClient = new QueryClient();
@@ -176,15 +181,73 @@ const App = () => (
             />
             
             {/* Rota Protegida - Admin Panel (somente ADMIN) */}
-            <Route 
-              path="/admin" 
+            <Route
+              path="/admin"
               element={
                 <ProtectedRoute>
                   <AdminPanelView />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
+            {/* Admin Analytics - Datasets */}
+            <Route
+              path="/admin/datasets"
+              element={
+                <AdminRoute>
+                  <DatasetManagementView />
+                </AdminRoute>
+              }
+            />
+
+            {/* Admin Analytics - Dashboards */}
+            <Route
+              path="/admin/dashboards"
+              element={
+                <AdminRoute>
+                  <DashboardListView />
+                </AdminRoute>
+              }
+            />
+
+            {/* Admin Analytics - Dashboard Config */}
+            <Route
+              path="/admin/dashboards/:id/config"
+              element={
+                <AdminRoute>
+                  <DashboardConfigView />
+                </AdminRoute>
+              }
+            />
+
+            {/* Admin Analytics - Chart Builder */}
+            <Route
+              path="/admin/chart-builder"
+              element={
+                <AdminRoute>
+                  <ChartBuilderView />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/chart-builder/:chartId"
+              element={
+                <AdminRoute>
+                  <ChartBuilderView />
+                </AdminRoute>
+              }
+            />
+
+            {/* Dynamic Dashboard - Accessible by all authenticated users */}
+            <Route
+              path="/dynamic-dashboard/:dashboardId"
+              element={
+                <ProtectedRoute>
+                  <DynamicDashboardView />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Catch-all - Redireciona para a home */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

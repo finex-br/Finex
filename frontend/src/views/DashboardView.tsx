@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, DollarSign, FileSpreadsheet, Coffee, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, FileSpreadsheet, Coffee, Activity, ArrowLeft, LayoutDashboard } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useFinancialData, DashboardState } from '@/hooks/useFinancialData';
@@ -17,6 +17,8 @@ import { HardwareHealthWidget } from '@/components/charts/HardwareHealthWidget';
 import { EmptyPeriodBanner } from '@/components/EmptyPeriodBanner';
 import { GraphType } from '@/services/financialService';
 import { AppLayout } from '@/components/AppLayout';
+import { dashboardService, Dashboard, DashboardWithData } from '@/services/dashboardService';
+import { DynamicDashboardRenderer } from '@/components/dashboard/DynamicDashboardRenderer';
 
 /**
  * DashboardView - Componente Presentacional (Dumb Component)
@@ -33,7 +35,83 @@ import { AppLayout } from '@/components/AppLayout';
 export function DashboardView() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  
+
+  // === Dynamic dashboard state ===
+  const [dynamicDashboards, setDynamicDashboards] = useState<Dashboard[]>([]);
+  const [dynamicLoading, setDynamicLoading] = useState(true);
+  const [selectedDashboard, setSelectedDashboard] = useState<DashboardWithData | null>(null);
+  const [selectedDashboardLoading, setSelectedDashboardLoading] = useState(false);
+  const [showHardcoded, setShowHardcoded] = useState(false);
+
+  const companyId = localStorage.getItem('current_company_id') || '';
+
+  // Check for dynamic dashboards on mount
+  useEffect(() => {
+    if (!companyId) {
+      setDynamicLoading(false);
+      setShowHardcoded(true);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const result = await dashboardService.list(companyId);
+        if (cancelled) return;
+
+        const dashboards = result.dashboards || [];
+        setDynamicDashboards(dashboards);
+
+        if (dashboards.length === 0) {
+          setShowHardcoded(true);
+        } else if (dashboards.length === 1) {
+          // Auto-load the single dashboard
+          setSelectedDashboardLoading(true);
+          try {
+            const full = await dashboardService.get(dashboards[0].id, companyId);
+            if (!cancelled) setSelectedDashboard(full);
+          } catch {
+            if (!cancelled) setShowHardcoded(true);
+          } finally {
+            if (!cancelled) setSelectedDashboardLoading(false);
+          }
+        }
+        // If multiple, we show the list (no auto-load)
+      } catch {
+        if (!cancelled) setShowHardcoded(true);
+      } finally {
+        if (!cancelled) setDynamicLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [companyId]);
+
+  const handleSelectDashboard = useCallback(async (dashboard: Dashboard) => {
+    setSelectedDashboardLoading(true);
+    try {
+      const full = await dashboardService.get(dashboard.id, companyId);
+      setSelectedDashboard(full);
+    } catch (err) {
+      console.error('[DashboardView] Failed to load dashboard:', err);
+    } finally {
+      setSelectedDashboardLoading(false);
+    }
+  }, [companyId]);
+
+  const handleRefreshDashboard = useCallback(async () => {
+    if (!selectedDashboard) return;
+    setSelectedDashboardLoading(true);
+    try {
+      const full = await dashboardService.get(selectedDashboard.id, companyId);
+      setSelectedDashboard(full);
+    } catch (err) {
+      console.error('[DashboardView] Failed to refresh dashboard:', err);
+    } finally {
+      setSelectedDashboardLoading(false);
+    }
+  }, [selectedDashboard, companyId]);
+
   // Financial data hook
   const { 
     summary, 
@@ -112,6 +190,94 @@ export function DashboardView() {
       currency: 'BRL',
     }).format(value);
   };
+
+  // === Dynamic dashboard rendering (takes priority over hardcoded) ===
+
+  // Still checking if dynamic dashboards exist
+  if (dynamicLoading) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+          <p className="text-lg text-slate-600 dark:text-slate-400">Carregando dashboard...</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Show selected dynamic dashboard
+  if (selectedDashboard) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
+            {dynamicDashboards.length > 1 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mb-4"
+                onClick={() => setSelectedDashboard(null)}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            )}
+            <DynamicDashboardRenderer
+              dashboard={selectedDashboard}
+              onRefresh={handleRefreshDashboard}
+              isLoading={selectedDashboardLoading}
+            />
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Show loading for a single dashboard being auto-loaded
+  if (selectedDashboardLoading) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+          <p className="text-lg text-slate-600 dark:text-slate-400">Carregando dashboard...</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Show dashboard list if multiple exist and none selected
+  if (dynamicDashboards.length > 1) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center gap-2 mb-6">
+              <LayoutDashboard className="h-6 w-6 text-orange-600" />
+              <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                Dashboards
+              </h1>
+            </div>
+            <div className="grid gap-4">
+              {dynamicDashboards.map((db) => (
+                <Card
+                  key={db.id}
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleSelectDashboard(db)}
+                >
+                  <CardHeader>
+                    <CardTitle className="text-lg">{db.name}</CardTitle>
+                    {db.description && (
+                      <CardDescription>{db.description}</CardDescription>
+                    )}
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // === Fallback: Hardcoded dashboard (when no dynamic dashboards exist) ===
 
   // Estado de loading
   if (isLoading) {

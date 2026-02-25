@@ -20,6 +20,7 @@ import { FinancialUploadSchema } from './infrastructure/persistence/typeorm/fina
 import { FinancialDataSchema } from './infrastructure/persistence/typeorm/financial-data.schema';
 import { UserSchema } from '../authentication/infrastructure/persistence/typeorm/entities/user.schema';
 import { EnvService } from '../../shared/infra/env/env.service';
+import { AnalyticsModule } from '../analytics/analytics.module';
 
 /**
  * FinancialModule - Módulo de Transações Financeiras
@@ -48,6 +49,7 @@ import { EnvService } from '../../shared/infra/env/env.service';
       FinancialUploadSchema, // Usando tabela existente financial_uploads
       UserSchema, // Necessário para JwtAuthGuard
     ]),
+    AnalyticsModule,
   ],
   controllers: [
     FinancialController,

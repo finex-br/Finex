@@ -1,16 +1,18 @@
 import { ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Upload, 
+import {
+  LayoutDashboard,
+  Upload,
   FileSearch,
-  LogOut, 
-  ChevronLeft, 
+  LogOut,
+  ChevronLeft,
   ChevronRight,
   Menu,
   X,
   FileText,
-  Shield
+  Shield,
+  Database,
+  BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -84,6 +86,18 @@ export function AppLayout({ children }: AppLayoutProps) {
           label: 'Revisar Documentos',
           icon: FileSearch,
           path: '/admin/pending-documents',
+        },
+        {
+          id: 'admin-datasets',
+          label: 'Datasets',
+          icon: Database,
+          path: '/admin/datasets',
+        },
+        {
+          id: 'admin-dashboards',
+          label: 'Dashboards',
+          icon: BarChart3,
+          path: '/admin/dashboards',
         },
       ]
     : [];

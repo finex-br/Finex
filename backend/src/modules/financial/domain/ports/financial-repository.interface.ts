@@ -10,11 +10,11 @@ import {
  * IFinancialRepository - Port (Interface)
  * 
  * Define o contrato para persistência de transações financeiras.
- * Implementação em Infrastructure Layer (DuckDB).
+ * Implementação em Infrastructure Layer (PostgreSQL/TypeORM).
  */
 export interface IFinancialRepository {
   /**
-   * Salva uma transação financeira no DuckDB
+   * Salva uma transação financeira
    */
   save(transaction: FinancialTransaction): Promise<void>;
 

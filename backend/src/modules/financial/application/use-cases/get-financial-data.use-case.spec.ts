@@ -149,7 +149,7 @@ describe('GetFinancialDataUseCase', () => {
     });
 
     it('deve propagar erros do Repository ao calcular summary', async () => {
-      const errorMessage = 'Erro ao calcular summary no DuckDB';
+      const errorMessage = 'Erro ao calcular summary';
       mockFinancialRepository.calculateSummary.mockRejectedValue(new Error(errorMessage));
 
       // Mock outros métodos para retornar valores (Promise.all executa todos)
@@ -178,7 +178,7 @@ describe('GetFinancialDataUseCase', () => {
 
       mockFinancialRepository.calculateSummary.mockResolvedValue(mockSummary);
 
-      const errorMessage = 'Erro ao buscar dados mensais no DuckDB';
+      const errorMessage = 'Erro ao buscar dados mensais';
       mockFinancialRepository.getMonthlyData.mockRejectedValue(new Error(errorMessage));
 
       const request = {

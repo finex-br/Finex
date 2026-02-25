@@ -384,13 +384,13 @@ export class TypeORMFinancialRepository implements IFinancialRepository {
     endDate?: Date,
   ): Promise<SalesVolumeByMachineDTO[]> {
     const qb = this.repository.createQueryBuilder('t')
-      .select("operational_metadata->>'deviceId'", 'deviceId')
+      .select("t.operational_metadata->>'deviceId'", 'deviceId')
       .addSelect('COUNT(*)', 'totalSales')
       .addSelect('COALESCE(SUM(t.amount), 0)', 'totalRevenue')
       .addSelect('COALESCE(AVG(t.amount), 0)', 'averageTicket')
-      .addSelect("operational_metadata->>'location'", 'location')
+      .addSelect("t.operational_metadata->>'location'", 'location')
       .where('t.companyId = :companyId', { companyId })
-      .andWhere("operational_metadata->>'deviceId' IS NOT NULL");
+      .andWhere("t.operational_metadata->>'deviceId' IS NOT NULL");
 
     if (startDate && endDate) {
       qb.andWhere(
@@ -403,8 +403,8 @@ export class TypeORMFinancialRepository implements IFinancialRepository {
     }
 
     const rows = await qb
-      .groupBy("operational_metadata->>'deviceId'")
-      .addGroupBy("operational_metadata->>'location'")
+      .groupBy("t.operational_metadata->>'deviceId'")
+      .addGroupBy("t.operational_metadata->>'location'")
       .getRawMany<{
         deviceId: string;
         totalSales: string;
@@ -432,11 +432,11 @@ export class TypeORMFinancialRepository implements IFinancialRepository {
     endDate?: Date,
   ): Promise<ProductMixPerformanceDTO[]> {
     const qb = this.repository.createQueryBuilder('t')
-      .select("operational_metadata->>'blend'", 'product')
+      .select("t.operational_metadata->>'blend'", 'product')
       .addSelect('COUNT(*)', 'salesCount')
       .addSelect('COALESCE(SUM(t.amount), 0)', 'totalRevenue')
       .where('t.companyId = :companyId', { companyId })
-      .andWhere("operational_metadata->>'blend' IS NOT NULL");
+      .andWhere("t.operational_metadata->>'blend' IS NOT NULL");
 
     if (startDate && endDate) {
       qb.andWhere(
@@ -449,7 +449,7 @@ export class TypeORMFinancialRepository implements IFinancialRepository {
     }
 
     const rows = await qb
-      .groupBy("operational_metadata->>'blend'")
+      .groupBy("t.operational_metadata->>'blend'")
       .getRawMany<{
         product: string;
         salesCount: string;
@@ -474,16 +474,16 @@ export class TypeORMFinancialRepository implements IFinancialRepository {
     // Subconsulta para obter última transação de cada dispositivo
     const latestReadings = await this.repository
       .createQueryBuilder('t')
-      .select("operational_metadata->>'deviceId'", 'deviceId')
-      .addSelect("(operational_metadata->>'nivelGalao')::numeric", 'nivelGalao')
-      .addSelect("operational_metadata->>'location'", 'location')
+      .select("t.operational_metadata->>'deviceId'", 'deviceId')
+      .addSelect("(t.operational_metadata->>'nivelGalao')::numeric", 'nivelGalao')
+      .addSelect("t.operational_metadata->>'location'", 'location')
       .addSelect('MAX(COALESCE(t.dateCompetence, t.datePayment))', 'lastUpdate')
       .where('t.companyId = :companyId', { companyId })
-      .andWhere("operational_metadata->>'deviceId' IS NOT NULL")
-      .andWhere("operational_metadata->>'nivelGalao' IS NOT NULL")
-      .groupBy("operational_metadata->>'deviceId'")
-      .addGroupBy("operational_metadata->>'nivelGalao'")
-      .addGroupBy("operational_metadata->>'location'")
+      .andWhere("t.operational_metadata->>'deviceId' IS NOT NULL")
+      .andWhere("t.operational_metadata->>'nivelGalao' IS NOT NULL")
+      .groupBy("t.operational_metadata->>'deviceId'")
+      .addGroupBy("t.operational_metadata->>'nivelGalao'")
+      .addGroupBy("t.operational_metadata->>'location'")
       .getRawMany<{
         deviceId: string;
         nivelGalao: number | null;
@@ -534,7 +534,7 @@ export class TypeORMFinancialRepository implements IFinancialRepository {
       .addSelect('COALESCE(AVG(t.amount), 0)', 'averageTicket')
       .addSelect('COUNT(*)', 'transactionCount')
       .where('t.companyId = :companyId', { companyId })
-      .andWhere("operational_metadata->>'deviceId' IS NOT NULL"); // Only vending transactions
+      .andWhere("t.operational_metadata->>'deviceId' IS NOT NULL"); // Only vending transactions
 
     if (startDate && endDate) {
       qb.andWhere(

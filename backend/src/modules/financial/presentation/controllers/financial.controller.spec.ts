@@ -181,7 +181,7 @@ describe('FinancialController (e2e)', () => {
 
     it('deve propagar erro do Use Case', async () => {
       getFinancialDataUseCase.execute.mockRejectedValue(
-        new Error('Erro ao buscar dados no DuckDB'),
+        new Error('Erro ao buscar dados financeiros'),
       );
 
       const response = await request(app.getHttpServer())
