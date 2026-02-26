@@ -240,6 +240,10 @@ export function AppLayout({ children }: AppLayoutProps) {
           'hidden lg:flex fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex-col transition-all duration-300 z-40 overflow-hidden',
           isCollapsed ? 'w-20' : 'w-64'
         )}
+        style={{ 
+          backgroundColor: theme === 'dark' ? '#0b0b14' : '#fafafa',
+          borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb'
+        }}
       >
         {/* Company Info */}
         <div className="p-4 border-b border-sidebar-border">
@@ -317,6 +321,10 @@ export function AppLayout({ children }: AppLayoutProps) {
           'lg:hidden fixed left-0 top-16 bottom-0 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 z-40',
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
+        style={{ 
+          backgroundColor: theme === 'dark' ? '#0b0b14' : '#fafafa',
+          borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb'
+        }}
       >
         {/* User Info */}
         <div className="p-4 border-b border-sidebar-border">

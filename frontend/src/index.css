@@ -55,10 +55,10 @@
     --sidebar-foreground: 222 47% 11%;
     --sidebar-primary: 24 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 93%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 217 33% 85%;
-    --sidebar-ring: 24 100% 50%;
+    --sidebar-accent: 222 32% 7%;
+    --sidebar-accent-foreground: 220 12% 59%;
+    --sidebar-border: 222 32% 10%;
+    --sidebar-ring: 18 100% 50%;
   }
 
   .dark {
@@ -105,14 +105,14 @@
     --glow-primary: 0 0 30px hsl(24 100% 50% / 0.3);
     --glow-ai: 0 0 40px hsl(280 65% 60% / 0.4);
 
-    --sidebar-background: 222 47% 5%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 24 100% 50%;
+    --sidebar-background: 222 32% 7%;
+    --sidebar-foreground: 220 12% 59%;
+    --sidebar-primary: 18 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 12%;
+    --sidebar-accent: 222 32% 7%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 15%;
-    --sidebar-ring: 24 100% 50%;
+    --sidebar-border: 222 32% 10%;
+    --sidebar-ring: 18 100% 50%;
   }
 }
 
@@ -181,15 +181,15 @@
   }
 
   .sidebar-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground transition-all duration-200;
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200;
   }
 
   .sidebar-item:hover {
-    @apply bg-accent text-foreground;
+    @apply bg-sidebar-accent;
   }
 
   .sidebar-item-active {
-    @apply bg-primary/10 text-primary border-l-2 border-primary;
+    @apply bg-transparent text-[#f96403] border-l-2 border-[#f96403];
   }
 
   .data-grid {
