@@ -108,6 +108,24 @@ class AdminSurveyService {
     );
     return response.data;
   }
+  /**
+   * Get responses for a completed assessment (admin)
+   */
+  async getAssessmentResponses(assessmentId: string): Promise<{
+    assessmentId: string;
+    surveyTitle: string;
+    companyName: string;
+    responses: Array<{
+      questionText: string;
+      questionType: string;
+      orderIndex: number;
+      value: any;
+      comment: string | null;
+    }>;
+  }> {
+    const response = await api.get(`/admin/surveys/assessments/${assessmentId}/responses`);
+    return response.data;
+  }
 }
 
 export const adminSurveyService = new AdminSurveyService();

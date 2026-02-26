@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:finex.astraflow.io)",
+      "Bash(npm run lint)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run test:*)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}

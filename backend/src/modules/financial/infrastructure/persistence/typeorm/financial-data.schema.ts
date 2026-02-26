@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 /**
  * FinancialDataSchema - TypeORM Entity
@@ -11,6 +11,7 @@ export class FinancialDataSchema {
   id: string;
 
   @Column({ name: 'company_id', type: 'uuid' })
+  @Index()
   companyId: string;
 
   @Column({ name: 'upload_id', type: 'uuid', nullable: true })

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/AppLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/PageHeader';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useMyPendingDocumentDetailViewModel } from '@/hooks/useMyPendingDocumentDetailViewModel';
@@ -22,200 +22,202 @@ export function MyDocumentDetailView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Documento</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <PageHeader
+            breadcrumb="Meus Documentos"
+            title="Documento"
+          />
 
-              {isLoading && <div className="text-sm text-slate-500">Carregando...</div>}
+          {/* Document Info */}
+          <div className="glass-card p-6 space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-              {document && (
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium">Arquivo:</span> {document.fileName}
-                  </div>
-                  <div>
-                    <span className="font-medium">Status:</span> {document.status}
-                  </div>
-                  <div>
-                    <span className="font-medium">Total de linhas:</span> {document.rawData.totalRows}
-                  </div>
-                  <div>
-                    <span className="font-medium">Atualizado em:</span> {new Date(document.updatedAt).toLocaleString()}
-                  </div>
+            {isLoading && <div className="text-sm text-muted-foreground">Carregando...</div>}
+
+            {document && (
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="font-medium text-foreground">Arquivo:</span>{' '}
+                  <span className="text-muted-foreground">{document.fileName}</span>
                 </div>
-              )}
-
-              {document?.notes && (
-                <Alert>
-                  <AlertDescription>
-                    <span className="font-medium">Comentário do administrador:</span> {document.notes}
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {excludedRows.length > 0 && (
-                <div className="text-xs text-slate-600 dark:text-slate-300">
-                  Linhas excluídas pelo admin (ignoradas na validação/importação): {excludedRows.join(', ')}
+                <div>
+                  <span className="font-medium text-foreground">Status:</span>{' '}
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                    {document.status}
+                  </span>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                <div>
+                  <span className="font-medium text-foreground">Total de linhas:</span>{' '}
+                  <span className="text-muted-foreground">{document.rawData.totalRows}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-foreground">Atualizado em:</span>{' '}
+                  <span className="text-muted-foreground">{new Date(document.updatedAt).toLocaleString()}</span>
+                </div>
+              </div>
+            )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Preview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border bg-white dark:bg-slate-950 overflow-auto">
+            {document?.notes && (
+              <Alert>
+                <AlertDescription>
+                  <span className="font-medium">Comentário do administrador:</span> {document.notes}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {excludedRows.length > 0 && (
+              <div className="text-xs text-muted-foreground">
+                Linhas excluídas pelo admin (ignoradas na validação/importação): {excludedRows.join(', ')}
+              </div>
+            )}
+          </div>
+
+          {/* Preview */}
+          <div className="glass-card overflow-hidden">
+            <div className="p-4 border-b border-border">
+              <h2 className="text-lg font-semibold text-foreground">Preview</h2>
+            </div>
+            <div className="overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border">
+                    {headers.map((h) => (
+                      <TableHead key={h}>{h}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {previewRows.map((row, idx) => (
+                    <TableRow key={idx} className="border-border">
+                      {row.map((cell, cellIdx) => (
+                        <TableCell key={cellIdx}>
+                          {cell === null || cell === undefined ? '' : String(cell)}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+
+                  {!isLoading && document && previewRows.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={headers.length || 1} className="text-center text-muted-foreground py-8">
+                        Sem linhas de preview.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* Status & Validation */}
+          <div className="glass-card p-6 space-y-4">
+            <h2 className="text-lg font-semibold text-foreground">Status e validação</h2>
+
+            {!document?.columnMapping && (
+              <div className="text-sm text-muted-foreground">
+                Aguardando o administrador mapear as colunas.
+              </div>
+            )}
+
+            {document?.columnMapping && !validation && (
+              <div className="text-sm text-muted-foreground">
+                Mapeamento definido. Aguardando validação/revisão do administrador.
+              </div>
+            )}
+
+            {validation && (
+              <div className="text-sm space-y-1">
+                <div>
+                  <span className="font-medium text-foreground">Linhas válidas:</span>{' '}
+                  <span className="text-muted-foreground">{validation.validTransactions}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-foreground">Linhas inválidas:</span>{' '}
+                  <span className="text-muted-foreground">{validation.invalidTransactions}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-foreground">Pode importar (tem linhas válidas):</span>{' '}
+                  <span className="text-muted-foreground">{validation.isValid ? 'Sim' : 'Não'}</span>
+                </div>
+              </div>
+            )}
+
+            {validation && validation.errors.length > 0 && (
+              <div className="rounded-md border border-border overflow-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      {headers.map((h) => (
-                        <TableHead key={h}>{h}</TableHead>
-                      ))}
+                    <TableRow className="border-border">
+                      <TableHead>Linha</TableHead>
+                      <TableHead>Campo</TableHead>
+                      <TableHead>Mensagem</TableHead>
+                      <TableHead>Conteúdo da linha</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {previewRows.map((row, idx) => (
-                      <TableRow key={idx}>
-                        {row.map((cell, cellIdx) => (
-                          <TableCell key={cellIdx}>
-                            {cell === null || cell === undefined ? '' : String(cell)}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-
-                    {!isLoading && document && previewRows.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={headers.length || 1} className="text-center text-slate-500">
-                          Sem linhas de preview.
+                    {validation.errors.slice(0, 50).map((e, idx) => (
+                      <TableRow key={idx} className="border-border">
+                        <TableCell>{e.row}</TableCell>
+                        <TableCell>{e.field}</TableCell>
+                        <TableCell>{e.message}</TableCell>
+                        <TableCell>
+                          {e.rowData ? (
+                            <pre className="text-xs whitespace-pre-wrap max-w-[700px]">
+                              {JSON.stringify(e.rowData, null, 2)}
+                            </pre>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">(sem snapshot)</span>
+                          )}
                         </TableCell>
                       </TableRow>
-                    )}
+                    ))}
                   </TableBody>
                 </Table>
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Status e validação</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {!document?.columnMapping && (
-                <div className="text-sm text-slate-600 dark:text-slate-300">
-                  Aguardando o administrador mapear as colunas.
-                </div>
-              )}
+          {/* Admin Changes */}
+          <div className="glass-card p-6 space-y-4">
+            <h2 className="text-lg font-semibold text-foreground">Alterações do administrador</h2>
 
-              {document?.columnMapping && !validation && (
-                <div className="text-sm text-slate-600 dark:text-slate-300">
-                  Mapeamento definido. Aguardando validação/revisão do administrador.
-                </div>
-              )}
+            {audit.length === 0 && (
+              <div className="text-sm text-muted-foreground">
+                Nenhuma alteração registrada ainda.
+              </div>
+            )}
 
-              {validation && (
-                <div className="text-sm space-y-1">
-                  <div>
-                    <span className="font-medium">Linhas válidas:</span> {validation.validTransactions}
-                  </div>
-                  <div>
-                    <span className="font-medium">Linhas inválidas:</span> {validation.invalidTransactions}
-                  </div>
-                  <div>
-                    <span className="font-medium">Pode importar (tem linhas válidas):</span>{' '}
-                    {validation.isValid ? 'Sim' : 'Não'}
-                  </div>
-                </div>
-              )}
-
-              {validation && validation.errors.length > 0 && (
-                <div className="rounded-md border bg-white dark:bg-slate-950 overflow-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Linha</TableHead>
-                        <TableHead>Campo</TableHead>
-                        <TableHead>Mensagem</TableHead>
-                        <TableHead>Conteúdo da linha</TableHead>
+            {audit.length > 0 && (
+              <div className="rounded-md border border-border overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-border">
+                      <TableHead>Quando</TableHead>
+                      <TableHead>Ação</TableHead>
+                      <TableHead>Detalhes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {audit.map((a, idx) => (
+                      <TableRow key={idx} className="border-border">
+                        <TableCell className="text-muted-foreground">{new Date(a.at).toLocaleString()}</TableCell>
+                        <TableCell className="text-foreground">{a.action}</TableCell>
+                        <TableCell>
+                          <pre className="text-xs whitespace-pre-wrap max-w-[700px] text-muted-foreground">
+                            {JSON.stringify(a.details ?? {}, null, 2)}
+                          </pre>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {validation.errors.slice(0, 50).map((e, idx) => (
-                        // eslint-disable-next-line react/no-array-index-key
-                        <TableRow key={idx}>
-                          <TableCell>{e.row}</TableCell>
-                          <TableCell>{e.field}</TableCell>
-                          <TableCell>{e.message}</TableCell>
-                          <TableCell>
-                            {e.rowData ? (
-                              <pre className="text-xs whitespace-pre-wrap max-w-[700px]">
-                                {JSON.stringify(e.rowData, null, 2)}
-                              </pre>
-                            ) : (
-                              <span className="text-xs text-slate-500">(sem snapshot)</span>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Alterações do administrador</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {audit.length === 0 && (
-                <div className="text-sm text-slate-600 dark:text-slate-300">
-                  Nenhuma alteração registrada ainda.
-                </div>
-              )}
-
-              {audit.length > 0 && (
-                <div className="rounded-md border bg-white dark:bg-slate-950 overflow-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Quando</TableHead>
-                        <TableHead>Ação</TableHead>
-                        <TableHead>Detalhes</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {audit.map((a, idx) => (
-                        // eslint-disable-next-line react/no-array-index-key
-                        <TableRow key={idx}>
-                          <TableCell>{new Date(a.at).toLocaleString()}</TableCell>
-                          <TableCell>{a.action}</TableCell>
-                          <TableCell>
-                            <pre className="text-xs whitespace-pre-wrap max-w-[700px]">
-                              {JSON.stringify(a.details ?? {}, null, 2)}
-                            </pre>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AppLayout>

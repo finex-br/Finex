@@ -88,35 +88,39 @@ export function DashboardView() {
   // Estado de loading
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <p className="text-lg text-slate-600">Carregando dados...</p>
-      </div>
+      <AppLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <p className="text-lg text-muted-foreground">Carregando dados...</p>
+        </div>
+      </AppLayout>
     );
   }
 
   // Estado de erro
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg text-center shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-red-600">
-              Erro ao carregar dados
-            </CardTitle>
-            <CardDescription className="text-base mt-2">
-              {error}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              onClick={() => fetchFinancialData()}
-              variant="outline"
-            >
-              Tentar novamente
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <AppLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <Card className="w-full max-w-lg text-center shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-red-600">
+                Erro ao carregar dados
+              </CardTitle>
+              <CardDescription className="text-base mt-2">
+                {error}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => fetchFinancialData()}
+                variant="outline"
+              >
+                Tentar novamente
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -189,13 +193,13 @@ export function DashboardView() {
           {/* Receita Total */}
           <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">
+              <CardTitle className="text-base sm:text-sm font-medium text-slate-600">
                 Receita Total
               </CardTitle>
               <TrendingUp className="h-5 w-5 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-3xl sm:text-2xl font-bold text-green-600">
                 {formatCurrency(summary.totalRevenue)}
               </div>
               <p className="text-xs text-slate-500 mt-1">
@@ -207,13 +211,13 @@ export function DashboardView() {
           {/* Despesas Totais */}
           <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">
+              <CardTitle className="text-base sm:text-sm font-medium text-slate-600">
                 Despesas Totais
               </CardTitle>
               <TrendingDown className="h-5 w-5 text-red-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-3xl sm:text-2xl font-bold text-red-600">
                 {formatCurrency(summary.totalExpense)}
               </div>
               <p className="text-xs text-slate-500 mt-1">
@@ -225,13 +229,13 @@ export function DashboardView() {
           {/* Lucro/Prejuízo */}
           <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">
+              <CardTitle className="text-base sm:text-sm font-medium text-slate-600">
                 {summary.profit >= 0 ? 'Lucro' : 'Prejuízo'}
               </CardTitle>
               <DollarSign className={`h-5 w-5 ${summary.profit >= 0 ? 'text-blue-600' : 'text-orange-600'}`} />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${summary.profit >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+              <div className={`text-3xl sm:text-2xl font-bold ${summary.profit >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
                 {formatCurrency(summary.profit)}
               </div>
               <p className="text-xs text-slate-500 mt-1">

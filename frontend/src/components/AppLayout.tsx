@@ -1,48 +1,84 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Upload, 
+import {
+  LayoutDashboard,
+  Upload,
   FileSearch,
-  LogOut, 
-  ChevronLeft, 
+  LogOut,
+  ChevronLeft,
   ChevronRight,
   Menu,
   X,
   FileText,
   Shield,
-  Moon,
   Sun,
-  Bell
+  Moon,
+  Settings,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { useAuthStore } from '@/store/authStore';
-import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
+import { useAuthStore } from '@/store/authStore';
+import { companyService } from '@/services/companyService';
+import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
-/**
- * AppLayout Component
- * 
- * Layout principal com sidebar de navegação
- * - Sidebar colapsável em desktop
- * - Menu hamburguer em mobile
- * - Navegação entre páginas
- * - Botão de logout
- */
+const PREFERRED_THEME_KEY = 'finex-preferred-theme';
+
 export function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
   const { user, clearAuth } = useAuthStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [companyName, setCompanyName] = useState(
+    () => localStorage.getItem('finex-company-name') || 'FinEx'
+  );
 
   const isSystemAdmin = user?.role === 'ADMIN';
+
+  useEffect(() => {
+    companyService.getMyCompany().then(res => {
+      if (res.company) {
+        setCompanyName(res.company.name);
+        localStorage.setItem('finex-company-name', res.company.name);
+      }
+    }).catch(() => {});
+  }, []);
+
+  // Apply preferred theme on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(PREFERRED_THEME_KEY);
+    if (saved) {
+      setTheme(saved);
+    }
+  }, [setTheme]);
+
+  const handleToggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(PREFERRED_THEME_KEY, newTheme);
+    setTheme(newTheme);
+  };
 
   const menuItems = [
     {
@@ -75,7 +111,6 @@ export function AppLayout({ children }: AppLayoutProps) {
       : []),
   ];
 
-  // Admin menu items - only visible for ADMIN role
   const adminMenuItems = isSystemAdmin
     ? [
         {
@@ -92,15 +127,12 @@ export function AppLayout({ children }: AppLayoutProps) {
         },
       ]
     : [];
-  
-  const isAdmin = user?.role === 'ADMIN';
-  
-  // Debug logs
-  console.log('👤 Current User:', user);
-  console.log('🎭 User Role:', user?.role);
-  console.log('🛡️ Is Admin?:', isAdmin);
 
   const handleLogout = () => {
+    setIsLogoutModalOpen(true);
+  };
+
+  const confirmLogout = () => {
     clearAuth();
     navigate('/login');
   };
@@ -111,43 +143,101 @@ export function AppLayout({ children }: AppLayoutProps) {
   };
 
   const isActive = (path: string) => {
-    // Exact match
     if (location.pathname === path) return true;
-    
-    // For /admin route, only match exactly to avoid highlighting both buttons
     if (path === '/admin') {
       return location.pathname === '/admin';
     }
-    
-    // For other routes, match if pathname starts with path
     return location.pathname.startsWith(`${path}/`);
   };
 
+  const companyInitial = 'F';
+
+  const renderNavItems = (items: typeof menuItems, collapsed: boolean) =>
+    items.map((item) => {
+      const Icon = item.icon;
+      const active = isActive(item.path);
+      return (
+        <button
+          key={item.id}
+          onClick={() => handleNavigation(item.path)}
+          className={cn(
+            'w-full sidebar-item text-sm',
+            active && 'sidebar-item-active',
+            collapsed && 'justify-center px-2'
+          )}
+        >
+          <Icon className={cn('w-5 h-5 flex-shrink-0', active && 'text-primary')} />
+          {!collapsed && <span className="font-medium truncate">{item.label}</span>}
+        </button>
+      );
+    });
+
+  const optionsDropdown = (collapsed: boolean) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={cn('w-full sidebar-item text-sm', collapsed && 'justify-center px-2')}
+        >
+          <Settings className="w-5 h-5 flex-shrink-0" />
+          {!collapsed && <span className="font-medium">Opções</span>}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="right" align="end" className="w-56">
+        <DropdownMenuLabel>Preferências</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+
+        {/* Theme toggle (also saves as default) */}
+        <DropdownMenuItem onClick={handleToggleTheme}>
+          {theme === 'dark' ? (
+            <Sun className="w-4 h-4 mr-2" />
+          ) : (
+            <Moon className="w-4 h-4 mr-2" />
+          )}
+          {theme === 'dark' ? 'Claro' : 'Escuro'}
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        {/* Logout */}
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="text-red-400 focus:text-red-300 focus:bg-red-500/10"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Sair
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 z-50 flex items-center justify-between px-4">
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-border z-50 flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors"
           >
             {isMobileMenuOpen ? (
               <X className="h-5 w-5" />
             ) : (
               <Menu className="h-5 w-5" />
             )}
-          </Button>
-          <h1 className="text-xl font-bold text-orange-600">FinEx</h1>
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">{companyInitial}</span>
+            </div>
+            <span className="text-lg font-bold text-foreground">{companyName}</span>
+          </div>
         </div>
-        <ThemeToggle />
       </header>
 
       {/* Sidebar Desktop */}
       <aside
         className={cn(
-          'hidden lg:flex fixed left-0 top-0 h-screen border-r flex-col transition-all duration-300 z-40',
+          'hidden lg:flex fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex-col transition-all duration-300 z-40 overflow-hidden',
           isCollapsed ? 'w-20' : 'w-64'
         )}
         style={{ 
@@ -155,211 +245,67 @@ export function AppLayout({ children }: AppLayoutProps) {
           borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb'
         }}
       >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
-          {!isCollapsed && (
-            <h1 className="text-2xl font-bold" style={{ color: '#ff6600' }}>FinEx</h1>
-          )}
-          {isCollapsed && (
-            <span className="text-2xl font-bold mx-auto" style={{ color: '#ff6600' }}>F</span>
-          )}
-        </div>
-
-        {/* User Info */}
-        <div className="p-4 border-b" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
+        {/* Company Info */}
+        <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#ff6600' }}>
-              <span className="font-semibold text-lg" style={{ color: '#ffffff' }}>
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </span>
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+              <span className="text-primary-foreground font-bold text-lg">{companyInitial}</span>
             </div>
-            {!isCollapsed && (
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold truncate" style={{ color: theme === 'dark' ? '#ffffff' : '#0e172a' }}>
-                  Singular Tech
-                </p>
-                <p className="text-xs truncate" style={{ color: '#77849a' }}>
-                  {user?.name || 'Usuário'}
-                </p>
-              </div>
-            )}
+            <div className={cn(
+              "min-w-0 flex-1 overflow-hidden transition-all duration-300",
+              isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+            )}>
+              <h1 className="text-base font-bold text-foreground truncate">
+                {companyName}
+              </h1>
+              <p className="text-xs text-muted-foreground truncate">
+                {user?.name?.split(' ')[0] || 'Usuário'}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
           {!isCollapsed && (
-            <p className="text-xs font-semibold uppercase tracking-wider mb-3 px-3" style={{ color: '#77849a' }}>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">
               Módulos
             </p>
           )}
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavigation(item.path)}
-                className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group',
-                  active && 'border-l-2 font-medium',
-                  isCollapsed && 'justify-center'
-                )}
-                style={{
-                  color: active ? '#f96403' : '#77849a',
-                  borderColor: active ? '#f96403' : 'transparent',
-                  backgroundColor: active ? (theme === 'dark' ? '#211315' : '#fff3ed') : 'transparent'
-                }}
-                onMouseEnter={(e) => {
-                  if (!active) {
-                    e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                {!isCollapsed && <span>{item.label}</span>}
-              </button>
-            );
-          })}
+          {renderNavItems(menuItems, isCollapsed)}
 
-          {/* Admin Button - Only for ADMIN role */}
-          {isAdmin && adminMenuItems.length > 0 && (
+          {isSystemAdmin && adminMenuItems.length > 0 && (
             <>
               {!isCollapsed && (
-                <div className="mt-6 mb-3 px-3">
-                  <div className="border-t" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}></div>
-                </div>
-              )}
-              {isCollapsed && <div className="my-3"></div>}
-              {!isCollapsed && (
-                <p className="text-xs font-semibold uppercase tracking-wider mb-3 px-3" style={{ color: '#77849a' }}>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4 mt-6">
                   Administração
                 </p>
               )}
-              {adminMenuItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path);
-                
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavigation(item.path)}
-                    className={cn(
-                      'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-                      active && 'border-l-2 font-medium',
-                      isCollapsed && 'justify-center'
-                    )}
-                    style={{
-                      color: active ? '#f96403' : '#77849a',
-                      borderColor: active ? '#f96403' : 'transparent',
-                      backgroundColor: active ? (theme === 'dark' ? '#211315' : '#fff3ed') : 'transparent'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
-                  >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    {!isCollapsed && <span>{item.label}</span>}
-                  </button>
-                );
-              })}
+              {renderNavItems(adminMenuItems, isCollapsed)}
             </>
           )}
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-3 border-t space-y-1" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className={cn(
-              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-              isCollapsed && 'justify-center'
-            )}
-            style={{ color: '#77849a' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
-            {theme === "dark" ? (
-              <Sun className="w-5 h-5 flex-shrink-0" />
-            ) : (
-              <Moon className="w-5 h-5 flex-shrink-0" />
-            )}
-            {!isCollapsed && <span>{theme === "dark" ? "Modo Claro" : "Modo Escuro"}</span>}
-          </button>
-
-          <button
-            className={cn(
-              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-              isCollapsed && 'justify-center'
-            )}
-            style={{ color: '#77849a' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
-            <Bell className="w-5 h-5 flex-shrink-0" />
-            {!isCollapsed && (
-              <>
-                <span>Notificações</span>
-                <span className="ml-auto text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ff6600', color: '#ffffff' }}>
-                  3
-                </span>
-              </>
-            )}
-          </button>
-          
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className={cn(
-              'w-full hover:bg-red-500/10 flex items-center gap-3 px-3 py-2.5',
-              isCollapsed && 'justify-center px-0'
-            )}
-            style={{ color: '#ee6d70' }}
-          >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {!isCollapsed && <span>Sair</span>}
-          </Button>
-
-          {/* Collapse Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-full"
-            style={{ color: '#77849a' }}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="w-5 h-5" />
-            ) : (
-              <>
-                <ChevronLeft className="w-5 h-5" />
-                <span className="ml-2 text-sm">Recolher</span>
-              </>
-            )}
-          </Button>
+        <div className="p-3 border-t border-sidebar-border">
+          {optionsDropdown(isCollapsed)}
         </div>
       </aside>
+
+      {/* Collapse Toggle - Outside aside to avoid overflow-hidden clipping */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className={cn(
+          'hidden lg:flex fixed top-[72px] z-50 w-6 h-6 bg-card border border-border rounded-full items-center justify-center hover:bg-accent transition-all duration-300',
+          isCollapsed ? 'left-[68px]' : 'left-[248px]'
+        )}
+      >
+        {isCollapsed ? (
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+        )}
+      </button>
 
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
@@ -372,7 +318,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Mobile Sidebar */}
       <aside
         className={cn(
-          'lg:hidden fixed left-0 top-16 bottom-0 w-64 border-r flex flex-col transition-transform duration-300 z-40',
+          'lg:hidden fixed left-0 top-16 bottom-0 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 z-40',
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
         style={{ 
@@ -381,19 +327,17 @@ export function AppLayout({ children }: AppLayoutProps) {
         }}
       >
         {/* User Info */}
-        <div className="p-4 border-b" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
+        <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#ff6600' }}>
-              <span className="font-semibold text-lg" style={{ color: '#ffffff' }}>
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </span>
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-lg">{companyInitial}</span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold truncate" style={{ color: theme === 'dark' ? '#ffffff' : '#0e172a' }}>
-                Singular Tech
+              <p className="text-sm font-bold text-foreground truncate">
+                {companyName}
               </p>
-              <p className="text-xs truncate" style={{ color: '#77849a' }}>
-                {user?.name || 'Usuário'}
+              <p className="text-xs text-muted-foreground truncate">
+                {user?.name?.split(' ')[0] || 'Usuário'}
               </p>
             </div>
           </div>
@@ -401,132 +345,24 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          <p className="text-xs font-semibold uppercase tracking-wider mb-3 px-3" style={{ color: '#77849a' }}>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">
             Módulos
           </p>
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavigation(item.path)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-2"
-                style={{
-                  color: active ? '#f96403' : '#77849a',
-                  borderColor: active ? '#f96403' : 'transparent',
-                  backgroundColor: active ? (theme === 'dark' ? '#211315' : '#fff3ed') : 'transparent',
-                  fontWeight: active ? '500' : '400'
-                }}
-                onMouseEnter={(e) => {
-                  if (!active) {
-                    e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
-              >
-                <Icon className="w-5 h-5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+          {renderNavItems(menuItems, false)}
 
-          {/* Admin Section - Only for ADMIN role */}
-          {isAdmin && adminMenuItems.length > 0 && (
+          {isSystemAdmin && adminMenuItems.length > 0 && (
             <>
-              <div className="mt-6 mb-3 px-3">
-                <div className="border-t" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}></div>
-              </div>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-3 px-3" style={{ color: '#77849a' }}>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4 mt-6">
                 Administração
               </p>
-              {adminMenuItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path);
-                
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavigation(item.path)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-2"
-                    style={{
-                      color: active ? '#f96403' : '#77849a',
-                      borderColor: active ? '#f96403' : 'transparent',
-                      backgroundColor: active ? (theme === 'dark' ? '#211315' : '#fff3ed') : 'transparent',
-                      fontWeight: active ? '500' : '400'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
+              {renderNavItems(adminMenuItems, false)}
             </>
           )}
         </nav>
 
-        {/* Bottom Buttons */}
-        <div className="p-3 border-t space-y-1" style={{ borderColor: theme === 'dark' ? '#1a1a2e' : '#e5e7eb' }}>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
-            style={{ color: '#77849a' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
-            {theme === "dark" ? (
-              <Sun className="w-5 h-5" />
-            ) : (
-              <Moon className="w-5 h-5" />
-            )}
-            <span>{theme === "dark" ? "Modo Claro" : "Modo Escuro"}</span>
-          </button>
-
-          <button
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
-            style={{ color: '#77849a' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
-            <Bell className="w-5 h-5" />
-            <span>Notificações</span>
-            <span className="ml-auto text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ff6600', color: '#ffffff' }}>
-              3
-            </span>
-          </button>
-
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className="w-full justify-start hover:bg-red-500/10 px-3 py-2.5"
-            style={{ color: '#ee6d70' }}
-          >
-            <LogOut className="w-5 h-5 mr-3" />
-            Sair
-          </Button>
+        {/* Bottom Actions */}
+        <div className="p-3 border-t border-sidebar-border">
+          {optionsDropdown(false)}
         </div>
       </aside>
 
@@ -534,12 +370,32 @@ export function AppLayout({ children }: AppLayoutProps) {
       <main
         className={cn(
           'transition-all duration-300',
-          'pt-16 lg:pt-0', // Add padding-top on mobile for fixed header
+          'pt-16 lg:pt-0',
           isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
         )}
       >
         {children}
       </main>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Deseja mesmo sair?</DialogTitle>
+            <DialogDescription>
+              Caso saia agora da página, talvez possa ocorrer a perda de dados e alterações que fez recentemente. Deseja continuar mesmo assim?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsLogoutModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmLogout}>
+              Sair
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
