@@ -140,19 +140,6 @@ export class CompanyController {
       throw new HttpException('Company name is required', HttpStatus.BAD_REQUEST);
     }
 
-    // If user already has an active company, don't create another silently.
-    const existing = await this.dataSource.query(
-      'SELECT company_id FROM company_members WHERE user_id = $1 AND is_active = true LIMIT 1',
-      [userId],
-    );
-
-    if (existing && existing.length > 0) {
-      throw new HttpException(
-        'User is already associated with a company',
-        HttpStatus.CONFLICT,
-      );
-    }
-
     const created = await this.dataSource.transaction(async (manager) => {
       const companyRows = await manager.query(
         `INSERT INTO companies (name)

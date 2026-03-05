@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { CompanySwitcher } from '@/components/CompanySwitcher';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
 
@@ -191,6 +192,11 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         </div>
 
+        {/* Company Switcher */}
+        <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-700">
+          <CompanySwitcher isCollapsed={isCollapsed} />
+        </div>
+
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {!isCollapsed && (
@@ -201,7 +207,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
-            
+
             return (
               <button
                 key={item.id}
@@ -325,6 +331,11 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         </div>
 
+        {/* Company Switcher - Mobile */}
+        <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-700">
+          <CompanySwitcher isCollapsed={false} />
+        </div>
+
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-3">
@@ -333,7 +344,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
-            
+
             return (
               <button
                 key={item.id}

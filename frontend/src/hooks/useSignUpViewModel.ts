@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { companyService } from '@/services/companyService';
 import { useAuthStore } from '@/store/authStore';
 
 /**
@@ -184,8 +185,19 @@ export const useSignUpViewModel = () => {
         localStorage.setItem('access_token', response.token);
       }
 
-      // Redireciona para a tela de upload (onboarding)
-      navigate('/upload');
+      // Busca a empresa criada durante o signup e armazena no store
+      try {
+        const list = await companyService.listMyCompanies();
+        if (list.companies.length > 0) {
+          const { setCurrentCompany } = useAuthStore.getState();
+          setCurrentCompany(list.companies[0].id, list.companies[0].name);
+        }
+      } catch {
+        // Não-crítico: se falhar, o usuário será redirecionado para /company/setup
+      }
+
+      // Redireciona para o dashboard
+      navigate('/dashboard');
     } catch (err: unknown) {
       // Trata erros da API
       console.error('Erro ao fazer cadastro:', err);

@@ -64,6 +64,8 @@ api.interceptors.response.use(
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
+      localStorage.removeItem('current_company_id');
+      localStorage.removeItem('current_company_name');
 
       // Redireciona para a página de login
       // Usamos window.location.href pois funciona melhor em interceptors
@@ -100,6 +102,7 @@ api.interceptors.response.use(
 
       if (looksLikeInvalidCompanyContext) {
         localStorage.removeItem('current_company_id');
+        localStorage.removeItem('current_company_name');
 
         if (window.location.pathname !== '/company/setup') {
           window.location.href = '/company/setup';

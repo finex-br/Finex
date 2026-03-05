@@ -18,7 +18,7 @@ import { useAuthStore } from '@/store/authStore';
 
 export function CompanySetupView() {
   const navigate = useNavigate();
-  const setCurrentCompanyId = useAuthStore((s) => s.setCurrentCompanyId);
+  const setCurrentCompany = useAuthStore((s) => s.setCurrentCompany);
 
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +35,7 @@ export function CompanySetupView() {
         const me = await companyService.getMyCompany(storedCompanyId);
 
         if (me.company) {
-          setCurrentCompanyId(me.company.id);
+          setCurrentCompany(me.company.id, me.company.name);
           navigate('/dashboard', { replace: true });
           return;
         }
@@ -57,7 +57,7 @@ export function CompanySetupView() {
             setCompanies(list.companies || []);
 
             if (list.companies?.length === 1) {
-              setCurrentCompanyId(list.companies[0].id);
+              setCurrentCompany(list.companies[0].id, list.companies[0].name);
               navigate('/dashboard', { replace: true });
               return;
             }
@@ -90,7 +90,7 @@ export function CompanySetupView() {
         return;
       }
 
-      setCurrentCompanyId(me.company.id);
+      setCurrentCompany(me.company.id, me.company.name);
       navigate('/dashboard', { replace: true });
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
@@ -108,7 +108,7 @@ export function CompanySetupView() {
     try {
       const result = await companyService.createCompany(companyName.trim());
       setSuccessMessage(result.message || 'Empresa criada com sucesso');
-      setCurrentCompanyId(result.company.id);
+      setCurrentCompany(result.company.id, result.company.name);
       setTimeout(() => navigate('/dashboard', { replace: true }), 800);
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
