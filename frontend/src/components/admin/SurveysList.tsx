@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Alert, AlertDescription } from '../ui/alert';
-import { Loader2, FileText, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
+import { Loader2, FileText, CheckCircle, XCircle, Edit, Trash2, Clock } from 'lucide-react';
 import { adminSurveyService } from '../../services/adminSurveyService';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -13,6 +13,7 @@ interface Survey {
   title: string;
   description: string;
   isActive: boolean;
+  estimatedTimeMinutes: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -88,6 +89,10 @@ export function SurveysList() {
                   )}
                 </CardTitle>
                 <CardDescription className="mt-2">{survey.description}</CardDescription>
+                <div className="flex items-center gap-1 mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>~{survey.estimatedTimeMinutes} min</span>
+                </div>
               </div>
             </div>
           </CardHeader>

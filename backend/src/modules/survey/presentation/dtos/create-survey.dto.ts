@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MaxLength, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, IsOptional, IsNumber, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSurveyDto {
@@ -12,4 +12,10 @@ export class CreateSurveyDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @ApiProperty({ example: 5, required: false, description: 'Tempo estimado em minutos' })
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  estimatedTimeMinutes?: number;
 }

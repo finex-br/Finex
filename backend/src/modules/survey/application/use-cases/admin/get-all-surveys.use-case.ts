@@ -7,6 +7,7 @@ export interface SurveyListItemDTO {
   title: string;
   description: string;
   isActive: boolean;
+  estimatedTimeMinutes: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +28,7 @@ export class GetAllSurveysUseCase implements IUseCase<void, Result<GetAllSurveys
         title: survey.title,
         description: survey.description ?? '',
         isActive: survey.isActive,
+        estimatedTimeMinutes: survey.estimatedTimeMinutes,
         createdAt: survey.createdAt,
         updatedAt: survey.updatedAt,
       }));

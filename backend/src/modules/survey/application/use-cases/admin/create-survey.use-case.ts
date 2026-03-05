@@ -28,6 +28,7 @@ export class CreateSurveyUseCase implements IUseCase<CreateSurveyDTO, Result<Sur
       title: request.title.trim(),
       description: request.description?.trim() || undefined,
       isActive: true,
+      estimatedTimeMinutes: request.estimatedTimeMinutes,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -65,6 +66,7 @@ export class CreateSurveyUseCase implements IUseCase<CreateSurveyDTO, Result<Sur
       title: survey.title,
       description: survey.description,
       isActive: survey.isActive,
+      estimatedTimeMinutes: survey.estimatedTimeMinutes,
       versionId: version.id.toString(),
       versionNumber: version.versionNumber,
       createdAt: survey.createdAt,

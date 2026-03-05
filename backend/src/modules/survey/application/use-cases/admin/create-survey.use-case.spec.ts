@@ -159,6 +159,39 @@ describe('CreateSurveyUseCase', () => {
       );
     });
 
+    it('should create survey with estimatedTimeMinutes from DTO', async () => {
+      // Arrange
+      const dto: CreateSurveyDTO = {
+        title: 'Survey with Time',
+        description: 'Test',
+        estimatedTimeMinutes: 15,
+      };
+
+      // Act
+      const result = await createSurveyUseCase.execute(dto);
+
+      // Assert
+      expect(result.isSuccess).toBe(true);
+      const surveyDTO = result.getValue();
+      expect(surveyDTO.estimatedTimeMinutes).toBe(15);
+    });
+
+    it('should create survey with default estimatedTimeMinutes when not provided', async () => {
+      // Arrange
+      const dto: CreateSurveyDTO = {
+        title: 'Survey without Time',
+        description: 'Test',
+      };
+
+      // Act
+      const result = await createSurveyUseCase.execute(dto);
+
+      // Assert
+      expect(result.isSuccess).toBe(true);
+      const surveyDTO = result.getValue();
+      expect(surveyDTO.estimatedTimeMinutes).toBe(2);
+    });
+
     it('should create survey version linked to survey', async () => {
       // Arrange
       const dto: CreateSurveyDTO = {

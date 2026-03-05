@@ -22,6 +22,9 @@ export class SurveySchema {
   @Column('boolean', { name: 'is_active', default: true })
   isActive: boolean;
 
+  @Column('int', { name: 'estimated_time_minutes', default: 2 })
+  estimatedTimeMinutes: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
