@@ -26,6 +26,7 @@ import { ApproveDocumentUseCase } from '../../application/use-cases/approve-docu
 import { GetPendingDocumentsUseCase } from '../../application/use-cases/get-pending-documents.use-case';
 import { IPendingDocumentRepository } from '../../domain/ports/pending-document-repository.interface';
 import { resolveCompanyContext } from '../../../../shared/tenant/company-context';
+import { UploadDatasetUseCase } from '../../../analytics/application/use-cases/upload-dataset.use-case';
 
 /**
  * PendingDocumentController - Presentation Layer
@@ -45,6 +46,7 @@ export class PendingDocumentController {
     private readonly dataSource: DataSource,
     @Inject('IPendingDocumentRepository')
     private readonly pendingDocumentRepository: IPendingDocumentRepository,
+    private readonly uploadDatasetUseCase: UploadDatasetUseCase,
   ) {}
 
   private async resolveCompany(
@@ -198,7 +200,26 @@ export class PendingDocumentController {
 
       console.log('[PendingDocumentController] Resultado:', result);
 
-      return result;
+      // Criar dataset automaticamente para a tela de Datasets
+      let datasetId: string | undefined;
+      try {
+        const nameWithoutExt = file.originalname.replace(/\.[^/.]+$/, '');
+        const datasetResult = await this.uploadDatasetUseCase.execute({
+          fileBuffer: file.buffer,
+          fileName: file.originalname,
+          mimeType: file.mimetype,
+          fileSize: file.size,
+          name: nameWithoutExt,
+          companyId,
+          userId,
+        });
+        datasetId = datasetResult.id;
+        console.log('[PendingDocumentController] Dataset criado:', datasetId);
+      } catch (datasetErr) {
+        console.error('[PendingDocumentController] Erro ao criar dataset (nao-fatal):', datasetErr);
+      }
+
+      return { ...result, datasetId };
     } catch (error) {
       console.error('[PendingDocumentController] Erro:', error);
 

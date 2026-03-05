@@ -11,11 +11,14 @@ import {
   X,
   FileText,
   Shield,
+  Database,
+  BarChart3,
   Sun,
   Moon,
   Settings,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { CompanySwitcher } from '@/components/CompanySwitcher';
 import { useAuthStore } from '@/store/authStore';
 import { companyService } from '@/services/companyService';
 import { cn } from '@/lib/utils';
@@ -124,6 +127,18 @@ export function AppLayout({ children }: AppLayoutProps) {
           label: 'Revisar Documentos',
           icon: FileSearch,
           path: '/admin/pending-documents',
+        },
+        {
+          id: 'admin-datasets',
+          label: 'Datasets',
+          icon: Database,
+          path: '/admin/datasets',
+        },
+        {
+          id: 'admin-dashboards',
+          label: 'Dashboards',
+          icon: BarChart3,
+          path: '/admin/dashboards',
         },
       ]
     : [];
@@ -265,6 +280,11 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         </div>
 
+        {/* Company Switcher */}
+        <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-700">
+          <CompanySwitcher isCollapsed={isCollapsed} />
+        </div>
+
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
           {!isCollapsed && (
@@ -341,6 +361,11 @@ export function AppLayout({ children }: AppLayoutProps) {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Company Switcher - Mobile */}
+        <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-700">
+          <CompanySwitcher isCollapsed={false} />
         </div>
 
         {/* Navigation */}

@@ -28,6 +28,10 @@ describe('ProcessExcelUseCase', () => {
       getTrendData: jest.fn(),
       getDateRange: jest.fn(),
       countAll: jest.fn(),
+      getSalesVolumeByMachine: jest.fn(),
+      getProductMixPerformance: jest.fn(),
+      getHardwareHealthStatus: jest.fn(),
+      getAverageTicketTrend: jest.fn(),
     } as jest.Mocked<IFinancialRepository>;
 
     // Mock padrão do getDateRange para todos os testes
@@ -185,7 +189,7 @@ describe('ProcessExcelUseCase', () => {
       const mockTransactions = [createMockTransaction()];
       mockExcelProcessor.processExcelFile.mockResolvedValue(mockTransactions);
 
-      const errorMessage = 'Erro ao salvar no DuckDB';
+      const errorMessage = 'Erro ao salvar no banco';
       mockFinancialRepository.saveBatch.mockRejectedValue(new Error(errorMessage));
 
       const request = {
