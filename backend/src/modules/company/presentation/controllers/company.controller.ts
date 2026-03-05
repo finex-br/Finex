@@ -5,6 +5,7 @@ import {
   Headers,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -129,6 +130,20 @@ export class CompanyController {
         role: rows[0].member_role,
       },
     };
+  }
+
+  @Get(':id/name')
+  async getCompanyName(@Param('id') id: string) {
+    const rows = await this.dataSource.query(
+      'SELECT name FROM companies WHERE id = $1 LIMIT 1',
+      [id],
+    );
+
+    if (!rows || rows.length === 0) {
+      throw new HttpException('Company not found', HttpStatus.NOT_FOUND);
+    }
+
+    return { success: true, companyName: rows[0].name };
   }
 
   @Post()

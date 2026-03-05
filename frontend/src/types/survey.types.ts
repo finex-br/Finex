@@ -2,6 +2,7 @@ export interface Survey {
   surveyId: string;
   title: string;
   description: string;
+  estimatedTimeMinutes?: number;
   hasStarted: boolean;
   progress?: number;
   assessmentId?: string;
@@ -59,4 +60,19 @@ export interface CompleteAssessmentResponse {
   success: boolean;
   finalScore: number;
   completedAt: Date;
+}
+
+export interface CompletedAssessment {
+  id: string;
+  title: string;
+  finalScore: number;
+  completedAt: string;
+}
+
+export interface AssessmentResponse {
+  questionText: string;
+  questionType: QuestionType;
+  orderIndex: number;
+  value: any;
+  comment: string | null;
 }

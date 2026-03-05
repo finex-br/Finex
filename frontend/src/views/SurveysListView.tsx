@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Progress } from '../components/ui/progress';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Loader2, FileText, PlayCircle } from 'lucide-react';
+import { Loader2, FileText, PlayCircle, Clock } from 'lucide-react';
 import { AppLayout } from '../components/AppLayout';
 import type { Survey } from '../types/survey.types';
 
@@ -102,6 +102,12 @@ export const SurveysListView = () => {
                     <CardDescription className="line-clamp-2">
                       {survey.description}
                     </CardDescription>
+                    {survey.estimatedTimeMinutes && (
+                      <div className="flex items-center gap-1 mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>~{survey.estimatedTimeMinutes} min</span>
+                      </div>
+                    )}
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {survey.hasStarted && survey.progress !== undefined ? (

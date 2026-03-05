@@ -3,6 +3,7 @@ import { api } from './api';
 export interface CreateSurveyRequest {
   title: string;
   description?: string;
+  estimatedTimeMinutes?: number;
 }
 
 export interface SurveyResponse {
@@ -10,6 +11,7 @@ export interface SurveyResponse {
   title: string;
   description?: string;
   isActive: boolean;
+  estimatedTimeMinutes: number;
   versionId: string;
   versionNumber: number;
   createdAt: string;
@@ -38,6 +40,7 @@ export interface GetAllSurveysResponse {
     title: string;
     description: string;
     isActive: boolean;
+    estimatedTimeMinutes: number;
     createdAt: string;
     updatedAt: string;
   }>;
@@ -106,6 +109,24 @@ class AdminSurveyService {
     const response = await api.get<GetCompletedAssessmentsResponse>(
       `/admin/surveys/assessments/completed?${params.toString()}`
     );
+    return response.data;
+  }
+  /**
+   * Get responses for a completed assessment (admin)
+   */
+  async getAssessmentResponses(assessmentId: string): Promise<{
+    assessmentId: string;
+    surveyTitle: string;
+    companyName: string;
+    responses: Array<{
+      questionText: string;
+      questionType: string;
+      orderIndex: number;
+      value: any;
+      comment: string | null;
+    }>;
+  }> {
+    const response = await api.get(`/admin/surveys/assessments/${assessmentId}/responses`);
     return response.data;
   }
 }

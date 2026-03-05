@@ -156,6 +156,86 @@ export class UserSurveyController {
     return result.getValue();
   }
 
+  @Get('completed')
+  @ApiOperation({ summary: 'Get completed assessments for company' })
+  async getCompletedAssessments(
+    @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
+  ) {
+    const companyId = await this.resolveCompanyId(req, xCompanyId);
+
+    const rows = await this.dataSource.query(
+      `SELECT a.id, s.title, a.final_score, a.updated_at as completed_at
+       FROM assessments a
+       JOIN survey_versions sv ON sv.id = a.survey_version_id
+       JOIN surveys s ON s.id = sv.survey_id
+       WHERE a.company_id = $1 AND a.status = 'COMPLETED'
+       ORDER BY a.updated_at DESC`,
+      [companyId],
+    );
+
+    return {
+      completedAssessments: (rows || []).map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        finalScore: Number(r.final_score),
+        completedAt: r.completed_at,
+      })),
+    };
+  }
+
+  @Get('assessments/:assessmentId/responses')
+  @ApiOperation({ summary: 'Get all responses for a completed assessment' })
+  async getAssessmentResponses(
+    @Param('assessmentId') assessmentId: string,
+    @Request() req: any,
+    @Headers('x-company-id') xCompanyId?: string,
+  ) {
+    const companyId = await this.resolveCompanyId(req, xCompanyId);
+
+    // Verify assessment belongs to company and is completed
+    const assessmentRows = await this.dataSource.query(
+      `SELECT a.id, a.survey_version_id, a.status, s.title as survey_title
+       FROM assessments a
+       JOIN survey_versions sv ON sv.id = a.survey_version_id
+       JOIN surveys s ON s.id = sv.survey_id
+       WHERE a.id = $1 AND a.company_id = $2`,
+      [assessmentId, companyId],
+    );
+
+    if (!assessmentRows || assessmentRows.length === 0) {
+      throw new HttpException('Assessment not found', HttpStatus.NOT_FOUND);
+    }
+
+    const assessment = assessmentRows[0];
+
+    if (assessment.status !== 'COMPLETED') {
+      throw new HttpException('Assessment is not completed', HttpStatus.BAD_REQUEST);
+    }
+
+    const rows = await this.dataSource.query(
+      `SELECT q.text as question_text, q.type as question_type, q.order_index,
+              ans.value_json as value, ans.comment
+       FROM questions q
+       LEFT JOIN answers ans ON ans.question_id = q.id AND ans.assessment_id = $1
+       WHERE q.survey_version_id = $2
+       ORDER BY q.order_index ASC`,
+      [assessmentId, assessment.survey_version_id],
+    );
+
+    return {
+      assessmentId,
+      surveyTitle: assessment.survey_title,
+      responses: (rows || []).map((r: any) => ({
+        questionText: r.question_text,
+        questionType: r.question_type,
+        orderIndex: r.order_index,
+        value: r.value,
+        comment: r.comment,
+      })),
+    };
+  }
+
   @Get('assessments/:assessmentId/progress')
   @ApiOperation({ summary: 'Get assessment progress' })
   async getProgress(@Param('assessmentId') assessmentId: string) {

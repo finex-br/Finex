@@ -6,6 +6,8 @@ import type {
   SubmitAnswersRequest,
   SubmitAnswersResponse,
   CompleteAssessmentResponse,
+  CompletedAssessment,
+  AssessmentResponse,
 } from '../types/survey.types';
 
 export const surveyService = {
@@ -39,6 +41,22 @@ export const surveyService = {
   // Completar assessment
   async completeAssessment(assessmentId: string): Promise<CompleteAssessmentResponse> {
     const response = await api.post(`/surveys/assessments/${assessmentId}/complete`);
+    return response.data;
+  },
+
+  // Listar assessments completados
+  async getCompletedAssessments(): Promise<CompletedAssessment[]> {
+    const response = await api.get('/surveys/completed');
+    return response.data.completedAssessments || [];
+  },
+
+  // Buscar respostas de um assessment completado
+  async getAssessmentResponses(assessmentId: string): Promise<{
+    assessmentId: string;
+    surveyTitle: string;
+    responses: AssessmentResponse[];
+  }> {
+    const response = await api.get(`/surveys/assessments/${assessmentId}/responses`);
     return response.data;
   },
 

@@ -88,9 +88,27 @@ export const useLoginViewModel = (): UseLoginViewModelReturn => {
       // Salva autenticação no store (localStorage + Zustand)
       setAuth(response.token, response.user);
 
+      // Detecta primeiro acesso do usuário
+      const firstLoginKey = `finex-first-login-${response.user.id}`;
+      const hasLoggedInBefore = localStorage.getItem(firstLoginKey);
+      if (!hasLoggedInBefore) {
+        localStorage.setItem(firstLoginKey, 'true');
+        sessionStorage.setItem('finex-redirect-after-setup', '/surveys');
+      }
+
       // Redireciona após login: exige seleção de empresa antes das rotas tenant
       const companyId = localStorage.getItem('current_company_id');
-      navigate(companyId ? '/dashboard' : '/company/setup', { replace: true });
+      if (companyId) {
+        const redirectAfterSetup = sessionStorage.getItem('finex-redirect-after-setup');
+        if (redirectAfterSetup) {
+          sessionStorage.removeItem('finex-redirect-after-setup');
+          navigate(redirectAfterSetup, { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
+      } else {
+        navigate('/company/setup', { replace: true });
+      }
     } catch (err) {
       // Tratamento de erro com mensagem amigável
       const axiosError = err as AxiosError<{ message?: string }>;

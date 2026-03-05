@@ -13,6 +13,7 @@ export interface PendingSurveyResponse {
   surveyId: string;
   title: string;
   description: string;
+  estimatedTimeMinutes: number;
   hasStarted: boolean;
   progress?: number;
   assessmentId?: string;
@@ -64,6 +65,7 @@ export class GetPendingAssessmentsUseCase {
           surveyId: survey.id.toString(),
           title: survey.title,
           description: survey.description ?? '',
+          estimatedTimeMinutes: survey.estimatedTimeMinutes,
           hasStarted: !!assessment,
           progress: assessment?.finalScore,
           assessmentId: assessment?.id.toString() ?? '',

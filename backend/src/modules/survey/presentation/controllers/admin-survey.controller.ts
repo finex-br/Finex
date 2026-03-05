@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Get, Patch, Param, Query, UseGuards, Inject } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param, Query, UseGuards, Inject, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
 import { JwtAuthGuard } from '../../../authentication/presentation/http/guards/jwt-auth.guard';
 import { AdminGuard } from '../../../authentication/presentation/http/guards/admin.guard';
 import { CreateSurveyDto } from '../dtos/create-survey.dto';
@@ -23,6 +24,7 @@ export class AdminSurveyController {
     private readonly getCompletedAssessmentsUseCase: GetCompletedAssessmentsUseCase,
     private readonly createSurveyVersionUseCase: CreateSurveyVersionUseCase,
     private readonly addQuestionUseCase: AddQuestionUseCase,
+    private readonly dataSource: DataSource,
   ) {}
 
   @Post()
@@ -97,6 +99,54 @@ export class AdminSurveyController {
     }
 
     return result.getValue();
+  }
+
+  @Get('assessments/:assessmentId/responses')
+  @ApiOperation({ summary: 'Get all responses for a completed assessment (admin)' })
+  async getAssessmentResponses(@Param('assessmentId') assessmentId: string) {
+    const assessmentRows = await this.dataSource.query(
+      `SELECT a.id, a.survey_version_id, a.status, s.title as survey_title,
+              c.name as company_name, a.company_id
+       FROM assessments a
+       JOIN survey_versions sv ON sv.id = a.survey_version_id
+       JOIN surveys s ON s.id = sv.survey_id
+       LEFT JOIN companies c ON c.id = a.company_id
+       WHERE a.id = $1`,
+      [assessmentId],
+    );
+
+    if (!assessmentRows || assessmentRows.length === 0) {
+      throw new HttpException('Assessment not found', HttpStatus.NOT_FOUND);
+    }
+
+    const assessment = assessmentRows[0];
+
+    if (assessment.status !== 'COMPLETED') {
+      throw new HttpException('Assessment is not completed', HttpStatus.BAD_REQUEST);
+    }
+
+    const rows = await this.dataSource.query(
+      `SELECT q.text as question_text, q.type as question_type, q.order_index,
+              ans.value_json as value, ans.comment
+       FROM questions q
+       LEFT JOIN answers ans ON ans.question_id = q.id AND ans.assessment_id = $1
+       WHERE q.survey_version_id = $2
+       ORDER BY q.order_index ASC`,
+      [assessmentId, assessment.survey_version_id],
+    );
+
+    return {
+      assessmentId,
+      surveyTitle: assessment.survey_title,
+      companyName: assessment.company_name,
+      responses: (rows || []).map((r: any) => ({
+        questionText: r.question_text,
+        questionType: r.question_type,
+        orderIndex: r.order_index,
+        value: r.value,
+        comment: r.comment,
+      })),
+    };
   }
 
   @Get(':id')

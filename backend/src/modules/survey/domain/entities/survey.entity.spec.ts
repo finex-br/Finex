@@ -109,6 +109,38 @@ describe('Survey Entity', () => {
 
       expect(result.isSuccess).toBe(true);
     });
+
+    it('should create survey with default estimatedTimeMinutes of 2', () => {
+      const result = Survey.create({
+        title: 'Test Survey',
+        description: 'Test',
+      });
+
+      expect(result.isSuccess).toBe(true);
+      expect(result.getValue().estimatedTimeMinutes).toBe(2);
+    });
+
+    it('should create survey with custom estimatedTimeMinutes', () => {
+      const result = Survey.create({
+        title: 'Test Survey',
+        description: 'Test',
+        estimatedTimeMinutes: 10,
+      });
+
+      expect(result.isSuccess).toBe(true);
+      expect(result.getValue().estimatedTimeMinutes).toBe(10);
+    });
+
+    it('should fail with estimatedTimeMinutes less than 1', () => {
+      const result = Survey.create({
+        title: 'Test Survey',
+        description: 'Test',
+        estimatedTimeMinutes: 0,
+      });
+
+      expect(result.isFailure).toBe(true);
+      expect(result.error).toContain('estimatedTimeMinutes');
+    });
   });
 
   describe('activate', () => {

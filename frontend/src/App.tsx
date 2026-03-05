@@ -12,6 +12,7 @@ import { DashboardView } from "./views/DashboardView";
 import { GoogleCallbackView } from "./views/GoogleCallbackView";
 import { SurveysListView } from "./views/SurveysListView";
 import { SurveyQuestionnaireView } from "./views/SurveyQuestionnaireView";
+import { SurveyResponsesView } from "./views/SurveyResponsesView";
 import { AdminPanelView } from "./views/AdminPanelView";
 import { PendingDocumentsAdminView } from "./views/PendingDocumentsAdminView";
 import { PendingDocumentAdminDetailView } from "./views/PendingDocumentAdminDetailView";
@@ -23,6 +24,8 @@ import { ChartBuilderView } from "./views/admin/ChartBuilderView";
 import { DashboardListView } from "./views/admin/DashboardListView";
 import { DashboardConfigView } from "./views/admin/DashboardConfigView";
 import { DynamicDashboardView } from "./views/DynamicDashboardView";
+import { PrivacyView } from "./views/PrivacyView";
+import { TermsView } from "./views/TermsView";
 import { useAuthStore } from "./store/authStore";
 
 const queryClient = new QueryClient();
@@ -88,6 +91,10 @@ const App = () => (
             
             {/* Rota Pública - Cadastro */}
             <Route path="/signup" element={<SignUpView />} />
+
+            {/* Rotas Públicas - Privacidade e Termos */}
+            <Route path="/privacy" element={<PrivacyView />} />
+            <Route path="/terms" element={<TermsView />} />
             
             {/* OAuth DESABILITADO - Rota de callback removida */}
             {/* <Route path="/auth/google/callback" element={<GoogleCallbackView />} /> */}
@@ -122,14 +129,24 @@ const App = () => (
               } 
             />
             
+            {/* Rota Protegida - Ver Respostas (must be before :assessmentId) */}
+            <Route
+              path="/surveys/:assessmentId/responses"
+              element={
+                <ProtectedRoute requireCompany>
+                  <SurveyResponsesView />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Rota Protegida - Questionário */}
-            <Route 
-              path="/surveys/:assessmentId" 
+            <Route
+              path="/surveys/:assessmentId"
               element={
                 <ProtectedRoute requireCompany>
                   <SurveyQuestionnaireView />
                 </ProtectedRoute>
-              } 
+              }
             />
 
             {/* Rota Protegida - Admin Pending Documents */}

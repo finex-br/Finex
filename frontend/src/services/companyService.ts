@@ -40,4 +40,9 @@ export const companyService = {
     const res = await api.post<CreateCompanyResponse>('/companies', { name });
     return res.data;
   },
+
+  getCompanyName: async (companyId: string): Promise<string> => {
+    const res = await api.get<{ success: boolean; companyName: string }>(`/companies/${companyId}/name`);
+    return res.data.companyName;
+  },
 };

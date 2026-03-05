@@ -1,21 +1,18 @@
 import { useState } from 'react';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
 import { Upload, X, FileIcon } from 'lucide-react';
 import type { Question } from '../../types/survey.types';
 
 interface FileUploadQuestionProps {
   question: Question;
   value?: any;
-  comment?: string;
   onChange: (value: any, comment?: string) => void;
 }
 
 export const FileUploadQuestion = ({
   question,
   value,
-  comment,
   onChange,
 }: FileUploadQuestionProps) => {
   const [uploading, setUploading] = useState(false);
@@ -33,7 +30,7 @@ export const FileUploadQuestion = ({
       
       const newFileIds = [...uploadedFiles, ...fileIds];
       setUploadedFiles(newFileIds);
-      onChange({ fileIds: newFileIds }, comment);
+      onChange({ fileIds: newFileIds });
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
     } finally {
@@ -44,11 +41,7 @@ export const FileUploadQuestion = ({
   const handleRemoveFile = (fileId: string) => {
     const newFileIds = uploadedFiles.filter((id) => id !== fileId);
     setUploadedFiles(newFileIds);
-    onChange({ fileIds: newFileIds }, comment);
-  };
-
-  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(value, e.target.value);
+    onChange({ fileIds: newFileIds });
   };
 
   return (
@@ -111,19 +104,6 @@ export const FileUploadQuestion = ({
             </div>
           </div>
         )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor={`${question.id}-comment`}>
-          Comentário (opcional)
-        </Label>
-        <Textarea
-          id={`${question.id}-comment`}
-          placeholder="Adicione um comentário..."
-          value={comment || ''}
-          onChange={handleCommentChange}
-          rows={2}
-        />
       </div>
     </div>
   );

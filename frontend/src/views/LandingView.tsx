@@ -1,11 +1,11 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, ShieldCheck, TrendingUp, ArrowRight } from 'lucide-react';
 
 /**
  * LandingView - Landing Page Institucional do FinEx
- * 
+ *
  * Objetivo: Comunicar valor, autoridade e converter visitantes em usuários.
  * Foco: Clareza financeira, governança e valuation.
  */
@@ -17,9 +17,9 @@ export function LandingView() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       {/* Navbar */}
-      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b bg-white/80 dark:bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2">
@@ -28,10 +28,10 @@ export function LandingView() {
           </div>
 
           {/* CTA Button */}
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleNavigateToLogin}
-            className="border-orange-600 text-orange-600 hover:bg-orange-50"
+            className="border-orange-600 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
           >
             Login
           </Button>
@@ -42,20 +42,20 @@ export function LandingView() {
       <section className="container mx-auto px-4 py-20 md:py-32">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Headline */}
-          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 dark:text-foreground leading-tight">
             Transforme Dados Financeiros em{' '}
             <span className="text-orange-600">Decisões Estratégicas</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg md:text-xl text-slate-700 max-w-3xl mx-auto leading-relaxed">
-            A plataforma unificada de inteligência financeira, governança e valuation 
+          <p className="text-lg md:text-xl text-slate-700 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            A plataforma unificada de inteligência financeira, governança e valuation
             que desvenda a verdadeira saúde do seu negócio.
           </p>
 
           {/* CTA Principal */}
           <div className="pt-4">
-            <Button 
+            <Button
               size="lg"
               onClick={handleNavigateToLogin}
               className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
@@ -67,7 +67,7 @@ export function LandingView() {
 
           {/* Badge/Proof */}
           <div className="pt-8">
-            <p className="text-sm text-slate-500 font-medium">
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
               Desenvolvido por <span className="text-orange-600">Singular</span> • Tecnologia de ponta para finanças corporativas
             </p>
           </div>
@@ -75,27 +75,27 @@ export function LandingView() {
       </section>
 
       {/* Value Proposition - 3 Pilares */}
-      <section className="container mx-auto px-4 py-20 bg-white">
+      <section className="container mx-auto px-4 py-20 bg-white dark:bg-background">
         <div className="max-w-6xl mx-auto">
           {/* Section Title */}
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-foreground mb-4">
               Três Pilares da Excelência Financeira
             </h2>
-            <p className="text-lg text-slate-600">
+            <p className="text-lg text-slate-600 dark:text-slate-400">
               Tecnologia que une análise, gestão de risco e inteligência de mercado
             </p>
           </div>
 
           {/* Grid de Cards */}
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Card 1: Clareza Total */}
-            <Card className="border-2 hover:border-orange-200 transition-all duration-200 hover:shadow-lg">
+            <Card className="border-2 hover:border-orange-200 dark:hover:border-orange-800 transition-all duration-200 hover:shadow-lg">
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
                   <BarChart3 className="w-8 h-8 text-orange-600" />
                 </div>
-                <CardTitle className="text-xl font-bold text-slate-900">
+                <CardTitle className="text-xl font-bold text-slate-900 dark:text-foreground">
                   Clareza Total
                 </CardTitle>
                 <CardDescription className="text-base">
@@ -103,20 +103,20 @@ export function LandingView() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-center">
-                <p className="text-slate-700">
-                  Consolidação de fluxo de caixa e DRE em tempo real. 
+                <p className="text-slate-700 dark:text-slate-300">
+                  Consolidação de fluxo de caixa e DRE em tempo real.
                   Entenda suas operações com dashboards intuitivos e insights acionáveis.
                 </p>
               </CardContent>
             </Card>
 
             {/* Card 2: Maturidade & Risco */}
-            <Card className="border-2 hover:border-orange-200 transition-all duration-200 hover:shadow-lg">
+            <Card className="border-2 hover:border-orange-200 dark:hover:border-orange-800 transition-all duration-200 hover:shadow-lg">
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
                   <ShieldCheck className="w-8 h-8 text-orange-600" />
                 </div>
-                <CardTitle className="text-xl font-bold text-slate-900">
+                <CardTitle className="text-xl font-bold text-slate-900 dark:text-foreground">
                   Maturidade & Risco
                 </CardTitle>
                 <CardDescription className="text-base">
@@ -124,30 +124,30 @@ export function LandingView() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-center">
-                <p className="text-slate-700">
-                  Avalie a governança corporativa e reduza riscos operacionais. 
+                <p className="text-slate-700 dark:text-slate-300">
+                  Avalie a governança corporativa e reduza riscos operacionais.
                   Frameworks validados para elevar a maturidade do seu negócio.
                 </p>
               </CardContent>
             </Card>
 
-            {/* Card 3: Valor Invisível */}
-            <Card className="border-2 hover:border-orange-200 transition-all duration-200 hover:shadow-lg">
+            {/* Card 3: Valuation Empresarial */}
+            <Card className="border-2 hover:border-orange-200 dark:hover:border-orange-800 transition-all duration-200 hover:shadow-lg">
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
                   <TrendingUp className="w-8 h-8 text-orange-600" />
                 </div>
-                <CardTitle className="text-xl font-bold text-slate-900">
-                  Valor Invisível
+                <CardTitle className="text-xl font-bold text-slate-900 dark:text-foreground">
+                  Valuation Empresarial
                 </CardTitle>
                 <CardDescription className="text-base">
                   Descubra o valor real do negócio
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-center">
-                <p className="text-slate-700">
-                  Descubra quanto sua empresa realmente vale. 
-                  Metodologias de valuation para fundraising, M&A e planejamento estratégico.
+                <p className="text-slate-700 dark:text-slate-300">
+                  Descubra quanto sua empresa realmente vale. Metodologias de valuation
+                  para fundraising, M&A e planejamento estratégico.
                 </p>
               </CardContent>
             </Card>
@@ -164,7 +164,7 @@ export function LandingView() {
           <p className="text-lg text-orange-100 mb-8">
             Junte-se a empresas que já tomam decisões baseadas em dados reais.
           </p>
-          <Button 
+          <Button
             size="lg"
             onClick={handleNavigateToLogin}
             className="bg-white text-orange-600 hover:bg-orange-50 px-8 py-6 text-lg font-semibold shadow-lg"
@@ -176,7 +176,7 @@ export function LandingView() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-slate-50">
+      <footer className="border-t bg-slate-50 dark:bg-card">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             {/* Logo Footer */}
@@ -186,27 +186,29 @@ export function LandingView() {
             </div>
 
             {/* Copyright */}
-            <p className="text-sm text-slate-600">
-              © 2025 Singular. Todos os direitos reservados.
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              © 2025 FinEx. Todos os direitos reservados.
             </p>
 
-            {/* Social Links ou Menu (Opcional) */}
+            {/* Links */}
             <div className="flex items-center space-x-6">
-              <a 
-                href="#" 
-                className="text-sm text-slate-600 hover:text-orange-600 transition-colors"
+              <Link
+                to="/privacy"
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-orange-600 transition-colors"
               >
                 Privacidade
-              </a>
-              <a 
-                href="#" 
-                className="text-sm text-slate-600 hover:text-orange-600 transition-colors"
+              </Link>
+              <Link
+                to="/terms"
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-orange-600 transition-colors"
               >
                 Termos
-              </a>
-              <a 
-                href="#" 
-                className="text-sm text-slate-600 hover:text-orange-600 transition-colors"
+              </Link>
+              <a
+                href="https://wa.me/5561961740440"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-orange-600 transition-colors"
               >
                 Contato
               </a>

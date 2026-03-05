@@ -16,6 +16,15 @@ import {
 } from '@/components/ui/select';
 import { useAuthStore } from '@/store/authStore';
 
+function getPostSetupRedirect(): string {
+  const redirect = sessionStorage.getItem('finex-redirect-after-setup');
+  if (redirect) {
+    sessionStorage.removeItem('finex-redirect-after-setup');
+    return redirect;
+  }
+  return '/dashboard';
+}
+
 export function CompanySetupView() {
   const navigate = useNavigate();
   const setCurrentCompany = useAuthStore((s) => s.setCurrentCompany);
@@ -36,7 +45,7 @@ export function CompanySetupView() {
 
         if (me.company) {
           setCurrentCompany(me.company.id, me.company.name);
-          navigate('/dashboard', { replace: true });
+          navigate(getPostSetupRedirect(), { replace: true });
           return;
         }
 
@@ -58,7 +67,7 @@ export function CompanySetupView() {
 
             if (list.companies?.length === 1) {
               setCurrentCompany(list.companies[0].id, list.companies[0].name);
-              navigate('/dashboard', { replace: true });
+              navigate(getPostSetupRedirect(), { replace: true });
               return;
             }
           } catch {
@@ -91,7 +100,7 @@ export function CompanySetupView() {
       }
 
       setCurrentCompany(me.company.id, me.company.name);
-      navigate('/dashboard', { replace: true });
+      navigate(getPostSetupRedirect(), { replace: true });
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
       setError(axiosError.response?.data?.message || 'Erro ao selecionar empresa');
@@ -109,7 +118,8 @@ export function CompanySetupView() {
       const result = await companyService.createCompany(companyName.trim());
       setSuccessMessage(result.message || 'Empresa criada com sucesso');
       setCurrentCompany(result.company.id, result.company.name);
-      setTimeout(() => navigate('/dashboard', { replace: true }), 800);
+      const redirect = getPostSetupRedirect();
+      setTimeout(() => navigate(redirect, { replace: true }), 800);
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
       setError(axiosError.response?.data?.message || 'Erro ao criar empresa');

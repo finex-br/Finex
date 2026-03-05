@@ -14,6 +14,7 @@ export function CreateSurveyForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [surveyTitle, setSurveyTitle] = useState('');
   const [surveyDescription, setSurveyDescription] = useState('');
+  const [estimatedTime, setEstimatedTime] = useState(2);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [surveyVersionId, setSurveyVersionId] = useState<string | null>(null);
 
@@ -104,6 +105,7 @@ export function CreateSurveyForm() {
       const surveyResponse = await adminSurveyService.createSurvey({
         title: surveyTitle.trim(),
         description: surveyDescription.trim() || undefined,
+        estimatedTimeMinutes: estimatedTime,
       });
 
       console.log('✅ Survey created:', surveyResponse);
@@ -138,6 +140,7 @@ export function CreateSurveyForm() {
       // Reset form
       setSurveyTitle('');
       setSurveyDescription('');
+      setEstimatedTime(2);
       setQuestions([]);
       setSurveyVersionId(null);
 
@@ -179,6 +182,20 @@ export function CreateSurveyForm() {
             disabled={isLoading}
             rows={3}
             className="mt-1"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="estimatedTime">Tempo estimado (minutos)</Label>
+          <Input
+            id="estimatedTime"
+            type="number"
+            min={1}
+            placeholder="Ex: 5"
+            value={estimatedTime}
+            onChange={(e) => setEstimatedTime(Math.max(1, parseInt(e.target.value) || 1))}
+            disabled={isLoading}
+            className="mt-1 w-32"
           />
         </div>
       </div>
