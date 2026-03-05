@@ -3,6 +3,7 @@ import { api } from './api';
 export interface CreateSurveyRequest {
   title: string;
   description?: string;
+  estimatedTimeMinutes?: number;
 }
 
 export interface SurveyResponse {
@@ -10,6 +11,7 @@ export interface SurveyResponse {
   title: string;
   description?: string;
   isActive: boolean;
+  estimatedTimeMinutes: number;
   versionId: string;
   versionNumber: number;
   createdAt: string;
@@ -38,6 +40,7 @@ export interface GetAllSurveysResponse {
     title: string;
     description: string;
     isActive: boolean;
+    estimatedTimeMinutes: number;
     createdAt: string;
     updatedAt: string;
   }>;

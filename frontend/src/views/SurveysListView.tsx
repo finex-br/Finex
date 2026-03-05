@@ -2,35 +2,19 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { surveyService } from '../services/surveyService';
 import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Progress } from '../components/ui/progress';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Loader2, FileText, PlayCircle, Info, CheckCircle, Eye } from 'lucide-react';
+import { Loader2, FileText, PlayCircle, Clock } from 'lucide-react';
 import { AppLayout } from '../components/AppLayout';
-import { PageHeader } from '../components/PageHeader';
-import { useAuthStore } from '../store/authStore';
-import type { Survey, CompletedAssessment } from '../types/survey.types';
+import type { Survey } from '../types/survey.types';
 
 export const SurveysListView = () => {
   const navigate = useNavigate();
-  const user = useAuthStore((s) => s.user);
   const [surveys, setSurveys] = useState<Survey[]>([]);
-  const [completedAssessments, setCompletedAssessments] = useState<CompletedAssessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startingId, setStartingId] = useState<string | null>(null);
-  const [showIntroBanner, setShowIntroBanner] = useState(false);
-
-  useEffect(() => {
-    if (user?.id) {
-      const firstLoginKey = `finex-first-login-${user.id}`;
-      const completedSurveysKey = `finex-surveys-intro-dismissed-${user.id}`;
-      const isFirstLogin = localStorage.getItem(firstLoginKey);
-      const dismissed = localStorage.getItem(completedSurveysKey);
-      if (isFirstLogin && !dismissed) {
-        setShowIntroBanner(true);
-      }
-    }
-  }, [user?.id]);
 
   useEffect(() => {
     loadSurveys();
@@ -40,12 +24,8 @@ export const SurveysListView = () => {
     setLoading(true);
     setError(null);
     try {
-      const [pendingData, completedData] = await Promise.all([
-        surveyService.getPendingSurveys(),
-        surveyService.getCompletedAssessments().catch(() => []),
-      ]);
-      setSurveys(pendingData);
-      setCompletedAssessments(completedData);
+      const data = await surveyService.getPendingSurveys();
+      setSurveys(data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erro ao carregar questionários');
     } finally {
@@ -67,10 +47,10 @@ export const SurveysListView = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="min-h-screen p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+          <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-center min-h-[60vh]">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           </div>
         </div>
@@ -80,35 +60,17 @@ export const SurveysListView = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <PageHeader
-            title="Questionários"
-            subtitle="Complete os questionários disponíveis para sua empresa"
-          />
-
-          {/* First Access Intro Banner */}
-          {showIntroBanner && (
-            <Alert className="bg-primary/10 border-primary/30">
-              <Info className="h-4 w-4 text-primary" />
-              <AlertDescription className="flex items-center justify-between">
-                <span>Antes de prosseguir, responda a estas breves perguntas para que possamos conhecer melhor sua empresa.</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-4 shrink-0"
-                  onClick={() => {
-                    if (user?.id) {
-                      localStorage.setItem(`finex-surveys-intro-dismissed-${user.id}`, 'true');
-                    }
-                    setShowIntroBanner(false);
-                  }}
-                >
-                  Fechar
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+              Questionários
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">
+              Complete os questionários disponíveis para sua empresa
+            </p>
+          </div>
 
           {/* Error Alert */}
           {error && (
@@ -118,103 +80,69 @@ export const SurveysListView = () => {
           )}
 
           {/* Empty State */}
-          {surveys.length === 0 && completedAssessments.length === 0 ? (
-            <div className="glass-card p-12 text-center">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                Nenhum questionário disponível no momento
-              </p>
-            </div>
+          {surveys.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6 text-center py-12">
+                <FileText className="h-12 w-12 mx-auto text-slate-400 dark:text-slate-500 mb-4" />
+                <p className="text-slate-600 dark:text-slate-400">
+                  Nenhum questionário disponível no momento
+                </p>
+              </CardContent>
+            </Card>
           ) : (
-            <>
-              {/* Pending Surveys Grid */}
-              {surveys.length > 0 && (
-                <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-                  {surveys.map((survey) => (
-                    <div key={survey.surveyId} className="glass-card-hover p-6 space-y-4">
-                      <div>
-                        <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                          <FileText className="h-5 w-5 flex-shrink-0 text-primary" />
-                          <span className="line-clamp-2">{survey.title}</span>
-                        </h3>
-                        {survey.description && (
-                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                            {survey.description}
-                          </p>
-                        )}
+            /* Surveys Grid */
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+              {surveys.map((survey) => (
+                <Card key={survey.surveyId} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                      <FileText className="h-5 w-5 flex-shrink-0" />
+                      <span className="line-clamp-2">{survey.title}</span>
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {survey.description}
+                    </CardDescription>
+                    {survey.estimatedTimeMinutes && (
+                      <div className="flex items-center gap-1 mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>~{survey.estimatedTimeMinutes} min</span>
                       </div>
-
-                      {survey.hasStarted && survey.progress !== undefined ? (
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Progresso</span>
-                            <span className="font-medium text-foreground">
-                              {survey.progress}%
-                            </span>
-                          </div>
-                          <Progress value={survey.progress} className="h-2" />
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {survey.hasStarted && survey.progress !== undefined ? (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-600 dark:text-slate-400">Progresso</span>
+                          <span className="font-medium text-slate-900 dark:text-slate-100">
+                            {survey.progress}%
+                          </span>
                         </div>
-                      ) : null}
-
-                      <Button
-                        onClick={() => handleStartSurvey(survey)}
-                        disabled={startingId === survey.surveyId}
-                        className="w-full"
-                      >
-                        {startingId === survey.surveyId ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Carregando...
-                          </>
-                        ) : (
-                          <>
-                            <PlayCircle className="h-4 w-4 mr-2" />
-                            {survey.hasStarted ? 'Continuar' : 'Iniciar'}
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Completed Assessments */}
-              {completedAssessments.length > 0 && (
-                <div className="space-y-4">
-                  <h2 className="text-lg font-semibold text-foreground">Questionários Respondidos</h2>
-                  <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-                    {completedAssessments.map((assessment) => (
-                      <div key={assessment.id} className="glass-card p-6 space-y-4">
-                        <div>
-                          <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                            <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500" />
-                            <span className="line-clamp-2">{assessment.title}</span>
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Respondido em {new Date(assessment.completedAt).toLocaleDateString('pt-BR')}
-                          </p>
-                        </div>
-
-                        {assessment.finalScore > 0 && (
-                          <div className="text-sm text-muted-foreground">
-                            Pontuação: <span className="font-medium text-foreground">{assessment.finalScore.toFixed(1)}</span>
-                          </div>
-                        )}
-
-                        <Button
-                          variant="outline"
-                          onClick={() => navigate(`/surveys/${assessment.id}/responses`)}
-                          className="w-full"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Ver Respostas
-                        </Button>
+                        <Progress value={survey.progress} className="h-2" />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
+                    ) : null}
+
+                    <Button
+                      onClick={() => handleStartSurvey(survey)}
+                      disabled={startingId === survey.surveyId}
+                      className="w-full"
+                    >
+                      {startingId === survey.surveyId ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Carregando...
+                        </>
+                      ) : (
+                        <>
+                          <PlayCircle className="h-4 w-4 mr-2" />
+                          {survey.hasStarted ? 'Continuar' : 'Iniciar'}
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </div>
       </div>

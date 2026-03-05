@@ -9,6 +9,7 @@ export class SurveyMapper {
         title: schema.title,
         description: schema.description ?? undefined,
         isActive: schema.isActive,
+        estimatedTimeMinutes: schema.estimatedTimeMinutes,
         createdAt: schema.createdAt,
         updatedAt: schema.updatedAt,
       },
@@ -28,6 +29,7 @@ export class SurveyMapper {
     schema.title = survey.title;
     schema.description = survey.description ?? '';
     schema.isActive = survey.isActive;
+    schema.estimatedTimeMinutes = survey.estimatedTimeMinutes;
     schema.createdAt = survey.createdAt;
     schema.updatedAt = survey.updatedAt;
     return schema;

@@ -2,6 +2,7 @@ export interface Survey {
   surveyId: string;
   title: string;
   description: string;
+  estimatedTimeMinutes?: number;
   hasStarted: boolean;
   progress?: number;
   assessmentId?: string;

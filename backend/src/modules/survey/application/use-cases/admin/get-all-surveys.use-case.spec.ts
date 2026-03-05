@@ -95,6 +95,7 @@ describe('GetAllSurveysUseCase', () => {
       expect(surveyDTO).toHaveProperty('isActive');
       expect(surveyDTO).toHaveProperty('createdAt');
       expect(surveyDTO).toHaveProperty('updatedAt');
+      expect(surveyDTO).toHaveProperty('estimatedTimeMinutes');
     });
   });
 
