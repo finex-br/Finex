@@ -34,7 +34,7 @@ import { DynamicDashboardRenderer } from '@/components/dashboard/DynamicDashboar
  */
 export function DashboardView() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, currentCompanyId } = useAuthStore();
 
   // === Dynamic dashboard state ===
   const [dynamicDashboards, setDynamicDashboards] = useState<Dashboard[]>([]);
@@ -43,10 +43,16 @@ export function DashboardView() {
   const [selectedDashboardLoading, setSelectedDashboardLoading] = useState(false);
   const [showHardcoded, setShowHardcoded] = useState(false);
 
-  const companyId = localStorage.getItem('current_company_id') || '';
+  const companyId = currentCompanyId || '';
 
-  // Check for dynamic dashboards on mount
+  // Check for dynamic dashboards on mount / company change
   useEffect(() => {
+    // Reset estado ao trocar de empresa para evitar dados stale
+    setDynamicDashboards([]);
+    setSelectedDashboard(null);
+    setShowHardcoded(false);
+    setDynamicLoading(true);
+
     if (!companyId) {
       setDynamicLoading(false);
       setShowHardcoded(true);
@@ -161,7 +167,7 @@ export function DashboardView() {
     if (showOperationalGraphs) {
       fetchVendingMetrics();
     }
-  }, [user?.id, periodFilter, showOperationalGraphs]);
+  }, [user?.id, companyId, periodFilter, showOperationalGraphs]);
 
   /**
    * NOVO (Lote 5): Handler para mudança de filtro individual de gráfico
