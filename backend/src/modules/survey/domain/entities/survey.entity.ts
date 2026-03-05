@@ -6,6 +6,7 @@ interface SurveyProps {
   title: string;
   description?: string;
   isActive: boolean;
+  estimatedTimeMinutes: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -14,6 +15,7 @@ export interface CreateSurveyProps {
   title: string;
   description?: string;
   isActive?: boolean;
+  estimatedTimeMinutes?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -45,6 +47,10 @@ export class Survey extends Entity<SurveyProps> {
 
   get updatedAt(): Date {
     return this.props.updatedAt;
+  }
+
+  get estimatedTimeMinutes(): number {
+    return this.props.estimatedTimeMinutes;
   }
 
   public activate(): Result<void> {
@@ -91,11 +97,17 @@ export class Survey extends Entity<SurveyProps> {
       return Result.fail<Survey>('Title cannot exceed 255 characters');
     }
 
+    const estimatedTimeMinutes = props.estimatedTimeMinutes ?? 2;
+    if (estimatedTimeMinutes < 1) {
+      return Result.fail<Survey>('estimatedTimeMinutes must be at least 1');
+    }
+
     const survey = new Survey(
       {
         title: props.title.trim(),
         description: props.description?.trim(),
         isActive: props.isActive ?? true,
+        estimatedTimeMinutes,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? new Date(),
       },

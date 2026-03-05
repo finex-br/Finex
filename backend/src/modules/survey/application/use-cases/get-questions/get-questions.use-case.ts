@@ -5,7 +5,7 @@ import { IQuestionRepository } from '../../../domain/repositories/question.repos
 import { IAssessmentRepository } from '../../../domain/repositories/assessment.repository.interface';
 import { IAnswerRepository } from '../../../domain/repositories/answer.repository.interface';
 
-const QUESTIONS_PER_PAGE = 5;
+const QUESTIONS_PER_PAGE = 1;
 
 export interface GetQuestionsRequest {
   assessmentId: string;
