@@ -59,7 +59,7 @@ export const useDashboardConfig = () => {
   const updateDashboard = useCallback(async (
     id: string,
     companyId: string,
-    data: { name?: string; description?: string; isDefault?: boolean },
+    data: { name?: string; description?: string; isDefault?: boolean; embedHtml?: string },
   ) => {
     setIsLoading(true);
     setError(null);
@@ -118,6 +118,7 @@ export const useDashboardConfig = () => {
         name: result.name,
         description: result.description,
         isDefault: result.isDefault,
+        embedHtml: result.embedHtml,
         createdBy: '',
         createdAt: '',
         updatedAt: '',

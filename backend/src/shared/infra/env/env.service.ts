@@ -58,4 +58,13 @@ export class EnvService {
   get asaasWebhookSecret(): string {
     return this.get('ASAAS_WEBHOOK_SECRET');
   }
+
+  // Sentry Configuration
+  get sentryDsn(): string {
+    return this.get('SENTRY_DSN');
+  }
+
+  get sentryEnabled(): boolean {
+    return !!this.get('SENTRY_DSN') && this.nodeEnv === 'production';
+  }
 }

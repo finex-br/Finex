@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import * as Sentry from '@sentry/react';
+import { SentryErrorFallback } from './components/SentryErrorFallback';
 import { LandingView } from "./views/LandingView";
 import { LoginView } from "./views/LoginView";
 import { SignUpView } from "./views/SignUpView";
@@ -29,6 +31,8 @@ import { TermsView } from "./views/TermsView";
 import { useAuthStore } from "./store/authStore";
 
 const queryClient = new QueryClient();
+
+const SentryRoutes = Sentry.withSentryReactRouterV6Routing(Routes);
 
 /**
  * ProtectedRoute - Componente de Rota Protegida
@@ -76,13 +80,14 @@ const AdminRoute = ({ children }: ProtectedRouteProps) => {
 };
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+  <Sentry.ErrorBoundary fallback={SentryErrorFallback}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <SentryRoutes>
             {/* Rota Pública - Landing Page */}
             <Route path="/" element={<LandingView />} />
             
@@ -267,11 +272,12 @@ const App = () => (
 
             {/* Catch-all - Redireciona para a home */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
+            </SentryRoutes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
+  </Sentry.ErrorBoundary>
 );
 
 export default App;

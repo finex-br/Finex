@@ -1,6 +1,7 @@
 import { Module, Controller, Get } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EnvModule, EnvService } from './shared/infra/env';
+import { SentryConfigModule } from './shared/infra/sentry';
 import { AuthenticationModule } from './modules/authentication/infrastructure/authentication.module';
 import { CompanyModule } from './modules/company/company.module';
 import { FinancialModule } from './modules/financial/financial.module';
@@ -19,6 +20,7 @@ export class AppController {
 @Module({
   imports: [
     EnvModule,
+    SentryConfigModule,
     TypeOrmModule.forRootAsync({
       inject: [EnvService],
       useFactory: (envService: EnvService) => ({

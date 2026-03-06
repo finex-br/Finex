@@ -13,8 +13,7 @@ import {
 
 @Injectable()
 export class GetDashboardUseCase
-  implements IUseCase<GetDashboardRequestDTO, DashboardWithDataResponseDTO>
-{
+  implements IUseCase<GetDashboardRequestDTO, DashboardWithDataResponseDTO> {
   constructor(
     @Inject('IDashboardRepository')
     private readonly dashboardRepo: IDashboardRepository,
@@ -22,7 +21,7 @@ export class GetDashboardUseCase
     private readonly chartConfigRepo: IChartConfigRepository,
     @Inject('IAnalyticsEngine')
     private readonly analyticsEngine: IAnalyticsEngine,
-  ) {}
+  ) { }
 
   async execute(
     request: GetDashboardRequestDTO,
@@ -93,6 +92,7 @@ export class GetDashboardUseCase
       name: dashboard.name,
       description: dashboard.description,
       isDefault: dashboard.isDefault,
+      embedHtml: dashboard.embedHtml,
     };
   }
 

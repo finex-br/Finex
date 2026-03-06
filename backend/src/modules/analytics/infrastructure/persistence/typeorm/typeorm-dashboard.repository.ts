@@ -11,7 +11,7 @@ export class TypeormDashboardRepository implements IDashboardRepository {
   constructor(
     @InjectRepository(DashboardSchema)
     private readonly repo: Repository<DashboardSchema>,
-  ) {}
+  ) { }
 
   async save(dashboard: Dashboard): Promise<void> {
     const record = this.toSchema(dashboard);
@@ -47,6 +47,7 @@ export class TypeormDashboardRepository implements IDashboardRepository {
     schema.name = dashboard.name;
     schema.description = dashboard.description ?? '';
     schema.isDefault = dashboard.isDefault;
+    schema.embedHtml = dashboard.embedHtml ?? '';
     schema.createdBy = dashboard.createdBy;
     return schema;
   }
@@ -58,6 +59,7 @@ export class TypeormDashboardRepository implements IDashboardRepository {
         name: schema.name,
         description: schema.description || undefined,
         isDefault: schema.isDefault,
+        embedHtml: schema.embedHtml || undefined,
         createdBy: schema.createdBy,
         createdAt: schema.createdAt,
         updatedAt: schema.updatedAt,

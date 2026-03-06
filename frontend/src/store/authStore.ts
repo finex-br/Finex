@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import * as Sentry from '@sentry/react';
 
 /**
  * User interface (alinhado com backend)
@@ -51,6 +52,7 @@ export const useAuthStore = create<AuthStore>()(
         localStorage.setItem('access_token', token);
         localStorage.setItem('user', JSON.stringify(user));
         set({ token, user });
+        Sentry.setUser({ id: user.id, email: user.email, username: user.name });
       },
 
       // Set current company (id + name)
@@ -68,6 +70,7 @@ export const useAuthStore = create<AuthStore>()(
         localStorage.removeItem('current_company_id');
         localStorage.removeItem('current_company_name');
         set({ token: null, user: null, currentCompanyId: null, currentCompanyName: null });
+        Sentry.setUser(null);
       },
 
       // Check if user is authenticated

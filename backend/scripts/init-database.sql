@@ -281,6 +281,7 @@ CREATE TABLE IF NOT EXISTS dashboards (
   name VARCHAR(255) NOT NULL,
   description TEXT,
   is_default BOOLEAN DEFAULT FALSE,
+  embed_html TEXT,
   created_by UUID NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
@@ -305,6 +306,11 @@ CREATE TABLE IF NOT EXISTS chart_configs (
 -- MIGRATION: operational_metadata (idempotente)
 -- ================================================
 ALTER TABLE financial_data ADD COLUMN IF NOT EXISTS operational_metadata JSONB DEFAULT NULL;
+
+-- ================================================
+-- MIGRATION: embed_html em dashboards (idempotente)
+-- ================================================
+ALTER TABLE dashboards ADD COLUMN IF NOT EXISTS embed_html TEXT;
 
 -- ================================================
 -- ÍNDICES PARA PERFORMANCE

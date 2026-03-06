@@ -30,7 +30,7 @@ export class DashboardController {
     private readonly deleteDashboardUseCase: DeleteDashboardUseCase,
     private readonly getDashboardUseCase: GetDashboardUseCase,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   private async resolveAdmin(req: any, companyIdOverride?: string) {
     const ctx = await resolveCompanyContext(this.dataSource, req, companyIdOverride, {
@@ -52,6 +52,7 @@ export class DashboardController {
         name: body.name,
         description: body.description,
         isDefault: body.isDefault,
+        embedHtml: body.embedHtml,
       });
       return { success: true, dashboard: result };
     } catch (error: any) {
@@ -73,6 +74,7 @@ export class DashboardController {
       const dashboards = await this.dataSource.query(
         `SELECT id, company_id as "companyId", name, description,
                 is_default as "isDefault", created_by as "createdBy",
+                embed_html as "embedHtml",
                 created_at as "createdAt", updated_at as "updatedAt"
          FROM dashboards
          WHERE company_id = $1
@@ -122,6 +124,7 @@ export class DashboardController {
         name: body.name,
         description: body.description,
         isDefault: body.isDefault,
+        embedHtml: body.embedHtml,
       });
       return { success: true, dashboard: result };
     } catch (error: any) {

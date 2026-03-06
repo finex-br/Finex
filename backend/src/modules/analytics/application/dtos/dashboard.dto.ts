@@ -8,6 +8,7 @@ export interface CreateDashboardRequestDTO {
   name: string;
   description?: string;
   isDefault?: boolean;
+  embedHtml?: string;
 }
 
 export interface DashboardResponseDTO {
@@ -16,6 +17,7 @@ export interface DashboardResponseDTO {
   name: string;
   description?: string;
   isDefault: boolean;
+  embedHtml?: string;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
@@ -29,6 +31,7 @@ export interface UpdateDashboardRequestDTO {
   name?: string;
   description?: string;
   isDefault?: boolean;
+  embedHtml?: string;
 }
 
 // ===== Get Dashboard with Charts =====
@@ -44,6 +47,7 @@ export interface DashboardWithChartsResponseDTO {
   name: string;
   description?: string;
   isDefault: boolean;
+  embedHtml?: string;
   createdBy: string;
   charts: ChartConfigResponseDTO[];
   createdAt: Date;
@@ -58,6 +62,7 @@ export interface DashboardWithDataResponseDTO {
   name: string;
   description?: string;
   isDefault: boolean;
+  embedHtml?: string;
   charts: {
     config: ChartConfigResponseDTO;
     data: {

@@ -45,3 +45,8 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# AI Agent tooling
+.agents/
+.agent/
+.gemini/

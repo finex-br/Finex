@@ -6,24 +6,29 @@ import {
   CreateDashboardRequestDTO,
   DashboardResponseDTO,
 } from '../dtos/dashboard.dto';
+import { processEmbedHtml } from '../helpers/sanitize-html';
 
 @Injectable()
 export class CreateDashboardUseCase
-  implements IUseCase<CreateDashboardRequestDTO, DashboardResponseDTO>
-{
+  implements IUseCase<CreateDashboardRequestDTO, DashboardResponseDTO> {
   constructor(
     @Inject('IDashboardRepository')
     private readonly dashboardRepo: IDashboardRepository,
-  ) {}
+  ) { }
 
   async execute(
     request: CreateDashboardRequestDTO,
   ): Promise<DashboardResponseDTO> {
+    const processedEmbedHtml = request.embedHtml
+      ? processEmbedHtml(request.embedHtml)
+      : undefined;
+
     const dashboardResult = Dashboard.create({
       companyId: request.companyId,
       name: request.name,
       description: request.description,
       isDefault: request.isDefault ?? false,
+      embedHtml: processedEmbedHtml || undefined,
       createdBy: request.userId,
     });
 
@@ -40,6 +45,7 @@ export class CreateDashboardUseCase
       name: dashboard.name,
       description: dashboard.description,
       isDefault: dashboard.isDefault,
+      embedHtml: dashboard.embedHtml,
       createdBy: dashboard.createdBy,
       createdAt: dashboard.createdAt!,
       updatedAt: dashboard.updatedAt!,
