@@ -25,6 +25,9 @@ export class DashboardSchema {
   @Column({ name: 'is_default', type: 'boolean', default: false })
   isDefault: boolean;
 
+  @Column({ name: 'embed_html', type: 'text', nullable: true })
+  embedHtml: string;
+
   @Column({ name: 'created_by', type: 'uuid' })
   createdBy: string;
 

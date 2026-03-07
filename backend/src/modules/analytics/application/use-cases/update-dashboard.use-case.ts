@@ -5,15 +5,15 @@ import {
   UpdateDashboardRequestDTO,
   DashboardResponseDTO,
 } from '../dtos/dashboard.dto';
+import { processEmbedHtml } from '../helpers/sanitize-html';
 
 @Injectable()
 export class UpdateDashboardUseCase
-  implements IUseCase<UpdateDashboardRequestDTO, DashboardResponseDTO>
-{
+  implements IUseCase<UpdateDashboardRequestDTO, DashboardResponseDTO> {
   constructor(
     @Inject('IDashboardRepository')
     private readonly dashboardRepo: IDashboardRepository,
-  ) {}
+  ) { }
 
   async execute(
     request: UpdateDashboardRequestDTO,
@@ -27,10 +27,15 @@ export class UpdateDashboardUseCase
       throw new Error('Unauthorized: dashboard does not belong to this company');
     }
 
+    const processedEmbedHtml = request.embedHtml !== undefined
+      ? (request.embedHtml ? processEmbedHtml(request.embedHtml) : null)
+      : undefined;
+
     dashboard.update({
       name: request.name,
       description: request.description,
       isDefault: request.isDefault,
+      embedHtml: processedEmbedHtml === null ? null : processedEmbedHtml || undefined,
     });
 
     await this.dashboardRepo.update(dashboard);
@@ -41,6 +46,7 @@ export class UpdateDashboardUseCase
       name: dashboard.name,
       description: dashboard.description,
       isDefault: dashboard.isDefault,
+      embedHtml: dashboard.embedHtml,
       createdBy: dashboard.createdBy,
       createdAt: dashboard.createdAt!,
       updatedAt: dashboard.updatedAt!,

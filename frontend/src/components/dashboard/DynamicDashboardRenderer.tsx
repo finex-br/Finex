@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { DynamicChart } from '../charts/DynamicChart';
+import { SafeHtmlRenderer } from './SafeHtmlRenderer';
 
 interface ChartPosition {
   x: number;
@@ -38,6 +39,7 @@ interface Dashboard {
   id: string;
   name: string;
   description?: string;
+  embedHtml?: string;
   charts: DashboardChart[];
 }
 
@@ -97,6 +99,18 @@ export function DynamicDashboardRenderer({
           </Button>
         )}
       </div>
+
+      {/* Embed HTML */}
+      {dashboard.embedHtml && (
+        <Card>
+          <CardContent className="pt-6">
+            <SafeHtmlRenderer
+              html={dashboard.embedHtml}
+              className="w-full [&_iframe]:w-full [&_iframe]:min-h-[400px] [&_iframe]:rounded-md"
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Charts grid */}
       {isLoading ? (

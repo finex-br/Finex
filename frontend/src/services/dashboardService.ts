@@ -9,6 +9,7 @@ export interface Dashboard {
   name: string;
   description?: string;
   isDefault: boolean;
+  embedHtml?: string;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -24,6 +25,7 @@ export interface DashboardWithData {
   name: string;
   description?: string;
   isDefault: boolean;
+  embedHtml?: string;
   charts: {
     config: ChartConfig;
     data: {
@@ -42,6 +44,7 @@ export const dashboardService = {
     name: string;
     description?: string;
     isDefault?: boolean;
+    embedHtml?: string;
   }): Promise<{ success: boolean; dashboard: Dashboard }> => {
     const response = await api.post('/analytics/dashboards', data);
     return response.data;
@@ -68,6 +71,7 @@ export const dashboardService = {
       name?: string;
       description?: string;
       isDefault?: boolean;
+      embedHtml?: string;
     },
   ): Promise<{ success: boolean; dashboard: Dashboard }> => {
     const response = await api.put(`/analytics/dashboards/${id}`, data);
