@@ -253,19 +253,19 @@ export function ChartBuilderView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
-            <Button variant="ghost" size="sm" onClick={handleBack}>
+            <Button variant="ghost" size="sm" onClick={handleBack} className="cursor-pointer">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              <h1 className="text-3xl font-bold text-foreground">
                 {isEditing ? 'Editar Grafico' : 'Criar Grafico'}
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground mt-1">
                 Configure os dados e a visualizacao do grafico
               </p>
             </div>
@@ -285,7 +285,7 @@ export function ChartBuilderView() {
           )}
 
           {/* Company Selector */}
-          <Card>
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <CompanySelector
                 companies={companies}
@@ -299,7 +299,7 @@ export function ChartBuilderView() {
           {selectedCompanyId && (
             <>
               {/* Step 1: Chart Name */}
-              <Card>
+              <Card className="glass-card">
                 <CardHeader>
                   <CardTitle>1. Nome do Grafico</CardTitle>
                 </CardHeader>
@@ -317,7 +317,7 @@ export function ChartBuilderView() {
               </Card>
 
               {/* Step 2: Dataset Selector */}
-              <Card>
+              <Card className="glass-card">
                 <CardHeader>
                   <CardTitle>2. Selecionar Dataset</CardTitle>
                 </CardHeader>
@@ -354,7 +354,7 @@ export function ChartBuilderView() {
               </Card>
 
               {/* Step 3: Chart Type */}
-              <Card>
+              <Card className="glass-card">
                 <CardHeader>
                   <CardTitle>3. Tipo de Grafico</CardTitle>
                 </CardHeader>
@@ -368,7 +368,7 @@ export function ChartBuilderView() {
 
               {/* Step 4: Column Mapper */}
               {availableColumns.length > 0 && (
-                <Card>
+                <Card className="glass-card">
                   <CardHeader>
                     <CardTitle>4. Mapeamento de Colunas</CardTitle>
                   </CardHeader>
@@ -388,7 +388,7 @@ export function ChartBuilderView() {
               )}
 
               {/* Step 5: Preview */}
-              <Card>
+              <Card className="glass-card">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>5. Preview</CardTitle>
@@ -400,6 +400,7 @@ export function ChartBuilderView() {
                         (!xAxis && (!yAxis || yAxis.length === 0))
                       }
                       size="sm"
+                      className="cursor-pointer"
                     >
                       {chartLoading ? (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -422,12 +423,13 @@ export function ChartBuilderView() {
 
               {/* Save Button */}
               <div className="flex justify-end gap-3">
-                <Button variant="outline" onClick={handleBack}>
+                <Button variant="outline" onClick={handleBack} className="cursor-pointer">
                   Cancelar
                 </Button>
                 <Button
                   onClick={handleSave}
                   disabled={chartLoading || !name.trim() || !datasetId || !dashboardId}
+                  className="cursor-pointer"
                 >
                   {chartLoading ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

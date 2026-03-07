@@ -40,7 +40,7 @@ export function DynamicDashboardView() {
   if (isLoading && !dashboard) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto flex flex-col items-center justify-center py-24 gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
@@ -56,7 +56,7 @@ export function DynamicDashboardView() {
   if (error && !dashboard) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto space-y-6">
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -70,6 +70,7 @@ export function DynamicDashboardView() {
             <div className="flex justify-center">
               <Button
                 variant="outline"
+                className="cursor-pointer"
                 onClick={() => {
                   if (dashboardId && companyId) {
                     clearError();
@@ -91,7 +92,7 @@ export function DynamicDashboardView() {
   if (!dashboard) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto flex flex-col items-center justify-center py-24 text-muted-foreground gap-3">
             <LayoutDashboard className="h-12 w-12" />
             <p className="text-sm">Dashboard nao encontrado</p>
@@ -103,8 +104,8 @@ export function DynamicDashboardView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto animate-fade-in">
           <DynamicDashboardRenderer
             dashboard={dashboard}
             onRefresh={refreshDashboard}

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, DollarSign, FileSpreadsheet, Coffee, Activity, ArrowLeft, LayoutDashboard } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, FileSpreadsheet, Coffee, ArrowLeft, LayoutDashboard } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useFinancialData, DashboardState } from '@/hooks/useFinancialData';
@@ -19,17 +19,20 @@ import { GraphType } from '@/services/financialService';
 import { AppLayout } from '@/components/AppLayout';
 import { dashboardService, Dashboard, DashboardWithData } from '@/services/dashboardService';
 import { DynamicDashboardRenderer } from '@/components/dashboard/DynamicDashboardRenderer';
+import { MetricCard } from '@/components/shared/MetricCard';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { PageSkeleton } from '@/components/shared/PageSkeleton';
 
 /**
  * DashboardView - Componente Presentacional (Dumb Component)
- * 
+ *
  * Responsabilidades:
  * - Renderizar KPIs financeiros e operacionais
- * - Exibir gráficos em duas seções: Financeira e Operacional
+ * - Exibir graficos em duas secoes: Financeira e Operacional
  * - Exibir feedback visual (loading, erro)
  * - LOTE 4: Usar dashboardState para NUNCA desaparecer quando filtro vazio
- * 
- * TODA lógica está nos hooks useFinancialData e useVendingMachineMetrics (ViewModel).
+ *
+ * TODA logica esta nos hooks useFinancialData e useVendingMachineMetrics (ViewModel).
  * Backend processa e agrega dados (frontend apenas exibe).
  */
 export function DashboardView() {
@@ -119,8 +122,8 @@ export function DashboardView() {
   }, [selectedDashboard, companyId]);
 
   // Financial data hook
-  const { 
-    summary, 
+  const {
+    summary,
     monthlyData,
     categoryData,
     trendData,
@@ -131,7 +134,7 @@ export function DashboardView() {
     periodFilter,
     setPeriodFilter,
     fetchFinancialData,
-    // NOVO (Lote 5): Funções para filtros individuais
+    // NOVO (Lote 5): Funcoes para filtros individuais
     graphFilters,
     setGraphFilter,
     resetGraphFilter,
@@ -156,13 +159,13 @@ export function DashboardView() {
 
   // Busca dados ao montar o componente ou quando periodFilter mudar
   useEffect(() => {
-    console.log('[DashboardView] useEffect triggered:', { 
-      userId: user?.id, 
+    console.log('[DashboardView] useEffect triggered:', {
+      userId: user?.id,
       userName: user?.name,
-      periodFilter 
+      periodFilter
     });
     fetchFinancialData();
-    
+
     // Fetch vending metrics (operational data)
     if (showOperationalGraphs) {
       fetchVendingMetrics();
@@ -170,21 +173,21 @@ export function DashboardView() {
   }, [user?.id, companyId, periodFilter, showOperationalGraphs]);
 
   /**
-   * NOVO (Lote 5): Handler para mudança de filtro individual de gráfico
+   * NOVO (Lote 5): Handler para mudanca de filtro individual de grafico
    */
   const handleGraphFilterChange = async (graphType: GraphType, filter: any) => {
     setGraphFilter(graphType, filter);
-    
-    // Busca dados apenas para o gráfico específico
+
+    // Busca dados apenas para o grafico especifico
     await fetchGraphData(graphType, filter);
   };
 
   /**
-   * NOVO (Lote 5): Handler para resetar filtro de gráfico para o global
+   * NOVO (Lote 5): Handler para resetar filtro de grafico para o global
    */
   const handleResetGraphFilter = async (graphType: GraphType) => {
     resetGraphFilter(graphType);
-    
+
     // Busca dados com filtro global
     await fetchGraphData(graphType, periodFilter);
   };
@@ -203,8 +206,10 @@ export function DashboardView() {
   if (dynamicLoading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-          <p className="text-lg text-slate-600 dark:text-slate-400">Carregando dashboard...</p>
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
+            <PageSkeleton cards={3} charts={3} />
+          </div>
         </div>
       </AppLayout>
     );
@@ -214,13 +219,13 @@ export function DashboardView() {
   if (selectedDashboard) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8 animate-fade-in">
           <div className="max-w-7xl mx-auto">
             {dynamicDashboards.length > 1 && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="mb-4"
+                className="mb-4 cursor-pointer"
                 onClick={() => setSelectedDashboard(null)}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -242,8 +247,10 @@ export function DashboardView() {
   if (selectedDashboardLoading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-          <p className="text-lg text-slate-600 dark:text-slate-400">Carregando dashboard...</p>
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
+            <PageSkeleton cards={3} charts={3} />
+          </div>
         </div>
       </AppLayout>
     );
@@ -253,28 +260,34 @@ export function DashboardView() {
   if (dynamicDashboards.length > 1) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8 animate-fade-in">
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center gap-2 mb-6">
-              <LayoutDashboard className="h-6 w-6 text-orange-600" />
-              <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+              <LayoutDashboard className="h-6 w-6 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">
                 Dashboards
               </h1>
             </div>
             <div className="grid gap-4">
               {dynamicDashboards.map((db) => (
-                <Card
+                <div
                   key={db.id}
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  className="glass-card-hover p-5 cursor-pointer"
                   onClick={() => handleSelectDashboard(db)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleSelectDashboard(db);
+                    }
+                  }}
                 >
-                  <CardHeader>
-                    <CardTitle className="text-lg">{db.name}</CardTitle>
-                    {db.description && (
-                      <CardDescription>{db.description}</CardDescription>
-                    )}
-                  </CardHeader>
-                </Card>
+                  <h3 className="text-lg font-semibold text-foreground">{db.name}</h3>
+                  {db.description && (
+                    <p className="text-sm text-muted-foreground mt-1">{db.description}</p>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -289,8 +302,10 @@ export function DashboardView() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <p className="text-lg text-muted-foreground">Carregando dados...</p>
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
+            <PageSkeleton cards={3} charts={3} />
+          </div>
         </div>
       </AppLayout>
     );
@@ -314,6 +329,7 @@ export function DashboardView() {
               <Button
                 onClick={() => fetchFinancialData()}
                 variant="outline"
+                className="cursor-pointer"
               >
                 Tentar novamente
               </Button>
@@ -326,40 +342,24 @@ export function DashboardView() {
 
   // LOTE 4: Estado vazio - NUNCA FEZ UPLOAD (totalTransactionsInSystem === 0)
   if (dashboardState === DashboardState.NO_UPLOAD) {
-    console.log('[DashboardView] NO_UPLOAD state:', { 
-      dashboardState, 
-      metadata, 
+    console.log('[DashboardView] NO_UPLOAD state:', {
+      dashboardState,
+      metadata,
       userId: user?.id,
-      isLoading 
+      isLoading
     });
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
-          <Card className="w-full max-w-lg text-center shadow-lg">
-            <CardHeader>
-              <div className="flex justify-center mb-4">
-                <FileSpreadsheet className="h-16 w-16 text-orange-500" />
-              </div>
-              <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                Dashboard
-              </CardTitle>
-              <CardDescription className="text-base mt-2">
-                sem dados para analise, importar arquivo primeiro
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={() => navigate('/upload')}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium"
-                size="lg"
-              >
-                Importar arquivo
-              </Button>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
-                Suportamos arquivos Excel (.xlsx, .xls)
-              </p>
-            </CardContent>
-          </Card>
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <EmptyState
+            icon={FileSpreadsheet}
+            title="Dashboard"
+            description="Sem dados para analise, importar arquivo primeiro. Suportamos arquivos Excel (.xlsx, .xls)."
+            action={{
+              label: "Importar arquivo",
+              onClick: () => navigate('/upload'),
+            }}
+          />
         </div>
       </AppLayout>
     );
@@ -368,13 +368,28 @@ export function DashboardView() {
   // Dashboard com dados
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        {/* Filtro de Período */}
-        <div className="max-w-7xl mx-auto mb-6">
-          <DateFilter 
-            periodFilter={periodFilter} 
-            onPeriodChange={setPeriodFilter} 
-          />
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8 animate-fade-in">
+        {/* Greeting + Filtro de Periodo */}
+        <div className="max-w-7xl mx-auto mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">
+                {(() => {
+                  const hour = new Date().getHours();
+                  if (hour < 12) return 'Bom dia';
+                  if (hour < 18) return 'Boa tarde';
+                  return 'Boa noite';
+                })()}, {user?.name?.split(' ')[0] || 'Usuário'}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Visão geral dos seus dados financeiros
+              </p>
+            </div>
+            <DateFilter
+              periodFilter={periodFilter}
+              onPeriodChange={setPeriodFilter}
+            />
+          </div>
         </div>
 
         {/* LOTE 4: Banner quando filtro retorna vazio (EMPTY_PERIOD) */}
@@ -388,74 +403,47 @@ export function DashboardView() {
           </div>
         )}
 
-        {/* KPIs - Sempre visível quando tem dados no sistema */}
+        {/* KPIs - Sempre visivel quando tem dados no sistema */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Receita Total */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base sm:text-sm font-medium text-slate-600">
-                Receita Total
-              </CardTitle>
-              <TrendingUp className="h-5 w-5 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl sm:text-2xl font-bold text-green-600">
-                {formatCurrency(summary.totalRevenue)}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Total de entradas
-              </p>
-            </CardContent>
-          </Card>
+          <MetricCard
+            title="Receita Total"
+            value={formatCurrency(summary.totalRevenue)}
+            icon={TrendingUp}
+            trendDirection="up"
+            subtitle="Total de entradas"
+            delay={0}
+          />
 
-          {/* Despesas Totais */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base sm:text-sm font-medium text-slate-600">
-                Despesas Totais
-              </CardTitle>
-              <TrendingDown className="h-5 w-5 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl sm:text-2xl font-bold text-red-600">
-                {formatCurrency(summary.totalExpense)}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Total de saídas
-              </p>
-            </CardContent>
-          </Card>
+          <MetricCard
+            title="Despesas Totais"
+            value={formatCurrency(summary.totalExpense)}
+            icon={TrendingDown}
+            trendDirection="down"
+            subtitle="Total de saidas"
+            delay={100}
+          />
 
-          {/* Lucro/Prejuízo */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base sm:text-sm font-medium text-slate-600">
-                {summary.profit >= 0 ? 'Lucro' : 'Prejuízo'}
-              </CardTitle>
-              <DollarSign className={`h-5 w-5 ${summary.profit >= 0 ? 'text-blue-600' : 'text-orange-600'}`} />
-            </CardHeader>
-            <CardContent>
-              <div className={`text-3xl sm:text-2xl font-bold ${summary.profit >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-                {formatCurrency(summary.profit)}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Receitas - Despesas
-              </p>
-            </CardContent>
-          </Card>
+          <MetricCard
+            title={summary.profit >= 0 ? 'Lucro' : 'Prejuizo'}
+            value={formatCurrency(summary.profit)}
+            icon={DollarSign}
+            trendDirection={summary.profit >= 0 ? 'up' : 'down'}
+            subtitle="Receitas - Despesas"
+            delay={200}
+          />
         </div>
 
-        {/* Gráficos Financeiros - LOTE 5: Individualizados com filtros próprios */}
+        {/* Graficos Financeiros - LOTE 5: Individualizados com filtros proprios */}
         <div className="max-w-7xl mx-auto mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="h-6 w-6 text-green-600" />
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-              Gráficos Financeiros
+          <div className="flex items-center gap-2 mb-5">
+            <DollarSign className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">
+              Financeiro
             </h2>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Gráfico de Tendência */}
+            {/* Grafico de Tendencia */}
             <TrendChart
               trendData={trendData}
               currentFilter={getEffectiveFilter(GraphType.TREND)}
@@ -464,7 +452,7 @@ export function DashboardView() {
               onResetFilter={handleResetGraphFilter}
             />
 
-            {/* Gráfico de Categorias */}
+            {/* Grafico de Categorias */}
             <CategoryChart
               categoryData={categoryData}
               currentFilter={getEffectiveFilter(GraphType.CATEGORY)}
@@ -473,7 +461,7 @@ export function DashboardView() {
               onResetFilter={handleResetGraphFilter}
             />
 
-            {/* Gráfico Mensal */}
+            {/* Grafico Mensal */}
             <MonthlyChart
               monthlyData={monthlyData}
               currentFilter={getEffectiveFilter(GraphType.MONTHLY)}
@@ -484,26 +472,26 @@ export function DashboardView() {
           </div>
         </div>
 
-        {/* Gráficos Operacionais - NOVO (Máquinas de Vending) */}
+        {/* Graficos Operacionais - Maquinas de Vending */}
         {showOperationalGraphs && (
           <div className="max-w-7xl mx-auto mb-8">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
-                <Coffee className="h-6 w-6 text-amber-600" />
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                  Gráficos Operacionais
+                <Coffee className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">
+                  Operacional
                 </h2>
               </div>
-              
+
               {/* Summary badges */}
               <div className="flex gap-3">
-                <div className="px-3 py-1 bg-blue-50 border border-blue-200 rounded-md">
-                  <span className="text-sm font-medium text-blue-700">
+                <div className="px-3 py-1 bg-muted rounded-lg">
+                  <span className="text-xs font-medium text-foreground">
                     {vendingSummary.totalMachines} Máquinas
                   </span>
                 </div>
-                <div className="px-3 py-1 bg-green-50 border border-green-200 rounded-md">
-                  <span className="text-sm font-medium text-green-700">
+                <div className="px-3 py-1 bg-muted rounded-lg">
+                  <span className="text-xs font-medium text-foreground">
                     {vendingSummary.totalSales} Vendas
                   </span>
                 </div>
@@ -511,14 +499,12 @@ export function DashboardView() {
             </div>
 
             {isLoadingVending ? (
-              <div className="flex items-center justify-center h-64">
-                <p className="text-lg text-slate-600">Carregando métricas operacionais...</p>
-              </div>
+              <PageSkeleton cards={0} charts={4} />
             ) : vendingError ? (
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-yellow-800">⚠️ {vendingError}</p>
-                <p className="text-sm text-yellow-600 mt-2">
-                  Os gráficos operacionais estão temporariamente indisponíveis.
+              <div className="p-4 bg-muted border border-border rounded-lg">
+                <p className="text-foreground">{vendingError}</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Os graficos operacionais estao temporariamente indisponiveis.
                 </p>
               </div>
             ) : (
@@ -539,10 +525,10 @@ export function DashboardView() {
           </div>
         )}
 
-        {/* Informações adicionais */}
-        <div className="max-w-7xl mx-auto mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+        {/* Informacoes adicionais */}
+        <div className="max-w-7xl mx-auto mt-6 text-center text-sm text-muted-foreground">
           <p>
-            Dados carregados com sucesso • {metadata?.totalTransactionsInSystem || 0} transações no sistema
+            Dados carregados com sucesso • {metadata?.totalTransactionsInSystem || 0} transacoes no sistema
           </p>
         </div>
       </div>

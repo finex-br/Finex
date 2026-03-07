@@ -153,7 +153,7 @@ export function DashboardConfigView() {
   if (isLoading && !selectedDashboard) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto flex items-center justify-center py-24">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -164,29 +164,29 @@ export function DashboardConfigView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
           {/* Header */}
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={handleBack}>
+              <Button variant="ghost" size="sm" onClick={handleBack} className="cursor-pointer">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Voltar
               </Button>
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                  <h1 className="text-3xl font-bold text-foreground">
                     <Settings className="h-7 w-7 inline-block mr-2 -mt-1" />
                     Configurar Dashboard
                   </h1>
                 </div>
                 {selectedDashboard && (
                   <div className="mt-2">
-                    <p className="text-lg font-medium text-slate-700 dark:text-slate-300">
+                    <p className="text-lg font-medium text-foreground">
                       {selectedDashboard.name}
                     </p>
                     {selectedDashboard.description && (
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {selectedDashboard.description}
                       </p>
                     )}
@@ -206,11 +206,12 @@ export function DashboardConfigView() {
                 variant="outline"
                 size="sm"
                 onClick={() => setEditDialogOpen(true)}
+                className="cursor-pointer"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Editar Info
               </Button>
-              <Button variant="outline" size="sm" onClick={handleViewDashboard}>
+              <Button variant="outline" size="sm" onClick={handleViewDashboard} className="cursor-pointer">
                 <Eye className="h-4 w-4 mr-2" />
                 Visualizar Dashboard
               </Button>
@@ -231,7 +232,7 @@ export function DashboardConfigView() {
           )}
 
           {/* Charts List */}
-          <Card>
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <DashboardChartList
                 charts={chartItems}
@@ -311,7 +312,7 @@ export function DashboardConfigView() {
                 )}
               </div>
               {showEmbedPreview && editEmbedHtml.trim() && (
-                <div className="mt-2 rounded-md border p-4 bg-slate-50 dark:bg-slate-800">
+                <div className="mt-2 rounded-md border p-4 bg-muted">
                   <p className="text-xs font-medium text-muted-foreground mb-2">Preview:</p>
                   <SafeHtmlRenderer
                     html={editEmbedHtml}

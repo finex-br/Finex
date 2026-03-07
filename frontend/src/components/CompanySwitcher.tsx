@@ -77,13 +77,13 @@ export function CompanySwitcher({ isCollapsed }: CompanySwitcherProps) {
       <PopoverTrigger asChild>
         <button
           className={cn(
-            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-            'hover:bg-slate-100 dark:hover:bg-slate-700',
-            'text-slate-700 dark:text-slate-300',
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer',
+            'hover:bg-sidebar-accent',
+            'text-sidebar-foreground',
             isCollapsed && 'justify-center'
           )}
         >
-          <Building2 className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+          <Building2 className="w-5 h-5 text-primary flex-shrink-0" />
           {!isCollapsed && (
             <>
               <span className="text-sm font-medium truncate flex-1 text-left">
@@ -95,8 +95,8 @@ export function CompanySwitcher({ isCollapsed }: CompanySwitcherProps) {
         </button>
       </PopoverTrigger>
       <PopoverContent side="right" align="start" sideOffset={8} className="w-72 p-0">
-        <div className="p-3 border-b border-slate-200 dark:border-slate-700">
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+        <div className="p-3 border-b border-border">
+          <p className="text-sm font-semibold text-foreground">
             Suas empresas
           </p>
         </div>
@@ -104,10 +104,10 @@ export function CompanySwitcher({ isCollapsed }: CompanySwitcherProps) {
         <div className="max-h-60 overflow-y-auto p-1">
           {loading ? (
             <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
             </div>
           ) : companies.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+            <p className="text-sm text-muted-foreground text-center py-4">
               Nenhuma empresa encontrada
             </p>
           ) : (
@@ -116,13 +116,13 @@ export function CompanySwitcher({ isCollapsed }: CompanySwitcherProps) {
                 key={company.id}
                 onClick={() => handleSwitch(company)}
                 className={cn(
-                  'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm',
-                  'hover:bg-slate-100 dark:hover:bg-slate-700',
+                  'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm cursor-pointer',
+                  'hover:bg-accent',
                   company.id === currentCompanyId &&
-                    'bg-orange-50 dark:bg-orange-900/20'
+                    'bg-primary/10'
                 )}
               >
-                <span className="flex-1 text-left truncate text-slate-900 dark:text-slate-100">
+                <span className="flex-1 text-left truncate text-foreground">
                   {company.name}
                 </span>
                 <Badge
@@ -132,18 +132,18 @@ export function CompanySwitcher({ isCollapsed }: CompanySwitcherProps) {
                   {company.role}
                 </Badge>
                 {company.id === currentCompanyId && (
-                  <Check className="w-4 h-4 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+                  <Check className="w-4 h-4 text-primary flex-shrink-0" />
                 )}
               </button>
             ))
           )}
         </div>
 
-        <div className="border-t border-slate-200 dark:border-slate-700 p-2">
+        <div className="border-t border-border p-2">
           {!showCreateForm ? (
             <button
               onClick={() => setShowCreateForm(true)}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-primary hover:bg-primary/10 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Criar nova empresa</span>
@@ -162,7 +162,7 @@ export function CompanySwitcher({ isCollapsed }: CompanySwitcherProps) {
                 }}
               />
               {createError && (
-                <p className="text-xs text-red-600 dark:text-red-400">{createError}</p>
+                <p className="text-xs text-destructive">{createError}</p>
               )}
               <div className="flex gap-2">
                 <Button
@@ -173,7 +173,7 @@ export function CompanySwitcher({ isCollapsed }: CompanySwitcherProps) {
                     setNewCompanyName('');
                     setCreateError(null);
                   }}
-                  className="flex-1"
+                  className="flex-1 cursor-pointer"
                 >
                   Cancelar
                 </Button>
@@ -181,7 +181,7 @@ export function CompanySwitcher({ isCollapsed }: CompanySwitcherProps) {
                   size="sm"
                   onClick={handleCreate}
                   disabled={creating || !newCompanyName.trim()}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                  className="flex-1 cursor-pointer"
                 >
                   {creating ? 'Criando...' : 'Criar'}
                 </Button>

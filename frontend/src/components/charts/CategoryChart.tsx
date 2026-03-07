@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CHART_COLORS, TOOLTIP_STYLE, GRID_STYLE, AXIS_STYLE } from '@/lib/chart-theme';
 import { CategoryData, PeriodFilter, GraphType } from '@/services/financialService';
 import { PieChart, ChevronDown, ChevronUp, Filter as FilterIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -88,9 +89,9 @@ export const CategoryChart = ({
       {/* Área de Filtro Customizado (Colapsável) */}
       {isFilterExpanded && (
         <div className="px-6 pb-4 border-b">
-          <div className="bg-slate-50 p-4 rounded-lg space-y-3">
+          <div className="bg-muted p-4 rounded-lg space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Filtro personalizado
               </p>
               {hasCustomFilter && (
@@ -104,7 +105,7 @@ export const CategoryChart = ({
                 </Button>
               )}
             </div>
-            
+
             <GraphDateFilter
               periodFilter={currentFilter}
               onPeriodChange={(filter) => onFilterChange(GraphType.CATEGORY, filter)}
@@ -117,25 +118,25 @@ export const CategoryChart = ({
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={categoryData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="category" 
-              tick={{ fontSize: 12 }}
+            <CartesianGrid {...GRID_STYLE} vertical={false} />
+            <XAxis
+              dataKey="category"
+              tick={AXIS_STYLE.tick}
               angle={-45}
               textAnchor="end"
               height={100}
             />
-            <YAxis 
-              tick={{ fontSize: 12 }}
+            <YAxis
+              tick={AXIS_STYLE.tick}
               tickFormatter={formatCurrency}
             />
-            <Tooltip 
+            <Tooltip
               formatter={(value: number) => formatCurrency(value)}
-              labelStyle={{ color: 'black' }}
+              contentStyle={TOOLTIP_STYLE}
             />
-            <Bar 
-              dataKey="total" 
-              fill="#3b82f6" 
+            <Bar
+              dataKey="total"
+              fill={CHART_COLORS[2]}
               name="Total"
               radius={[8, 8, 0, 0]}
             />

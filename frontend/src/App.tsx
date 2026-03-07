@@ -2,9 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import * as Sentry from '@sentry/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { SentryErrorFallback } from './components/SentryErrorFallback';
 import { LandingView } from "./views/LandingView";
 import { LoginView } from "./views/LoginView";
@@ -79,67 +80,74 @@ const AdminRoute = ({ children }: ProtectedRouteProps) => {
   return <>{children}</>;
 };
 
-const App = () => (
-  <Sentry.ErrorBoundary fallback={SentryErrorFallback}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <SentryRoutes>
+function PageTransition({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function AppRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <SentryRoutes location={location} key={location.pathname}>
             {/* Rota Pública - Landing Page */}
-            <Route path="/" element={<LandingView />} />
-            
+            <Route path="/" element={<PageTransition><LandingView /></PageTransition>} />
+
             {/* Rota Pública - Login */}
-            <Route path="/login" element={<LoginView />} />
-            
+            <Route path="/login" element={<PageTransition><LoginView /></PageTransition>} />
+
             {/* Rota Pública - Cadastro */}
-            <Route path="/signup" element={<SignUpView />} />
+            <Route path="/signup" element={<PageTransition><SignUpView /></PageTransition>} />
 
             {/* Rotas Públicas - Privacidade e Termos */}
-            <Route path="/privacy" element={<PrivacyView />} />
-            <Route path="/terms" element={<TermsView />} />
-            
-            {/* OAuth DESABILITADO - Rota de callback removida */}
-            {/* <Route path="/auth/google/callback" element={<GoogleCallbackView />} /> */}
-            
+            <Route path="/privacy" element={<PageTransition><PrivacyView /></PageTransition>} />
+            <Route path="/terms" element={<PageTransition><TermsView /></PageTransition>} />
+
             {/* Rota Protegida - Upload */}
-            <Route 
-              path="/upload" 
+            <Route
+              path="/upload"
               element={
                 <ProtectedRoute requireCompany>
-                  <UploadView />
+                  <PageTransition><UploadView /></PageTransition>
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* Rota Protegida - Dashboard */}
-            <Route 
-              path="/dashboard" 
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute requireCompany>
-                  <DashboardView />
+                  <PageTransition><DashboardView /></PageTransition>
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* Rota Protegida - Lista de Surveys */}
-            <Route 
-              path="/surveys" 
+            <Route
+              path="/surveys"
               element={
                 <ProtectedRoute requireCompany>
-                  <SurveysListView />
+                  <PageTransition><SurveysListView /></PageTransition>
                 </ProtectedRoute>
-              } 
+              }
             />
-            
-            {/* Rota Protegida - Ver Respostas (must be before :assessmentId) */}
+
+            {/* Rota Protegida - Ver Respostas */}
             <Route
               path="/surveys/:assessmentId/responses"
               element={
                 <ProtectedRoute requireCompany>
-                  <SurveyResponsesView />
+                  <PageTransition><SurveyResponsesView /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -149,27 +157,27 @@ const App = () => (
               path="/surveys/:assessmentId"
               element={
                 <ProtectedRoute requireCompany>
-                  <SurveyQuestionnaireView />
+                  <PageTransition><SurveyQuestionnaireView /></PageTransition>
                 </ProtectedRoute>
               }
             />
 
             {/* Rota Protegida - Admin Pending Documents */}
-            <Route 
-              path="/admin/pending-documents" 
+            <Route
+              path="/admin/pending-documents"
               element={
                 <AdminRoute>
-                  <PendingDocumentsAdminView />
+                  <PageTransition><PendingDocumentsAdminView /></PageTransition>
                 </AdminRoute>
               }
             />
 
             {/* Rota Protegida - Admin Pending Document Detail */}
-            <Route 
-              path="/admin/pending-documents/:id" 
+            <Route
+              path="/admin/pending-documents/:id"
               element={
                 <AdminRoute>
-                  <PendingDocumentAdminDetailView />
+                  <PageTransition><PendingDocumentAdminDetailView /></PageTransition>
                 </AdminRoute>
               }
             />
@@ -179,7 +187,7 @@ const App = () => (
               path="/company/setup"
               element={
                 <ProtectedRoute>
-                  <CompanySetupView />
+                  <PageTransition><CompanySetupView /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -189,7 +197,7 @@ const App = () => (
               path="/documents"
               element={
                 <ProtectedRoute requireCompany>
-                  <MyDocumentsView />
+                  <PageTransition><MyDocumentsView /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -197,17 +205,17 @@ const App = () => (
               path="/documents/:id"
               element={
                 <ProtectedRoute requireCompany>
-                  <MyDocumentDetailView />
+                  <PageTransition><MyDocumentDetailView /></PageTransition>
                 </ProtectedRoute>
               }
             />
-            
-            {/* Rota Protegida - Admin Panel (somente ADMIN) */}
+
+            {/* Rota Protegida - Admin Panel */}
             <Route
               path="/admin"
               element={
                 <ProtectedRoute>
-                  <AdminPanelView />
+                  <PageTransition><AdminPanelView /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -217,7 +225,7 @@ const App = () => (
               path="/admin/datasets"
               element={
                 <AdminRoute>
-                  <DatasetManagementView />
+                  <PageTransition><DatasetManagementView /></PageTransition>
                 </AdminRoute>
               }
             />
@@ -227,7 +235,7 @@ const App = () => (
               path="/admin/dashboards"
               element={
                 <AdminRoute>
-                  <DashboardListView />
+                  <PageTransition><DashboardListView /></PageTransition>
                 </AdminRoute>
               }
             />
@@ -237,7 +245,7 @@ const App = () => (
               path="/admin/dashboards/:id/config"
               element={
                 <AdminRoute>
-                  <DashboardConfigView />
+                  <PageTransition><DashboardConfigView /></PageTransition>
                 </AdminRoute>
               }
             />
@@ -247,7 +255,7 @@ const App = () => (
               path="/admin/chart-builder"
               element={
                 <AdminRoute>
-                  <ChartBuilderView />
+                  <PageTransition><ChartBuilderView /></PageTransition>
                 </AdminRoute>
               }
             />
@@ -255,24 +263,37 @@ const App = () => (
               path="/admin/chart-builder/:chartId"
               element={
                 <AdminRoute>
-                  <ChartBuilderView />
+                  <PageTransition><ChartBuilderView /></PageTransition>
                 </AdminRoute>
               }
             />
 
-            {/* Dynamic Dashboard - Accessible by all authenticated users */}
+            {/* Dynamic Dashboard */}
             <Route
               path="/dynamic-dashboard/:dashboardId"
               element={
                 <ProtectedRoute>
-                  <DynamicDashboardView />
+                  <PageTransition><DynamicDashboardView /></PageTransition>
                 </ProtectedRoute>
               }
             />
 
-            {/* Catch-all - Redireciona para a home */}
+            {/* Catch-all */}
             <Route path="*" element={<Navigate to="/" replace />} />
-            </SentryRoutes>
+      </SentryRoutes>
+    </AnimatePresence>
+  );
+}
+
+const App = () => (
+  <Sentry.ErrorBoundary fallback={SentryErrorFallback}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>

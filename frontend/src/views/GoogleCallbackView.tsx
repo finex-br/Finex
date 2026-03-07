@@ -18,10 +18,10 @@ export function GoogleCallbackView() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-bold text-orange-600">
+          <CardTitle className="text-3xl font-bold text-primary">
             FinEx
           </CardTitle>
         </CardHeader>
@@ -29,11 +29,11 @@ export function GoogleCallbackView() {
         <CardContent className="flex flex-col items-center justify-center space-y-4 py-8">
           {isProcessing && (
             <>
-              <Loader2 className="h-12 w-12 animate-spin text-orange-600" />
-              <p className="text-center text-slate-600">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              <p className="text-center text-muted-foreground">
                 Autenticando com Google...
               </p>
-              <p className="text-center text-sm text-slate-500">
+              <p className="text-center text-sm text-muted-foreground">
                 Aguarde um momento
               </p>
             </>
@@ -42,7 +42,7 @@ export function GoogleCallbackView() {
           {error && (
             <div className="text-center">
               <p className="text-red-600 font-medium">{error}</p>
-              <p className="text-sm text-slate-500 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 Redirecionando para o login...
               </p>
             </div>

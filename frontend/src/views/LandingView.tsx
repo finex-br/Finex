@@ -1,14 +1,19 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, ShieldCheck, TrendingUp, ArrowRight } from 'lucide-react';
+import { BarChart3, ShieldCheck, TrendingUp, ArrowRight, Zap, Globe, Lock } from 'lucide-react';
+import { motion } from 'framer-motion';
+import {
+  heroContainer,
+  heroItem,
+  staggerContainer,
+  staggerItem,
+  fadeUp,
+  scaleIn,
+  viewportOnce,
+} from '@/lib/motion';
+import { AnimatedCounter } from '@/components/shared/AnimatedCounter';
+import { BrowserMockup } from '@/components/shared/BrowserMockup';
 
-/**
- * LandingView - Landing Page Institucional do FinEx
- *
- * Objetivo: Comunicar valor, autoridade e converter visitantes em usuários.
- * Foco: Clareza financeira, governança e valuation.
- */
 export function LandingView() {
   const navigate = useNavigate();
 
@@ -16,191 +21,334 @@ export function LandingView() {
     navigate('/login');
   };
 
+  const handleNavigateToRegister = () => {
+    navigate('/register');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="border-b bg-white/80 dark:bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <BarChart3 className="w-8 h-8 text-orange-600" />
-            <span className="text-2xl font-bold text-orange-600">FinEx</span>
+      <nav className="border-b border-border/50 bg-background/80 backdrop-blur-lg sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <div
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => navigate('/')}
+          >
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-sm font-bold text-primary-foreground">F</span>
+            </div>
+            <span className="text-xl font-bold text-foreground tracking-tight">FinEx</span>
           </div>
 
-          {/* CTA Button */}
-          <Button
-            variant="outline"
-            onClick={handleNavigateToLogin}
-            className="border-orange-600 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
-          >
-            Login
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              onClick={handleNavigateToLogin}
+              className="cursor-pointer text-muted-foreground hover:text-foreground"
+            >
+              Login
+            </Button>
+            <Button
+              variant="gradient"
+              onClick={handleNavigateToRegister}
+              className="cursor-pointer"
+            >
+              Criar Conta
+            </Button>
+          </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 md:py-32">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          {/* Headline */}
-          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 dark:text-foreground leading-tight">
-            Transforme Dados Financeiros em{' '}
-            <span className="text-orange-600">Decisões Estratégicas</span>
-          </h1>
+      <section className="relative overflow-hidden">
+        {/* Animated gradient blobs */}
+        <motion.div
+          className="absolute top-[-20%] left-[5%] w-[500px] h-[500px] rounded-full bg-primary/[0.05] blur-[100px] pointer-events-none"
+          animate={{ x: [0, 40, 0], y: [0, -30, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full blur-[80px] pointer-events-none"
+          style={{ background: 'hsl(168 76% 42% / 0.05)' }}
+          animate={{ x: [0, -30, 0], y: [0, 20, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-[30%] right-[30%] w-[300px] h-[300px] rounded-full blur-[90px] pointer-events-none"
+          style={{ background: 'hsl(210 68% 52% / 0.04)' }}
+          animate={{ x: [0, 20, 0], y: [0, -15, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
 
-          {/* Subtitle */}
-          <p className="text-lg md:text-xl text-slate-700 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            A plataforma unificada de inteligência financeira, governança e valuation
-            que desvenda a verdadeira saúde do seu negócio.
-          </p>
-
-          {/* CTA Principal */}
-          <div className="pt-4">
-            <Button
-              size="lg"
-              onClick={handleNavigateToLogin}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 md:pt-32 md:pb-36 relative z-10">
+          <motion.div
+            className="max-w-3xl mx-auto text-center"
+            variants={heroContainer}
+            initial="initial"
+            animate="animate"
+          >
+            <motion.h1
+              variants={heroItem}
+              className="text-display text-4xl sm:text-5xl md:text-6xl text-foreground mb-6"
             >
-              Acessar Plataforma
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </div>
+              Transforme dados financeiros em{' '}
+              <span className="text-gradient">decisões estratégicas</span>
+            </motion.h1>
 
-          {/* Badge/Proof */}
-          <div className="pt-8">
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-              Desenvolvido por <span className="text-orange-600">Singular</span> • Tecnologia de ponta para finanças corporativas
-            </p>
-          </div>
+            <motion.p
+              variants={heroItem}
+              className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-10"
+            >
+              Plataforma unificada de inteligência financeira, governança corporativa e valuation
+              para empresas que levam gestão a sério.
+            </motion.p>
+
+            <motion.div
+              variants={heroItem}
+              className="flex flex-col sm:flex-row items-center justify-center gap-3"
+            >
+              <Button
+                variant="gradient"
+                size="lg"
+                onClick={handleNavigateToRegister}
+                className="cursor-pointer h-12 px-8 text-base font-semibold"
+              >
+                Começar Gratuitamente
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleNavigateToLogin}
+                className="cursor-pointer h-12 px-8 text-base"
+              >
+                Já tenho conta
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Value Proposition - 3 Pilares */}
-      <section className="container mx-auto px-4 py-20 bg-white dark:bg-background">
-        <div className="max-w-6xl mx-auto">
-          {/* Section Title */}
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-foreground mb-4">
-              Três Pilares da Excelência Financeira
+      {/* Impact Numbers */}
+      <motion.section
+        className="border-y border-border/50 bg-muted/30"
+        variants={fadeUp}
+        initial="initial"
+        whileInView="whileInView"
+        viewport={viewportOnce}
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {[
+              { value: 99.9, suffix: '%', label: 'Uptime garantido', format: (n: number) => n.toFixed(1) + '%' },
+              { value: 3, prefix: '< ', suffix: 's', label: 'Tempo de processamento', format: (n: number) => '< ' + Math.round(n) + 's' },
+              { value: 256, suffix: '-bit', label: 'Criptografia AES', format: (n: number) => Math.round(n) + '-bit' },
+              { value: 24, suffix: '/7', label: 'Suporte técnico', format: (n: number) => Math.round(n) + '/7' },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <p className="text-2xl md:text-3xl font-bold text-foreground font-mono tabular-nums">
+                  <AnimatedCounter
+                    value={stat.value}
+                    format={stat.format}
+                    className="text-2xl md:text-3xl font-bold text-foreground font-mono tabular-nums"
+                  />
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Features — 3 Pillars */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+        <motion.div
+          className="text-center mb-16"
+          variants={fadeUp}
+          initial="initial"
+          whileInView="whileInView"
+          viewport={viewportOnce}
+        >
+          <h2 className="text-headline text-3xl md:text-4xl text-foreground mb-4">
+            Três pilares da excelência financeira
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+            Tecnologia que une análise, gestão de risco e inteligência de mercado
+          </p>
+        </motion.div>
+
+        <motion.div
+          className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto"
+          variants={staggerContainer}
+          initial="initial"
+          whileInView="animate"
+          viewport={viewportOnce}
+        >
+          {[
+            {
+              icon: BarChart3,
+              title: 'Clareza Total',
+              subtitle: 'Visibilidade financeira em tempo real',
+              description: 'Consolidação de fluxo de caixa e DRE em tempo real. Entenda suas operações com dashboards intuitivos e insights acionáveis.',
+            },
+            {
+              icon: ShieldCheck,
+              title: 'Maturidade & Risco',
+              subtitle: 'Governança que protege e cresce',
+              description: 'Avalie a governança corporativa e reduza riscos operacionais. Frameworks validados para elevar a maturidade do seu negócio.',
+            },
+            {
+              icon: TrendingUp,
+              title: 'Valuation Empresarial',
+              subtitle: 'Descubra o valor real do negócio',
+              description: 'Descubra quanto sua empresa realmente vale. Metodologias de valuation para fundraising, M&A e planejamento estratégico.',
+            },
+          ].map((feature) => (
+            <motion.div
+              key={feature.title}
+              variants={staggerItem}
+              className="surface-elevated p-6 md:p-8 group cursor-default hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+            >
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                <feature.icon className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-primary/80 font-medium mb-3">
+                {feature.subtitle}
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* Product Preview — Browser Mockup */}
+      <section className="relative bg-gradient-radial">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <motion.div
+            className="text-center mb-12"
+            variants={fadeUp}
+            initial="initial"
+            whileInView="whileInView"
+            viewport={viewportOnce}
+          >
+            <h2 className="text-headline text-3xl md:text-4xl text-foreground mb-4">
+              Veja o FinEx em ação
             </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400">
-              Tecnologia que une análise, gestão de risco e inteligência de mercado
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+              Interface intuitiva projetada para tomada de decisão rápida
             </p>
-          </div>
+          </motion.div>
 
-          {/* Grid de Cards */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Card 1: Clareza Total */}
-            <Card className="border-2 hover:border-orange-200 dark:hover:border-orange-800 transition-all duration-200 hover:shadow-lg">
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
-                  <BarChart3 className="w-8 h-8 text-orange-600" />
-                </div>
-                <CardTitle className="text-xl font-bold text-slate-900 dark:text-foreground">
-                  Clareza Total
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Visibilidade financeira em tempo real
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-slate-700 dark:text-slate-300">
-                  Consolidação de fluxo de caixa e DRE em tempo real.
-                  Entenda suas operações com dashboards intuitivos e insights acionáveis.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Card 2: Maturidade & Risco */}
-            <Card className="border-2 hover:border-orange-200 dark:hover:border-orange-800 transition-all duration-200 hover:shadow-lg">
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
-                  <ShieldCheck className="w-8 h-8 text-orange-600" />
-                </div>
-                <CardTitle className="text-xl font-bold text-slate-900 dark:text-foreground">
-                  Maturidade & Risco
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Governança que protege e cresce
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-slate-700 dark:text-slate-300">
-                  Avalie a governança corporativa e reduza riscos operacionais.
-                  Frameworks validados para elevar a maturidade do seu negócio.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Card 3: Valuation Empresarial */}
-            <Card className="border-2 hover:border-orange-200 dark:hover:border-orange-800 transition-all duration-200 hover:shadow-lg">
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
-                  <TrendingUp className="w-8 h-8 text-orange-600" />
-                </div>
-                <CardTitle className="text-xl font-bold text-slate-900 dark:text-foreground">
-                  Valuation Empresarial
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Descubra o valor real do negócio
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-slate-700 dark:text-slate-300">
-                  Descubra quanto sua empresa realmente vale. Metodologias de valuation
-                  para fundraising, M&A e planejamento estratégico.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <motion.div
+            className="max-w-4xl mx-auto"
+            variants={scaleIn}
+            initial="initial"
+            whileInView="whileInView"
+            viewport={viewportOnce}
+          >
+            <BrowserMockup />
+          </motion.div>
         </div>
       </section>
 
-      {/* Call to Action Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="max-w-4xl mx-auto bg-gradient-to-r from-orange-600 to-orange-700 rounded-2xl p-12 text-center shadow-2xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+      {/* Why FinEx */}
+      <section className="bg-muted/30 border-y border-border/50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <motion.div
+            className="text-center mb-12"
+            variants={fadeUp}
+            initial="initial"
+            whileInView="whileInView"
+            viewport={viewportOnce}
+          >
+            <h2 className="text-headline text-3xl text-foreground mb-4">
+              Por que empresas escolhem o FinEx
+            </h2>
+          </motion.div>
+          <motion.div
+            className="grid sm:grid-cols-3 gap-8 max-w-4xl mx-auto"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={viewportOnce}
+          >
+            {[
+              { icon: Zap, title: 'Rápido de configurar', desc: 'Importe seus dados em minutos. Sem integrações complexas.' },
+              { icon: Lock, title: 'Segurança bancária', desc: 'Dados criptografados em repouso e em trânsito. LGPD compliant.' },
+              { icon: Globe, title: 'Acesso em qualquer lugar', desc: 'Aplicação web responsiva. Funciona em desktop, tablet e mobile.' },
+            ].map((item) => (
+              <motion.div key={item.title} variants={staggerItem} className="text-center">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <item.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="text-base font-semibold text-foreground mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <motion.div
+          className="max-w-3xl mx-auto surface-elevated bg-mesh p-10 md:p-14 text-center"
+          variants={fadeUp}
+          initial="initial"
+          whileInView="whileInView"
+          viewport={viewportOnce}
+        >
+          <h2 className="text-headline text-2xl md:text-3xl text-foreground mb-4">
             Pronto para transformar sua gestão financeira?
           </h2>
-          <p className="text-lg text-orange-100 mb-8">
+          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
             Junte-se a empresas que já tomam decisões baseadas em dados reais.
           </p>
           <Button
+            variant="gradient"
             size="lg"
-            onClick={handleNavigateToLogin}
-            className="bg-white text-orange-600 hover:bg-orange-50 px-8 py-6 text-lg font-semibold shadow-lg"
+            onClick={handleNavigateToRegister}
+            className="cursor-pointer h-12 px-8 text-base font-semibold"
           >
             Começar Agora
-            <ArrowRight className="ml-2 w-5 h-5" />
+            <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
-        </div>
+        </motion.div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-slate-50 dark:bg-card">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            {/* Logo Footer */}
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="w-6 h-6 text-orange-600" />
-              <span className="text-xl font-bold text-orange-600">FinEx</span>
+      <footer className="border-t border-border/50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+                <span className="text-xs font-bold text-primary-foreground">F</span>
+              </div>
+              <span className="text-base font-semibold text-foreground">FinEx</span>
+              <span className="text-sm text-muted-foreground ml-2">
+                por <span className="text-foreground font-medium">Singular</span>
+              </span>
             </div>
 
-            {/* Copyright */}
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              © 2025 FinEx. Todos os direitos reservados.
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} FinEx. Todos os direitos reservados.
             </p>
 
-            {/* Links */}
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center gap-6">
               <Link
                 to="/privacy"
-                className="text-sm text-slate-600 dark:text-slate-400 hover:text-orange-600 transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 Privacidade
               </Link>
               <Link
                 to="/terms"
-                className="text-sm text-slate-600 dark:text-slate-400 hover:text-orange-600 transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 Termos
               </Link>
@@ -208,7 +356,7 @@ export function LandingView() {
                 href="https://wa.me/5561961740440"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-slate-600 dark:text-slate-400 hover:text-orange-600 transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 Contato
               </a>

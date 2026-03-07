@@ -6,7 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Progress } from '../components/ui/progress';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Loader2, FileText, PlayCircle, Clock } from 'lucide-react';
+import { Skeleton } from '../components/ui/skeleton';
 import { AppLayout } from '../components/AppLayout';
+import { PageHeader } from '../components/PageHeader';
 import type { Survey } from '../types/survey.types';
 
 export const SurveysListView = () => {
@@ -47,10 +49,23 @@ export const SurveysListView = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-center min-h-[60vh]">
-              <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <div className="mb-6">
+              <Skeleton className="h-8 w-48 mb-2" />
+              <Skeleton className="h-5 w-80" />
+            </div>
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="surface-elevated p-6 space-y-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-1/3" />
+                  </div>
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -60,17 +75,12 @@ export const SurveysListView = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Questionários
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">
-              Complete os questionários disponíveis para sua empresa
-            </p>
-          </div>
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+          <PageHeader
+            title="Questionários"
+            subtitle="Complete os questionários disponíveis para sua empresa"
+          />
 
           {/* Error Alert */}
           {error && (
@@ -83,8 +93,8 @@ export const SurveysListView = () => {
           {surveys.length === 0 ? (
             <Card>
               <CardContent className="pt-6 text-center py-12">
-                <FileText className="h-12 w-12 mx-auto text-slate-400 dark:text-slate-500 mb-4" />
-                <p className="text-slate-600 dark:text-slate-400">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
                   Nenhum questionário disponível no momento
                 </p>
               </CardContent>
@@ -93,7 +103,7 @@ export const SurveysListView = () => {
             /* Surveys Grid */
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
               {surveys.map((survey) => (
-                <Card key={survey.surveyId} className="hover:shadow-lg transition-shadow">
+                <Card key={survey.surveyId} className="surface-elevated overflow-hidden transition-all duration-200 hover:translate-y-[-1px]">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                       <FileText className="h-5 w-5 flex-shrink-0" />
@@ -103,7 +113,7 @@ export const SurveysListView = () => {
                       {survey.description}
                     </CardDescription>
                     {survey.estimatedTimeMinutes && (
-                      <div className="flex items-center gap-1 mt-1 text-sm text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
                         <Clock className="w-3.5 h-3.5" />
                         <span>~{survey.estimatedTimeMinutes} min</span>
                       </div>
@@ -113,8 +123,8 @@ export const SurveysListView = () => {
                     {survey.hasStarted && survey.progress !== undefined ? (
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-slate-600 dark:text-slate-400">Progresso</span>
-                          <span className="font-medium text-slate-900 dark:text-slate-100">
+                          <span className="text-muted-foreground">Progresso</span>
+                          <span className="font-medium text-foreground">
                             {survey.progress}%
                           </span>
                         </div>
@@ -125,7 +135,7 @@ export const SurveysListView = () => {
                     <Button
                       onClick={() => handleStartSurvey(survey)}
                       disabled={startingId === survey.surveyId}
-                      className="w-full"
+                      className="w-full cursor-pointer"
                     >
                       {startingId === survey.surveyId ? (
                         <>

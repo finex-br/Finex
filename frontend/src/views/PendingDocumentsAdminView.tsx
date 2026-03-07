@@ -34,7 +34,7 @@ export function PendingDocumentsAdminView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-6">
           <PageHeader
             breadcrumb="Administração"
@@ -84,17 +84,17 @@ export function PendingDocumentsAdminView() {
                       </TableCell>
                       <TableCell className="text-muted-foreground">{doc.totalRows}</TableCell>
                       <TableCell>
-                        <span className={doc.hasMapping ? 'text-green-500' : 'text-muted-foreground'}>
+                        <span className={doc.hasMapping ? 'text-success' : 'text-muted-foreground'}>
                           {doc.hasMapping ? 'Sim' : 'Não'}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className={doc.hasValidation ? 'text-green-500' : 'text-muted-foreground'}>
+                        <span className={doc.hasValidation ? 'text-success' : 'text-muted-foreground'}>
                           {doc.hasValidation ? 'Sim' : 'Não'}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Button asChild variant="outline" size="sm">
+                        <Button asChild variant="outline" size="sm" className="cursor-pointer">
                           <Link to={`/admin/pending-documents/${doc.id}`}>Abrir</Link>
                         </Button>
                       </TableCell>

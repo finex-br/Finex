@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SEMANTIC_COLORS, TOOLTIP_STYLE, GRID_STYLE, AXIS_STYLE } from '@/lib/chart-theme';
 import { MonthlyData, PeriodFilter, GraphType } from '@/services/financialService';
 import { BarChart3, ChevronDown, ChevronUp, Filter as FilterIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -105,9 +106,9 @@ export const MonthlyChart = ({
       {/* Área de Filtro Customizado (Colapsável) */}
       {isFilterExpanded && (
         <div className="px-6 pb-4 border-b">
-          <div className="bg-slate-50 p-4 rounded-lg space-y-3">
+          <div className="bg-muted p-4 rounded-lg space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Filtro personalizado
               </p>
               {hasCustomFilter && (
@@ -121,7 +122,7 @@ export const MonthlyChart = ({
                 </Button>
               )}
             </div>
-            
+
             <GraphDateFilter
               periodFilter={currentFilter}
               onPeriodChange={(filter) => onFilterChange(GraphType.MONTHLY, filter)}
@@ -134,33 +135,33 @@ export const MonthlyChart = ({
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={monthlyData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="month" 
-              tick={{ fontSize: 12 }}
+            <CartesianGrid {...GRID_STYLE} vertical={false} />
+            <XAxis
+              dataKey="month"
+              tick={AXIS_STYLE.tick}
               tickFormatter={formatDateLabel}
               angle={monthlyData.length > 10 ? -45 : 0}
               textAnchor={monthlyData.length > 10 ? "end" : "middle"}
               height={monthlyData.length > 10 ? 80 : 30}
             />
-            <YAxis 
-              tick={{ fontSize: 12 }}
+            <YAxis
+              tick={AXIS_STYLE.tick}
               tickFormatter={formatCurrency}
             />
-            <Tooltip 
+            <Tooltip
               formatter={(value: number) => formatCurrency(value)}
-              labelStyle={{ color: 'black' }}
+              contentStyle={TOOLTIP_STYLE}
             />
             <Legend />
-            <Bar 
-              dataKey="revenue" 
-              fill="#10b981" 
+            <Bar
+              dataKey="revenue"
+              fill={SEMANTIC_COLORS.revenue}
               name="Receitas"
               radius={[8, 8, 0, 0]}
             />
-            <Bar 
-              dataKey="expense" 
-              fill="#ef4444" 
+            <Bar
+              dataKey="expense"
+              fill={SEMANTIC_COLORS.expense}
               name="Despesas"
               radius={[8, 8, 0, 0]}
             />

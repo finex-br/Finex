@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CHART_COLORS, SEMANTIC_COLORS, TOOLTIP_STYLE, GRID_STYLE, AXIS_STYLE } from '@/lib/chart-theme';
 import { TrendData, PeriodFilter, GraphType } from '@/services/financialService';
 import { TrendingUp, ChevronDown, ChevronUp, Filter as FilterIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -91,13 +92,13 @@ export const TrendChart = ({
           </Button>
         </div>
       </CardHeader>
-      
+
       {/* Área de Filtro Customizado (Colapsável) */}
       {isFilterExpanded && (
         <div className="px-6 pb-4 border-b">
-          <div className="bg-slate-50 p-4 rounded-lg space-y-3">
+          <div className="bg-muted p-4 rounded-lg space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Configure um período diferente apenas para este gráfico
               </p>
               {hasCustomFilter && (
@@ -111,7 +112,7 @@ export const TrendChart = ({
                 </Button>
               )}
             </div>
-            
+
             <GraphDateFilter
               periodFilter={currentFilter}
               onPeriodChange={(filter) => onFilterChange(GraphType.TREND, filter)}
@@ -124,43 +125,49 @@ export const TrendChart = ({
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={trendData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="date" 
-              tick={{ fontSize: 12 }}
+            <CartesianGrid {...GRID_STYLE} vertical={false} />
+            <XAxis
+              dataKey="date"
+              tick={AXIS_STYLE.tick}
             />
-            <YAxis 
-              tick={{ fontSize: 12 }}
+            <YAxis
+              tick={AXIS_STYLE.tick}
               tickFormatter={formatCurrency}
             />
-            <Tooltip 
+            <Tooltip
               formatter={(value: number) => formatCurrency(value)}
-              labelStyle={{ color: 'black' }}
+              contentStyle={TOOLTIP_STYLE}
             />
             <Legend />
             <Line
               type="monotone"
               dataKey="revenue"
-              stroke="#10b981"
+              stroke={SEMANTIC_COLORS.revenue}
               strokeWidth={2}
+              strokeLinecap="round"
               name="Receitas"
-              dot={{ r: 4 }}
+              dot={{ r: 3 }}
+              activeDot={{ r: 5 }}
             />
             <Line
               type="monotone"
               dataKey="expense"
-              stroke="#ef4444"
+              stroke={SEMANTIC_COLORS.expense}
               strokeWidth={2}
+              strokeLinecap="round"
               name="Despesas"
-              dot={{ r: 4 }}
+              dot={{ r: 3 }}
+              activeDot={{ r: 5 }}
             />
             <Line
               type="monotone"
               dataKey="profit"
-              stroke="#3b82f6"
+              stroke={CHART_COLORS[2]}
               strokeWidth={2}
+              strokeLinecap="round"
               name="Lucro"
-              dot={{ r: 4 }}
+              dot={{ r: 3 }}
+              activeDot={{ r: 5 }}
             />
           </LineChart>
         </ResponsiveContainer>
