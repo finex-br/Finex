@@ -108,6 +108,7 @@ export function DynamicDashboardView() {
         <div className="max-w-7xl mx-auto animate-fade-in">
           <DynamicDashboardRenderer
             dashboard={dashboard}
+            companyId={companyId}
             onRefresh={refreshDashboard}
             isLoading={isLoading}
           />

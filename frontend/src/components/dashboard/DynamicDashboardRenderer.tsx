@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { DynamicChart } from '../charts/DynamicChart';
-import { SafeHtmlRenderer } from './SafeHtmlRenderer';
+import { MetabaseEmbed } from './MetabaseEmbed';
 
 interface ChartPosition {
   x: number;
@@ -40,11 +40,13 @@ interface Dashboard {
   name: string;
   description?: string;
   embedHtml?: string;
+  metabaseDashboardId?: number;
   charts: DashboardChart[];
 }
 
 interface DynamicDashboardRendererProps {
   dashboard: Dashboard;
+  companyId: string;
   onRefresh?: () => void;
   isLoading?: boolean;
 }
@@ -64,6 +66,7 @@ function SkeletonCard(): React.ReactElement {
 
 export function DynamicDashboardRenderer({
   dashboard,
+  companyId,
   onRefresh,
   isLoading = false,
 }: DynamicDashboardRendererProps): React.ReactElement {
@@ -100,20 +103,13 @@ export function DynamicDashboardRenderer({
         )}
       </div>
 
-      {/* Embed HTML */}
-      {dashboard.embedHtml && (
-        <Card>
-          <CardContent className="pt-6">
-            <SafeHtmlRenderer
-              html={dashboard.embedHtml}
-              className="w-full [&_iframe]:w-full [&_iframe]:min-h-[400px] [&_iframe]:rounded-md"
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Charts grid */}
-      {isLoading ? (
+      {/* Metabase embed (full-page) or native charts */}
+      {dashboard.metabaseDashboardId ? (
+        <MetabaseEmbed
+          finexDashboardId={dashboard.id}
+          companyId={companyId}
+        />
+      ) : isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, index) => (
             <SkeletonCard key={index} />

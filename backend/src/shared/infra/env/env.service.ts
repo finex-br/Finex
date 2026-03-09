@@ -67,4 +67,13 @@ export class EnvService {
   get sentryEnabled(): boolean {
     return !!this.get('SENTRY_DSN') && this.nodeEnv === 'production';
   }
+
+  // Metabase Embedding Configuration
+  get metabaseSecretKey(): string {
+    return this.get('METABASE_SECRET_KEY');
+  }
+
+  get metabaseSiteUrl(): string {
+    return this.get('METABASE_SITE_URL');
+  }
 }

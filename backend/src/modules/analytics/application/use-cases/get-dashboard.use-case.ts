@@ -93,6 +93,7 @@ export class GetDashboardUseCase
       description: dashboard.description,
       isDefault: dashboard.isDefault,
       embedHtml: dashboard.embedHtml,
+      metabaseDashboardId: dashboard.metabaseDashboardId,
     };
   }
 

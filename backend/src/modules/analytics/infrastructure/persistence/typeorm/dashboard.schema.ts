@@ -28,6 +28,9 @@ export class DashboardSchema {
   @Column({ name: 'embed_html', type: 'text', nullable: true })
   embedHtml: string;
 
+  @Column({ name: 'metabase_dashboard_id', type: 'integer', nullable: true })
+  metabaseDashboardId: number | null;
+
   @Column({ name: 'created_by', type: 'uuid' })
   createdBy: string;
 

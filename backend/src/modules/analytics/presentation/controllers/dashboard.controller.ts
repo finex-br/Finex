@@ -20,6 +20,7 @@ import { UpdateDashboardUseCase } from '../../application/use-cases/update-dashb
 import { DeleteDashboardUseCase } from '../../application/use-cases/delete-dashboard.use-case';
 import { GetDashboardUseCase } from '../../application/use-cases/get-dashboard.use-case';
 import { GetDatasetsUseCase } from '../../application/use-cases/get-datasets.use-case';
+import { GenerateMetabaseEmbedTokenUseCase } from '../../application/use-cases/generate-metabase-embed-token.use-case';
 
 @Controller('analytics/dashboards')
 @UseGuards(JwtAuthGuard)
@@ -29,6 +30,7 @@ export class DashboardController {
     private readonly updateDashboardUseCase: UpdateDashboardUseCase,
     private readonly deleteDashboardUseCase: DeleteDashboardUseCase,
     private readonly getDashboardUseCase: GetDashboardUseCase,
+    private readonly generateMetabaseEmbedTokenUseCase: GenerateMetabaseEmbedTokenUseCase,
     private readonly dataSource: DataSource,
   ) { }
 
@@ -53,6 +55,9 @@ export class DashboardController {
         description: body.description,
         isDefault: body.isDefault,
         embedHtml: body.embedHtml,
+        metabaseDashboardId: body.metabaseDashboardId
+          ? Number(body.metabaseDashboardId)
+          : undefined,
       });
       return { success: true, dashboard: result };
     } catch (error: any) {
@@ -75,6 +80,7 @@ export class DashboardController {
         `SELECT id, company_id as "companyId", name, description,
                 is_default as "isDefault", created_by as "createdBy",
                 embed_html as "embedHtml",
+                metabase_dashboard_id as "metabaseDashboardId",
                 created_at as "createdAt", updated_at as "updatedAt"
          FROM dashboards
          WHERE company_id = $1
@@ -125,11 +131,37 @@ export class DashboardController {
         description: body.description,
         isDefault: body.isDefault,
         embedHtml: body.embedHtml,
+        metabaseDashboardId: body.metabaseDashboardId !== undefined
+          ? (body.metabaseDashboardId ? Number(body.metabaseDashboardId) : null)
+          : undefined,
       });
       return { success: true, dashboard: result };
     } catch (error: any) {
       throw new HttpException(
         error.message || 'Failed to update dashboard',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get(':id/metabase-token')
+  async getMetabaseToken(
+    @Param('id') id: string,
+    @Query('companyId') companyId: string,
+    @Request() req: any,
+  ) {
+    try {
+      const ctx = await resolveCompanyContext(this.dataSource, req, companyId, {
+        requireCompanyIdForAdmin: true,
+      });
+      const result = await this.generateMetabaseEmbedTokenUseCase.execute({
+        dashboardId: id,
+        companyId: ctx.companyId!,
+      });
+      return { success: true, ...result };
+    } catch (error: any) {
+      throw new HttpException(
+        error.message || 'Failed to generate Metabase token',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

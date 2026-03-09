@@ -129,6 +129,7 @@ export function DashboardView() {
             )}
             <DynamicDashboardRenderer
               dashboard={selectedDashboard}
+              companyId={companyId}
               onRefresh={handleRefresh}
               isLoading={selectedLoading}
             />
