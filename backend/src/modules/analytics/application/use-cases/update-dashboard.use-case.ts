@@ -36,6 +36,9 @@ export class UpdateDashboardUseCase
       description: request.description,
       isDefault: request.isDefault,
       embedHtml: processedEmbedHtml === null ? null : processedEmbedHtml || undefined,
+      metabaseDashboardId: request.metabaseDashboardId !== undefined
+        ? (request.metabaseDashboardId ?? null)
+        : undefined,
     });
 
     await this.dashboardRepo.update(dashboard);
@@ -47,6 +50,7 @@ export class UpdateDashboardUseCase
       description: dashboard.description,
       isDefault: dashboard.isDefault,
       embedHtml: dashboard.embedHtml,
+      metabaseDashboardId: dashboard.metabaseDashboardId,
       createdBy: dashboard.createdBy,
       createdAt: dashboard.createdAt!,
       updatedAt: dashboard.updatedAt!,

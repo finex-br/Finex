@@ -132,18 +132,18 @@ export function UploadView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-6">
           <PageHeader
             title="Importar Dados"
             subtitle="Envie seu arquivo Excel para revisão"
           />
 
-          <div className="glass-card p-6 space-y-6 max-w-2xl mx-auto">
+          <div className="surface-elevated p-6 sm:p-8 space-y-6 max-w-2xl mx-auto">
             {/* Upload Area */}
             <div
               onClick={handleClickUpload}
-              className="p-8 border-2 border-dashed border-border rounded-lg bg-card/50 hover:bg-accent/50 transition-colors cursor-pointer"
+              className="p-8 border-2 border-dashed border-border/60 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200 cursor-pointer"
             >
               <input
                 ref={fileInputRef}
@@ -167,9 +167,9 @@ export function UploadView() {
 
             {/* Success */}
             {uploadSuccess && (
-              <Alert className="bg-green-500/10 border-green-500/30">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <AlertDescription className="text-green-400">
+              <Alert className="bg-success/10 border-success/30">
+                <CheckCircle2 className="h-4 w-4 text-success" />
+                <AlertDescription className="text-success">
                   {isSystemAdmin
                     ? 'Documento enviado com sucesso! Redirecionando para a revisão...'
                     : 'Documento enviado com sucesso! Um administrador irá revisar.'}
@@ -205,13 +205,13 @@ export function UploadView() {
             </Button>
 
             {/* Download Model Button */}
-            <Button variant="outline" onClick={handleDownloadModel} className="w-full">
+            <Button variant="outline" onClick={handleDownloadModel} className="w-full cursor-pointer">
               <Download className="mr-2 h-5 w-5" />
               Baixar planilha modelo
             </Button>
 
             {/* Info */}
-            <div className="glass-card p-4 space-y-3">
+            <div className="surface p-4 space-y-3">
               <p className="text-sm text-foreground font-medium">
                 Formato esperado:
               </p>

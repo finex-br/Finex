@@ -157,20 +157,20 @@ export function DashboardListView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              <h1 className="text-3xl font-bold text-foreground">
                 Dashboards
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Gerencie os dashboards da empresa
               </p>
             </div>
             {selectedCompanyId && (
-              <Button onClick={() => setCreateDialogOpen(true)}>
+              <Button onClick={() => setCreateDialogOpen(true)} className="cursor-pointer">
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Dashboard
               </Button>
@@ -178,7 +178,7 @@ export function DashboardListView() {
           </div>
 
           {/* Company Selector */}
-          <Card>
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <CompanySelector
                 companies={companies}
@@ -210,7 +210,7 @@ export function DashboardListView() {
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
               ) : dashboards.length === 0 ? (
-                <Card>
+                <Card className="glass-card">
                   <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                     <LayoutDashboard className="h-12 w-12 mb-3" />
                     <p className="text-sm">Nenhum dashboard encontrado</p>
@@ -222,7 +222,7 @@ export function DashboardListView() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {dashboards.map((dashboard) => (
-                    <Card key={dashboard.id} className="border">
+                    <Card key={dashboard.id} className="glass-card-hover border cursor-pointer">
                       <CardContent className="p-5 space-y-4">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
@@ -255,7 +255,7 @@ export function DashboardListView() {
                             variant="default"
                             size="sm"
                             onClick={() => handleConfigure(dashboard.id)}
-                            className="flex-1"
+                            className="flex-1 cursor-pointer"
                           >
                             <Settings className="h-3.5 w-3.5 mr-1.5" />
                             Configurar
@@ -264,6 +264,7 @@ export function DashboardListView() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleView(dashboard.id)}
+                            className="cursor-pointer"
                           >
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
@@ -271,7 +272,7 @@ export function DashboardListView() {
                             variant="outline"
                             size="sm"
                             onClick={() => setDeleteTargetId(dashboard.id)}
-                            className="text-destructive hover:text-destructive"
+                            className="text-destructive hover:text-destructive cursor-pointer"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>

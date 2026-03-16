@@ -29,6 +29,7 @@ export class CreateDashboardUseCase
       description: request.description,
       isDefault: request.isDefault ?? false,
       embedHtml: processedEmbedHtml || undefined,
+      metabaseDashboardId: request.metabaseDashboardId,
       createdBy: request.userId,
     });
 
@@ -46,6 +47,7 @@ export class CreateDashboardUseCase
       description: dashboard.description,
       isDefault: dashboard.isDefault,
       embedHtml: dashboard.embedHtml,
+      metabaseDashboardId: dashboard.metabaseDashboardId,
       createdBy: dashboard.createdBy,
       createdAt: dashboard.createdAt!,
       updatedAt: dashboard.updatedAt!,

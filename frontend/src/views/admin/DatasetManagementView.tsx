@@ -141,22 +141,22 @@ export function DatasetManagementView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+            <h1 className="text-3xl font-bold text-foreground">
               Gerenciamento de Datasets
             </h1>
             {selectedCompanyName && (
-              <p className="text-slate-600 dark:text-slate-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Empresa: {selectedCompanyName}
               </p>
             )}
           </div>
 
           {/* Company Selector */}
-          <Card>
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <CompanySelector
                 companies={companies}
@@ -183,7 +183,7 @@ export function DatasetManagementView() {
           {selectedCompanyId && (
             <>
               {/* Dataset Uploader */}
-              <Card>
+              <Card className="glass-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileSpreadsheet className="h-5 w-5" />
@@ -200,7 +200,7 @@ export function DatasetManagementView() {
 
               {/* Dataset Preview (shown when a dataset is selected) */}
               {selectedDataset && (
-                <Card>
+                <Card className="glass-card">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
@@ -236,7 +236,7 @@ export function DatasetManagementView() {
               )}
 
               {/* Datasets List */}
-              <Card>
+              <Card className="glass-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Database className="h-5 w-5" />
@@ -259,7 +259,7 @@ export function DatasetManagementView() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {datasets.map((dataset) => (
-                        <Card key={dataset.id} className="border">
+                        <Card key={dataset.id} className="glass-card-hover border cursor-pointer">
                           <CardContent className="p-4 space-y-3">
                             <div>
                               <h4 className="font-medium text-sm truncate">
@@ -300,7 +300,7 @@ export function DatasetManagementView() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlePreview(dataset.id)}
-                                className="flex-1"
+                                className="flex-1 cursor-pointer"
                               >
                                 <Eye className="h-3.5 w-3.5 mr-1.5" />
                                 Preview
@@ -311,6 +311,7 @@ export function DatasetManagementView() {
                                 onClick={() =>
                                   handleDownload(dataset.id, dataset.fileName)
                                 }
+                                className="cursor-pointer"
                               >
                                 <Download className="h-3.5 w-3.5" />
                               </Button>
@@ -318,7 +319,7 @@ export function DatasetManagementView() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setDeleteTargetId(dataset.id)}
-                                className="text-destructive hover:text-destructive"
+                                className="text-destructive hover:text-destructive cursor-pointer"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>

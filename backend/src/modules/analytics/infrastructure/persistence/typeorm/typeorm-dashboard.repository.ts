@@ -48,6 +48,7 @@ export class TypeormDashboardRepository implements IDashboardRepository {
     schema.description = dashboard.description ?? '';
     schema.isDefault = dashboard.isDefault;
     schema.embedHtml = dashboard.embedHtml ?? '';
+    schema.metabaseDashboardId = dashboard.metabaseDashboardId ?? null;
     schema.createdBy = dashboard.createdBy;
     return schema;
   }
@@ -60,6 +61,7 @@ export class TypeormDashboardRepository implements IDashboardRepository {
         description: schema.description || undefined,
         isDefault: schema.isDefault,
         embedHtml: schema.embedHtml || undefined,
+        metabaseDashboardId: schema.metabaseDashboardId ?? undefined,
         createdBy: schema.createdBy,
         createdAt: schema.createdAt,
         updatedAt: schema.updatedAt,

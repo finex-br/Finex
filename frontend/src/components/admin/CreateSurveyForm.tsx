@@ -219,7 +219,7 @@ export function CreateSurveyForm() {
         </CardHeader>
         <CardContent>
           {questions.length === 0 ? (
-            <div className="text-center py-12 text-slate-500 dark:text-slate-400">
+            <div className="text-center py-12 text-muted-foreground">
               Nenhuma pergunta adicionada. Clique em "Adicionar Pergunta" para começar.
             </div>
           ) : (

@@ -2,15 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/AppLayout';
 import { DashboardChartList } from '@/components/admin/DashboardChartList';
-import { SafeHtmlRenderer } from '@/components/dashboard/SafeHtmlRenderer';
 import { useDashboardConfig } from '@/hooks/useDashboardConfig';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -63,8 +62,7 @@ export function DashboardConfigView() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [editEmbedHtml, setEditEmbedHtml] = useState('');
-  const [showEmbedPreview, setShowEmbedPreview] = useState(false);
+  const [editMetabaseDashboardId, setEditMetabaseDashboardId] = useState('');
 
   // Delete chart confirmation state
   const [deleteChartId, setDeleteChartId] = useState<string | null>(null);
@@ -81,7 +79,9 @@ export function DashboardConfigView() {
     if (selectedDashboard) {
       setEditName(selectedDashboard.name);
       setEditDescription(selectedDashboard.description || '');
-      setEditEmbedHtml(selectedDashboard.embedHtml || '');
+      setEditMetabaseDashboardId(
+        selectedDashboard.metabaseDashboardId?.toString() || ''
+      );
     }
   }, [selectedDashboard]);
 
@@ -91,7 +91,10 @@ export function DashboardConfigView() {
     const result = await updateDashboard(dashboardId, companyId, {
       name: editName.trim(),
       description: editDescription.trim() || undefined,
-      embedHtml: editEmbedHtml.trim() || '',
+      embedHtml: '',
+      metabaseDashboardId: editMetabaseDashboardId
+        ? Number(editMetabaseDashboardId)
+        : null,
     });
 
     if (result) {
@@ -100,9 +103,8 @@ export function DashboardConfigView() {
         description: 'As informacoes do dashboard foram salvas.',
       });
       setEditDialogOpen(false);
-      setShowEmbedPreview(false);
     }
-  }, [dashboardId, companyId, editName, editDescription, editEmbedHtml, updateDashboard, toast]);
+  }, [dashboardId, companyId, editName, editDescription, editMetabaseDashboardId, updateDashboard, toast]);
 
   const handleAddChart = useCallback(() => {
     if (!dashboardId || !companyId) return;
@@ -153,7 +155,7 @@ export function DashboardConfigView() {
   if (isLoading && !selectedDashboard) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto flex items-center justify-center py-24">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -164,36 +166,36 @@ export function DashboardConfigView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
           {/* Header */}
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={handleBack}>
+              <Button variant="ghost" size="sm" onClick={handleBack} className="cursor-pointer">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Voltar
               </Button>
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                  <h1 className="text-3xl font-bold text-foreground">
                     <Settings className="h-7 w-7 inline-block mr-2 -mt-1" />
                     Configurar Dashboard
                   </h1>
                 </div>
                 {selectedDashboard && (
                   <div className="mt-2">
-                    <p className="text-lg font-medium text-slate-700 dark:text-slate-300">
+                    <p className="text-lg font-medium text-foreground">
                       {selectedDashboard.name}
                     </p>
                     {selectedDashboard.description && (
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {selectedDashboard.description}
                       </p>
                     )}
-                    {selectedDashboard.embedHtml && (
+                    {(selectedDashboard.embedHtml || selectedDashboard.metabaseDashboardId) && (
                       <Badge variant="secondary" className="mt-2">
                         <Code className="h-3 w-3 mr-1" />
-                        Embed HTML configurado
+                        Metabase dashboard ID: {selectedDashboard.metabaseDashboardId}
                       </Badge>
                     )}
                   </div>
@@ -206,11 +208,12 @@ export function DashboardConfigView() {
                 variant="outline"
                 size="sm"
                 onClick={() => setEditDialogOpen(true)}
+                className="cursor-pointer"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Editar Info
               </Button>
-              <Button variant="outline" size="sm" onClick={handleViewDashboard}>
+              <Button variant="outline" size="sm" onClick={handleViewDashboard} className="cursor-pointer">
                 <Eye className="h-4 w-4 mr-2" />
                 Visualizar Dashboard
               </Button>
@@ -231,7 +234,7 @@ export function DashboardConfigView() {
           )}
 
           {/* Charts List */}
-          <Card>
+          <Card className="glass-card">
             <CardContent className="pt-6">
               <DashboardChartList
                 charts={chartItems}
@@ -274,50 +277,29 @@ export function DashboardConfigView() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-embed-html">
-                Embed HTML
+              <Label htmlFor="edit-metabase-id">
+                Metabase Dashboard ID
               </Label>
               <p className="text-xs text-muted-foreground">
-                Cole o código HTML completo para exibir no dashboard.
+                Cole o ID numérico do dashboard no Metabase (ex: o número ao final da URL{' '}
+                <code>/dashboard/42</code> → ID é <code>42</code>).
               </p>
-              <Textarea
-                id="edit-embed-html"
-                placeholder='<html><body><h1>Meu Dashboard</h1></body></html>'
-                value={editEmbedHtml}
-                onChange={(e) => setEditEmbedHtml(e.target.value)}
-                rows={5}
-                className="font-mono text-xs"
+              <Input
+                id="edit-metabase-id"
+                type="number"
+                placeholder="Ex: 42"
+                value={editMetabaseDashboardId}
+                onChange={(e) => setEditMetabaseDashboardId(e.target.value)}
               />
-              <div className="flex gap-2">
+              {editMetabaseDashboardId && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  onClick={() => setShowEmbedPreview((prev) => !prev)}
-                  disabled={!editEmbedHtml.trim()}
+                  onClick={() => setEditMetabaseDashboardId('')}
                 >
-                  <Eye className="h-4 w-4 mr-2" />
-                  {showEmbedPreview ? 'Ocultar Preview' : 'Preview'}
+                  Limpar
                 </Button>
-                {editEmbedHtml.trim() && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditEmbedHtml('')}
-                  >
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              {showEmbedPreview && editEmbedHtml.trim() && (
-                <div className="mt-2 rounded-md border p-4 bg-slate-50 dark:bg-slate-800">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Preview:</p>
-                  <SafeHtmlRenderer
-                    html={editEmbedHtml}
-                    className="w-full [&_iframe]:w-full [&_iframe]:min-h-[300px] [&_iframe]:rounded-md"
-                  />
-                </div>
               )}
             </div>
           </div>

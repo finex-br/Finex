@@ -18,7 +18,7 @@ export function MyDocumentsView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-6">
           <PageHeader
             title="Meus Documentos"
@@ -36,7 +36,7 @@ export function MyDocumentsView() {
             </Alert>
           )}
 
-          <div className="glass-card overflow-hidden">
+          <div className="surface-elevated overflow-hidden">
             <div className="p-4 border-b border-border">
               {!isLoading && <span className="text-sm text-muted-foreground">Total: {total}</span>}
             </div>
@@ -64,7 +64,7 @@ export function MyDocumentsView() {
                       <TableCell className="text-muted-foreground">{doc.totalRows}</TableCell>
                       <TableCell className="text-muted-foreground">{new Date(doc.updatedAt).toLocaleString()}</TableCell>
                       <TableCell>
-                        <Button asChild variant="outline" size="sm">
+                        <Button asChild variant="outline" size="sm" className="cursor-pointer">
                           <Link to={`/documents/${doc.id}`}>Acompanhar</Link>
                         </Button>
                       </TableCell>

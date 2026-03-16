@@ -147,8 +147,8 @@ export function CompletedAssessmentsList() {
       {/* Results */}
       {assessments.length === 0 ? (
         <div className="text-center py-12">
-          <CheckCircle className="h-12 w-12 mx-auto text-slate-400 dark:text-slate-500 mb-4" />
-          <p className="text-slate-600 dark:text-slate-400">
+          <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">
             Nenhum questionário respondido encontrado
           </p>
         </div>
@@ -169,15 +169,15 @@ export function CompletedAssessmentsList() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-slate-500 dark:text-slate-400">Empresa:</span>
+                        <span className="text-muted-foreground">Empresa:</span>
                         <p className="font-medium">{assessment.companyName}</p>
                       </div>
                       <div>
-                        <span className="text-slate-500 dark:text-slate-400">Progresso:</span>
+                        <span className="text-muted-foreground">Progresso:</span>
                         <p className="font-medium">{assessment.progress}%</p>
                       </div>
                       <div>
-                        <span className="text-slate-500 dark:text-slate-400">Completado:</span>
+                        <span className="text-muted-foreground">Completado:</span>
                         <p className="font-medium">
                           {formatDistanceToNow(new Date(assessment.completedAt), {
                             addSuffix: true,

@@ -29,6 +29,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { CHART_COLORS, GRID_STYLE } from '@/lib/chart-theme';
 
 interface DynamicChartProps {
   chartType:
@@ -59,16 +60,7 @@ interface DynamicChartProps {
   className?: string;
 }
 
-const DEFAULT_COLORS = [
-  '#f97316',
-  '#3b82f6',
-  '#10b981',
-  '#8b5cf6',
-  '#ef4444',
-  '#06b6d4',
-  '#f59e0b',
-  '#ec4899',
-];
+const DEFAULT_COLORS = CHART_COLORS;
 
 function renderBarChart(
   data: DynamicChartProps['data'],
@@ -82,7 +74,7 @@ function renderBarChart(
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data.rows}>
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid {...GRID_STYLE} />
         <XAxis dataKey={xKey} />
         <YAxis />
         <Tooltip />
@@ -111,7 +103,7 @@ function renderLineChart(
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data.rows}>
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid {...GRID_STYLE} />
         <XAxis dataKey={xKey} />
         <YAxis />
         <Tooltip />
@@ -143,7 +135,7 @@ function renderAreaChart(
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={data.rows}>
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid {...GRID_STYLE} />
         <XAxis dataKey={xKey} />
         <YAxis />
         <Tooltip />
@@ -217,7 +209,7 @@ function renderScatterChart(
   return (
     <ResponsiveContainer width="100%" height={300}>
       <ScatterChart>
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid {...GRID_STYLE} />
         <XAxis dataKey={xKey} name={xKey} />
         <YAxis dataKey={yKey} name={yKey} />
         <Tooltip cursor={{ strokeDasharray: '3 3' }} />
@@ -301,7 +293,7 @@ export function DynamicChart({
   visualConfig,
   className,
 }: DynamicChartProps): React.ReactElement {
-  const colors = visualConfig.colors ?? DEFAULT_COLORS;
+  const colors = visualConfig.colors ?? CHART_COLORS;
   const hasData = data && data.rows && data.rows.length > 0;
 
   const renderContent = (): React.ReactElement => {

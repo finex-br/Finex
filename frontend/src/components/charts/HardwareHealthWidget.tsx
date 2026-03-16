@@ -16,26 +16,26 @@ export const HardwareHealthWidget = ({ hardwareData }: HardwareHealthWidgetProps
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'HEALTHY':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
+        return <CheckCircle className="h-5 w-5 text-success" />;
       case 'WARNING':
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
+        return <AlertTriangle className="h-5 w-5 text-warning" />;
       case 'CRITICAL':
-        return <XCircle className="h-5 w-5 text-red-600" />;
+        return <XCircle className="h-5 w-5 text-destructive" />;
       default:
-        return <AlertTriangle className="h-5 w-5 text-gray-600" />;
+        return <AlertTriangle className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'HEALTHY':
-        return 'bg-green-100 text-green-800 border-green-300';
+        return 'bg-success/10 text-success border-success/30';
       case 'WARNING':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+        return 'bg-warning/10 text-warning border-warning/30';
       case 'CRITICAL':
-        return 'bg-red-100 text-red-800 border-red-300';
+        return 'bg-destructive/10 text-destructive border-destructive/30';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -54,11 +54,11 @@ export const HardwareHealthWidget = ({ hardwareData }: HardwareHealthWidgetProps
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleString('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -73,37 +73,37 @@ export const HardwareHealthWidget = ({ hardwareData }: HardwareHealthWidgetProps
   const criticalCount = hardwareData.filter(d => d.status === 'CRITICAL').length;
 
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+        <CardTitle className="text-lg font-semibold text-foreground">
           Saúde das Máquinas
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             Monitoramento do nível de galão (coffee supply)
           </p>
 
           {/* Summary badges */}
           <div className="flex gap-3 mb-4">
-            <div className="flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-200 rounded-md">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-700">{healthyCount} OK</span>
+            <div className="flex items-center gap-2 px-3 py-1 bg-success/10 border border-success/30 rounded-md">
+              <CheckCircle className="h-4 w-4 text-success" />
+              <span className="text-sm font-medium text-success">{healthyCount} OK</span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-yellow-50 border border-yellow-200 rounded-md">
-              <AlertTriangle className="h-4 w-4 text-yellow-600" />
-              <span className="text-sm font-medium text-yellow-700">{warningCount} Atenção</span>
+            <div className="flex items-center gap-2 px-3 py-1 bg-warning/10 border border-warning/30 rounded-md">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <span className="text-sm font-medium text-warning">{warningCount} Atenção</span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-200 rounded-md">
-              <XCircle className="h-4 w-4 text-red-600" />
-              <span className="text-sm font-medium text-red-700">{criticalCount} Crítico</span>
+            <div className="flex items-center gap-2 px-3 py-1 bg-destructive/10 border border-destructive/30 rounded-md">
+              <XCircle className="h-4 w-4 text-destructive" />
+              <span className="text-sm font-medium text-destructive">{criticalCount} Critico</span>
             </div>
           </div>
         </div>
 
         {sortedData.length === 0 ? (
-          <div className="flex items-center justify-center h-32 text-slate-500">
+          <div className="flex items-center justify-center h-32 text-muted-foreground">
             Nenhum dado de hardware disponível
           </div>
         ) : (
@@ -119,9 +119,9 @@ export const HardwareHealthWidget = ({ hardwareData }: HardwareHealthWidgetProps
                       {getStatusIcon(machine.status)}
                       <span className="font-semibold text-sm">{machine.deviceId}</span>
                     </div>
-                    
+
                     {machine.location && (
-                      <div className="flex items-center gap-1 text-xs text-slate-600 mb-2">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
                         <MapPin className="h-3 w-3" />
                         <span>{machine.location}</span>
                       </div>
@@ -129,13 +129,13 @@ export const HardwareHealthWidget = ({ hardwareData }: HardwareHealthWidgetProps
 
                     <div className="flex items-center gap-4 text-xs">
                       <div>
-                        <span className="text-slate-600">Nível Galão: </span>
+                        <span className="text-muted-foreground">Nível Galão: </span>
                         <span className="font-bold">
                           {machine.nivelGalao !== null ? `${machine.nivelGalao}%` : 'N/A'}
                         </span>
                       </div>
                       <div>
-                        <span className="text-slate-600">Última atualização: </span>
+                        <span className="text-muted-foreground">Última atualização: </span>
                         <span>{formatDate(machine.lastUpdate)}</span>
                       </div>
                     </div>
@@ -152,7 +152,7 @@ export const HardwareHealthWidget = ({ hardwareData }: HardwareHealthWidgetProps
           </div>
         )}
 
-        <div className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+        <div className="mt-4 text-xs text-muted-foreground">
           <p>💡 <strong>Crítico:</strong> {'<'}20% | <strong>Atenção:</strong> 20-40% | <strong>OK:</strong> {'>'}40%</p>
         </div>
       </CardContent>

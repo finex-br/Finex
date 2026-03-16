@@ -9,6 +9,7 @@ export interface CreateDashboardRequestDTO {
   description?: string;
   isDefault?: boolean;
   embedHtml?: string;
+  metabaseDashboardId?: number;
 }
 
 export interface DashboardResponseDTO {
@@ -18,6 +19,7 @@ export interface DashboardResponseDTO {
   description?: string;
   isDefault: boolean;
   embedHtml?: string;
+  metabaseDashboardId?: number;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
@@ -32,6 +34,7 @@ export interface UpdateDashboardRequestDTO {
   description?: string;
   isDefault?: boolean;
   embedHtml?: string;
+  metabaseDashboardId?: number | null;
 }
 
 // ===== Get Dashboard with Charts =====
@@ -48,6 +51,7 @@ export interface DashboardWithChartsResponseDTO {
   description?: string;
   isDefault: boolean;
   embedHtml?: string;
+  metabaseDashboardId?: number;
   createdBy: string;
   charts: ChartConfigResponseDTO[];
   createdAt: Date;
@@ -63,6 +67,7 @@ export interface DashboardWithDataResponseDTO {
   description?: string;
   isDefault: boolean;
   embedHtml?: string;
+  metabaseDashboardId?: number;
   charts: {
     config: ChartConfigResponseDTO;
     data: {
@@ -71,4 +76,11 @@ export interface DashboardWithDataResponseDTO {
       totalRows: number;
     };
   }[];
+}
+
+// ===== Metabase Embed Token =====
+
+export interface MetabaseEmbedTokenResponseDTO {
+  token: string;
+  siteUrl: string;
 }

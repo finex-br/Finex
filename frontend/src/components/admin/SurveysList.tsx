@@ -59,8 +59,8 @@ export function SurveysList() {
   if (surveys.length === 0) {
     return (
       <div className="text-center py-12">
-        <FileText className="h-12 w-12 mx-auto text-slate-400 dark:text-slate-500 mb-4" />
-        <p className="text-slate-600 dark:text-slate-400">
+        <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+        <p className="text-muted-foreground">
           Nenhum questionário criado ainda
         </p>
       </div>
@@ -89,7 +89,7 @@ export function SurveysList() {
                   )}
                 </CardTitle>
                 <CardDescription className="mt-2">{survey.description}</CardDescription>
-                <div className="flex items-center gap-1 mt-1 text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
                   <Clock className="w-3.5 h-3.5" />
                   <span>~{survey.estimatedTimeMinutes} min</span>
                 </div>
@@ -98,7 +98,7 @@ export function SurveysList() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-sm text-slate-500 dark:text-slate-400">
+              <div className="text-sm text-muted-foreground">
                 Criado{' '}
                 {formatDistanceToNow(new Date(survey.createdAt), {
                   addSuffix: true,

@@ -130,9 +130,9 @@ export function CompanySetupView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-xl mx-auto">
-          <Card>
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <div className="max-w-xl mx-auto animate-fade-in">
+          <Card className="bg-card/90 backdrop-blur-xl border border-border shadow-xl">
             <CardHeader>
               <CardTitle>
                 {companies && companies.length > 1 ? 'Selecionar empresa' : 'Criar empresa'}

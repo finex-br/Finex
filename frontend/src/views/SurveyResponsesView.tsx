@@ -4,6 +4,7 @@ import { surveyService } from '../services/surveyService';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Button } from '../components/ui/button';
 import { Loader2, ArrowLeft, MessageSquare } from 'lucide-react';
+import { Skeleton } from '../components/ui/skeleton';
 import { AppLayout } from '../components/AppLayout';
 import { PageHeader } from '../components/PageHeader';
 import type { AssessmentResponse } from '../types/survey.types';
@@ -46,9 +47,27 @@ export const SurveyResponsesView = () => {
     return (
       <AppLayout>
         <div className="min-h-screen p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-center min-h-[60vh]">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-5 w-80" />
+            </div>
+            <div className="space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-card/90 backdrop-blur-xl rounded-lg border border-border p-5 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                  <div className="ml-11">
+                    <Skeleton className="h-12 w-full rounded-lg" />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -59,13 +78,13 @@ export const SurveyResponsesView = () => {
   return (
     <AppLayout>
       <div className="min-h-screen p-4 sm:p-6 lg:p-8">
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
           <PageHeader
             breadcrumb="Questionários"
             title={surveyTitle || 'Respostas'}
             subtitle="Visualização das respostas enviadas"
             actions={
-              <Button variant="outline" onClick={() => navigate('/surveys')}>
+              <Button variant="outline" onClick={() => navigate('/surveys')} className="cursor-pointer">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </Button>

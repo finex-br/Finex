@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 import { EnvService } from '../../shared/infra/env/env.service';
 
@@ -37,6 +37,7 @@ import { CreateDashboardUseCase } from './application/use-cases/create-dashboard
 import { UpdateDashboardUseCase } from './application/use-cases/update-dashboard.use-case';
 import { DeleteDashboardUseCase } from './application/use-cases/delete-dashboard.use-case';
 import { GetDashboardUseCase } from './application/use-cases/get-dashboard.use-case';
+import { GenerateMetabaseEmbedTokenUseCase } from './application/use-cases/generate-metabase-embed-token.use-case';
 
 // Controllers
 import { DatasetController } from './presentation/controllers/dataset.controller';
@@ -205,6 +206,13 @@ import { DashboardController } from './presentation/controllers/dashboard.contro
         return new GetDashboardUseCase(dashboardRepo, chartConfigRepo, analyticsEngine);
       },
       inject: ['IDashboardRepository', 'IChartConfigRepository', 'IAnalyticsEngine'],
+    },
+    {
+      provide: GenerateMetabaseEmbedTokenUseCase,
+      useFactory: (dashboardRepo, jwtService, envService) => {
+        return new GenerateMetabaseEmbedTokenUseCase(dashboardRepo, jwtService, envService);
+      },
+      inject: ['IDashboardRepository', JwtService, EnvService],
     },
   ],
   exports: [UploadDatasetUseCase],

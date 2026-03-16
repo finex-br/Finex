@@ -313,6 +313,11 @@ ALTER TABLE financial_data ADD COLUMN IF NOT EXISTS operational_metadata JSONB D
 ALTER TABLE dashboards ADD COLUMN IF NOT EXISTS embed_html TEXT;
 
 -- ================================================
+-- MIGRATION: metabase_dashboard_id em dashboards (idempotente)
+-- ================================================
+ALTER TABLE dashboards ADD COLUMN IF NOT EXISTS metabase_dashboard_id INTEGER;
+
+-- ================================================
 -- ÍNDICES PARA PERFORMANCE
 -- ================================================
 

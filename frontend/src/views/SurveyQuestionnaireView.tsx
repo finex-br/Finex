@@ -7,6 +7,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { QuestionCard } from '../components/survey/QuestionCard';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Loader2, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { Skeleton } from '../components/ui/skeleton';
 import { useToast } from '../hooks/use-toast';
 import { AppLayout } from '../components/AppLayout';
 
@@ -71,8 +72,26 @@ export const SurveyQuestionnaireView = () => {
   if (loading && !questionsPage) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+          <div className="max-w-3xl mx-auto">
+            <div className="mb-6 space-y-3">
+              <Skeleton className="h-9 w-40 mb-4" />
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-4 w-64" />
+              <Skeleton className="h-1.5 w-full rounded-full" />
+            </div>
+            <div className="flex items-center justify-center min-h-[50vh]">
+              <div className="w-full bg-card/90 backdrop-blur-xl rounded-lg border border-border p-6 sm:p-8 space-y-6">
+                <Skeleton className="h-6 w-3/4" />
+                <div className="space-y-3">
+                  <Skeleton className="h-10 w-full rounded-md" />
+                  <Skeleton className="h-10 w-full rounded-md" />
+                  <Skeleton className="h-10 w-full rounded-md" />
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </AppLayout>
     );
@@ -94,14 +113,14 @@ export const SurveyQuestionnaireView = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <div className="max-w-3xl mx-auto animate-fade-in">
           {/* Header */}
           <div className="mb-6">
             <Button
               variant="ghost"
               onClick={() => navigate('/surveys')}
-              className="mb-4"
+              className="mb-4 cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Voltar para listagem
@@ -109,7 +128,7 @@ export const SurveyQuestionnaireView = () => {
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                <h1 className="text-2xl font-bold text-foreground">
                   Questionário
                 </h1>
                 {saving && (
@@ -150,7 +169,7 @@ export const SurveyQuestionnaireView = () => {
               }`}
             >
               {question && (
-                <Card className="shadow-lg">
+                <Card className="bg-card/90 backdrop-blur-xl shadow-lg">
                   <CardContent className="p-6 sm:p-8">
                     <QuestionCard
                       question={question}
@@ -173,6 +192,7 @@ export const SurveyQuestionnaireView = () => {
               onClick={handlePrevious}
               disabled={!hasPreviousPage || loading || transitioning}
               size="lg"
+              className="cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Anterior
@@ -192,6 +212,7 @@ export const SurveyQuestionnaireView = () => {
                 onClick={handleNext}
                 disabled={loading || transitioning}
                 size="lg"
+                className="cursor-pointer"
               >
                 Próxima
                 <ChevronRight className="h-4 w-4 ml-2" />
@@ -201,7 +222,7 @@ export const SurveyQuestionnaireView = () => {
                 onClick={() => setShowCompleteDialog(true)}
                 disabled={!isComplete || loading || transitioning}
                 size="lg"
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-primary hover:bg-primary/90 cursor-pointer"
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Finalizar
@@ -222,12 +243,13 @@ export const SurveyQuestionnaireView = () => {
                   <Button
                     variant="outline"
                     onClick={() => setShowCompleteDialog(false)}
+                    className="cursor-pointer"
                   >
                     Cancelar
                   </Button>
                   <Button
                     onClick={handleComplete}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-primary hover:bg-primary/90 cursor-pointer"
                   >
                     Sim, Finalizar
                   </Button>
