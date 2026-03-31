@@ -70,7 +70,7 @@ export function QuestionBuilder({
     <Card className="relative">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between text-lg">
-          <span className="text-orange-600">Pergunta {questionNumber}</span>
+          <span className="text-primary">Pergunta {questionNumber}</span>
           <Button
             type="button"
             variant="ghost"
@@ -130,7 +130,7 @@ export function QuestionBuilder({
                 {question.options.map((option, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800 rounded"
+                    className="flex items-center gap-2 p-2 bg-muted rounded"
                   >
                     <span className="flex-1 text-sm">{option}</span>
                     <Button
@@ -174,7 +174,7 @@ export function QuestionBuilder({
             </div>
 
             {(!question.options || question.options.length < 2) && (
-              <p className="text-xs text-orange-600">
+              <p className="text-xs text-primary">
                 Adicione pelo menos 2 opções para perguntas de múltipla escolha
               </p>
             )}
@@ -183,22 +183,22 @@ export function QuestionBuilder({
 
         {/* Helper text based on type */}
         {question.type === 'TEXT' && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Usuário poderá inserir texto livre
           </p>
         )}
         {question.type === 'CNPJ' && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Usuário deverá inserir um CNPJ válido (formato: 12.345.678/0001-90)
           </p>
         )}
         {question.type === 'NUMBER' && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Usuário poderá inserir apenas números
           </p>
         )}
         {question.type === 'FILE_UPLOAD' && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Usuário poderá fazer upload de um arquivo
           </p>
         )}

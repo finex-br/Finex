@@ -11,6 +11,7 @@ import { MapDocumentColumnsUseCase } from './application/use-cases/map-document-
 import { ValidateDocumentUseCase } from './application/use-cases/validate-document.use-case';
 import { ApproveDocumentUseCase } from './application/use-cases/approve-document.use-case';
 import { GetPendingDocumentsUseCase } from './application/use-cases/get-pending-documents.use-case';
+import { GetVendingMachineMetricsUseCase } from './application/use-cases/get-vending-machine-metrics.use-case';
 import { ExcelProcessorAdapter } from './infrastructure/adapters/excel-processor.adapter';
 import { ExcelAnalyzerAdapter } from './infrastructure/adapters/excel-analyzer.adapter';
 import { TypeORMFinancialRepository } from './infrastructure/persistence/typeorm/typeorm-financial.repository';
@@ -19,6 +20,7 @@ import { FinancialUploadSchema } from './infrastructure/persistence/typeorm/fina
 import { FinancialDataSchema } from './infrastructure/persistence/typeorm/financial-data.schema';
 import { UserSchema } from '../authentication/infrastructure/persistence/typeorm/entities/user.schema';
 import { EnvService } from '../../shared/infra/env/env.service';
+import { AnalyticsModule } from '../analytics/analytics.module';
 
 /**
  * FinancialModule - Módulo de Transações Financeiras
@@ -47,6 +49,7 @@ import { EnvService } from '../../shared/infra/env/env.service';
       FinancialUploadSchema, // Usando tabela existente financial_uploads
       UserSchema, // Necessário para JwtAuthGuard
     ]),
+    AnalyticsModule,
   ],
   controllers: [
     FinancialController,
@@ -85,6 +88,13 @@ import { EnvService } from '../../shared/infra/env/env.service';
       provide: GetFinancialDataUseCase,
       useFactory: (repository) => {
         return new GetFinancialDataUseCase(repository);
+      },
+      inject: ['IFinancialRepository'],
+    },
+    {
+      provide: GetVendingMachineMetricsUseCase,
+      useFactory: (repository) => {
+        return new GetVendingMachineMetricsUseCase(repository);
       },
       inject: ['IFinancialRepository'],
     },

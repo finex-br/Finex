@@ -32,12 +32,12 @@ export const EmptyPeriodBanner = ({
 
   return (
     <div className="mb-6">
-      <Alert className="border-orange-500 bg-orange-50">
-        <AlertCircle className="h-5 w-5 text-orange-600" />
-        <AlertTitle className="text-orange-900 font-semibold text-base">
+      <Alert className="border-primary bg-primary/10">
+        <AlertCircle className="h-5 w-5 text-primary" />
+        <AlertTitle className="text-primary font-semibold text-base">
           Nenhuma transação encontrada neste período
         </AlertTitle>
-        <AlertDescription className="text-orange-800 mt-2">
+        <AlertDescription className="text-primary mt-2">
           <p className="mb-3">
             O filtro aplicado não retornou resultados. Seus dados financeiros vão de{' '}
             <strong>{formatDate(earliestDate)}</strong> até{' '}
@@ -47,7 +47,7 @@ export const EmptyPeriodBanner = ({
             onClick={onViewAllData}
             variant="outline"
             size="sm"
-            className="border-orange-600 text-orange-600 hover:bg-orange-100"
+            className="border-primary text-primary hover:bg-primary/90"
           >
             <Calendar className="mr-2 h-4 w-4" />
             Ver Todos os Dados

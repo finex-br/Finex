@@ -1,286 +1,168 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, DollarSign, FileSpreadsheet } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState, useCallback } from 'react';
+import { ArrowLeft, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useFinancialData, DashboardState } from '@/hooks/useFinancialData';
 import { useAuthStore } from '@/store/authStore';
-import { DateFilter } from '@/components/DateFilter';
-import { TrendChart } from '@/components/charts/TrendChart';
-import { CategoryChart } from '@/components/charts/CategoryChart';
-import { MonthlyChart } from '@/components/charts/MonthlyChart';
-import { EmptyPeriodBanner } from '@/components/EmptyPeriodBanner';
-import { GraphType } from '@/services/financialService';
 import { AppLayout } from '@/components/AppLayout';
+import { dashboardService, Dashboard, DashboardWithData } from '@/services/dashboardService';
+import { DynamicDashboardRenderer } from '@/components/dashboard/DynamicDashboardRenderer';
+import { DashboardSelector } from '@/components/dashboard/DashboardSelector';
+import { DashboardSelectorSkeleton } from '@/components/dashboard/DashboardSelectorSkeleton';
+import { EmptyState } from '@/components/shared/EmptyState';
 
 /**
- * DashboardView - Componente Presentacional (Dumb Component)
- * 
- * Responsabilidades:
- * - Renderizar KPIs e gráficos
- * - Exibir feedback visual (loading, erro)
- * - LOTE 4: Usar dashboardState para NUNCA desaparecer quando filtro vazio
- * 
- * TODA lógica está no useFinancialData (ViewModel).
- * Backend processa e agrega dados (frontend apenas exibe).
+ * DashboardView — Orchestrates dynamic dashboard selection and display.
+ *
+ * Flow:
+ *  1. Loading        → skeleton grid
+ *  2. No dashboards  → empty state
+ *  3. One dashboard  → auto-load and render
+ *  4. Multiple       → visual card grid (DashboardSelector)
+ *  5. Selected       → back button + DynamicDashboardRenderer
  */
 export function DashboardView() {
-  const navigate = useNavigate();
-  const { user } = useAuthStore();
-  const { 
-    summary, 
-    monthlyData,
-    categoryData,
-    trendData,
-    metadata,
-    dashboardState,
-    isLoading,
-    error,
-    periodFilter,
-    setPeriodFilter,
-    fetchFinancialData,
-    // NOVO (Lote 5): Funções para filtros individuais
-    graphFilters,
-    setGraphFilter,
-    resetGraphFilter,
-    getEffectiveFilter,
-    fetchGraphData,
-  } = useFinancialData();
+  const { currentCompanyId } = useAuthStore();
 
-  // Busca dados ao montar o componente ou quando periodFilter mudar
+  const [dashboards, setDashboards] = useState<Dashboard[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDashboard, setSelectedDashboard] = useState<DashboardWithData | null>(null);
+  const [selectedLoading, setSelectedLoading] = useState(false);
+
+  const companyId = currentCompanyId || '';
+
+  // Fetch dashboard list on mount / company change
   useEffect(() => {
-    console.log('[DashboardView] useEffect triggered:', { 
-      userId: user?.id, 
-      userName: user?.name,
-      periodFilter 
-    });
-    fetchFinancialData();
-  }, [user?.id, periodFilter]);
+    setDashboards([]);
+    setSelectedDashboard(null);
+    setLoading(true);
 
-  /**
-   * NOVO (Lote 5): Handler para mudança de filtro individual de gráfico
-   */
-  const handleGraphFilterChange = async (graphType: GraphType, filter: any) => {
-    setGraphFilter(graphType, filter);
-    
-    // Busca dados apenas para o gráfico específico
-    await fetchGraphData(graphType, filter);
-  };
+    if (!companyId) {
+      setLoading(false);
+      return;
+    }
 
-  /**
-   * NOVO (Lote 5): Handler para resetar filtro de gráfico para o global
-   */
-  const handleResetGraphFilter = async (graphType: GraphType) => {
-    resetGraphFilter(graphType);
-    
-    // Busca dados com filtro global
-    await fetchGraphData(graphType, periodFilter);
-  };
+    let cancelled = false;
 
-  // Formata valores em Real Brasileiro
-  const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
+    (async () => {
+      try {
+        const result = await dashboardService.list(companyId);
+        if (cancelled) return;
 
-  // Estado de loading
-  if (isLoading) {
+        const list = result.dashboards || [];
+        setDashboards(list);
+
+        // Auto-load when exactly one dashboard exists
+        if (list.length === 1) {
+          setSelectedLoading(true);
+          try {
+            const full = await dashboardService.get(list[0].id, companyId);
+            if (!cancelled) setSelectedDashboard(full);
+          } finally {
+            if (!cancelled) setSelectedLoading(false);
+          }
+        }
+      } catch {
+        // List failed — dashboards stays empty, shows empty state
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [companyId]);
+
+  const handleSelect = useCallback(async (dashboard: Dashboard) => {
+    setSelectedLoading(true);
+    try {
+      const full = await dashboardService.get(dashboard.id, companyId);
+      setSelectedDashboard(full);
+    } catch (err) {
+      console.error('[DashboardView] Failed to load dashboard:', err);
+    } finally {
+      setSelectedLoading(false);
+    }
+  }, [companyId]);
+
+  const handleRefresh = useCallback(async () => {
+    if (!selectedDashboard) return;
+    setSelectedLoading(true);
+    try {
+      const full = await dashboardService.get(selectedDashboard.id, companyId);
+      setSelectedDashboard(full);
+    } catch (err) {
+      console.error('[DashboardView] Failed to refresh dashboard:', err);
+    } finally {
+      setSelectedLoading(false);
+    }
+  }, [selectedDashboard, companyId]);
+
+  // --- Render states ---
+
+  // 1. Loading
+  if (loading || (selectedLoading && !selectedDashboard)) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <p className="text-lg text-muted-foreground">Carregando dados...</p>
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+          <div className="max-w-5xl mx-auto">
+            <DashboardSelectorSkeleton />
+          </div>
         </div>
       </AppLayout>
     );
   }
 
-  // Estado de erro
-  if (error) {
+  // 2. Selected dashboard — render it
+  if (selectedDashboard) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8 animate-fade-in">
+          <div className="max-w-7xl mx-auto">
+            {dashboards.length > 1 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mb-4 cursor-pointer"
+                onClick={() => setSelectedDashboard(null)}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            )}
+            <DynamicDashboardRenderer
+              dashboard={selectedDashboard}
+              companyId={companyId}
+              onRefresh={handleRefresh}
+              isLoading={selectedLoading}
+            />
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // 3. No dashboards — empty state
+  if (dashboards.length === 0) {
     return (
       <AppLayout>
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
-          <Card className="w-full max-w-lg text-center shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-red-600">
-                Erro ao carregar dados
-              </CardTitle>
-              <CardDescription className="text-base mt-2">
-                {error}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={() => fetchFinancialData()}
-                variant="outline"
-              >
-                Tentar novamente
-              </Button>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={LayoutDashboard}
+            title="Nenhum dashboard configurado"
+            description="Entre em contato com o administrador para configurar dashboards para sua empresa."
+          />
         </div>
       </AppLayout>
     );
   }
 
-  // LOTE 4: Estado vazio - NUNCA FEZ UPLOAD (totalTransactionsInSystem === 0)
-  if (dashboardState === DashboardState.NO_UPLOAD) {
-    console.log('[DashboardView] NO_UPLOAD state:', { 
-      dashboardState, 
-      metadata, 
-      userId: user?.id,
-      isLoading 
-    });
-    return (
-      <AppLayout>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
-          <Card className="w-full max-w-lg text-center shadow-lg">
-            <CardHeader>
-              <div className="flex justify-center mb-4">
-                <FileSpreadsheet className="h-16 w-16 text-orange-500" />
-              </div>
-              <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                Dashboard
-              </CardTitle>
-              <CardDescription className="text-base mt-2">
-                sem dados para analise, importar arquivo primeiro
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={() => navigate('/upload')}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium"
-                size="lg"
-              >
-                Importar arquivo
-              </Button>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
-                Suportamos arquivos Excel (.xlsx, .xls)
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </AppLayout>
-    );
-  }
-
-  // Dashboard com dados
+  // 4. Multiple dashboards — visual card grid
   return (
     <AppLayout>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
-        {/* Filtro de Período */}
-        <div className="max-w-7xl mx-auto mb-6">
-          <DateFilter 
-            periodFilter={periodFilter} 
-            onPeriodChange={setPeriodFilter} 
-          />
-        </div>
-
-        {/* LOTE 4: Banner quando filtro retorna vazio (EMPTY_PERIOD) */}
-        {dashboardState === DashboardState.EMPTY_PERIOD && metadata && (
-          <div className="max-w-7xl mx-auto mb-6">
-            <EmptyPeriodBanner
-              earliestDate={metadata.earliestDate}
-              latestDate={metadata.latestDate}
-              onViewAllData={() => setPeriodFilter(undefined)}
-            />
-          </div>
-        )}
-
-        {/* KPIs - Sempre visível quando tem dados no sistema */}
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Receita Total */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base sm:text-sm font-medium text-slate-600">
-                Receita Total
-              </CardTitle>
-              <TrendingUp className="h-5 w-5 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl sm:text-2xl font-bold text-green-600">
-                {formatCurrency(summary.totalRevenue)}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Total de entradas
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Despesas Totais */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base sm:text-sm font-medium text-slate-600">
-                Despesas Totais
-              </CardTitle>
-              <TrendingDown className="h-5 w-5 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl sm:text-2xl font-bold text-red-600">
-                {formatCurrency(summary.totalExpense)}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Total de saídas
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Lucro/Prejuízo */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base sm:text-sm font-medium text-slate-600">
-                {summary.profit >= 0 ? 'Lucro' : 'Prejuízo'}
-              </CardTitle>
-              <DollarSign className={`h-5 w-5 ${summary.profit >= 0 ? 'text-blue-600' : 'text-orange-600'}`} />
-            </CardHeader>
-            <CardContent>
-              <div className={`text-3xl sm:text-2xl font-bold ${summary.profit >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-                {formatCurrency(summary.profit)}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Receitas - Despesas
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Gráficos Financeiros - LOTE 5: Individualizados com filtros próprios */}
-        <div className="max-w-7xl mx-auto grid gap-6 md:grid-cols-2">
-          {/* Gráfico de Tendência (Largura Total) */}
-          <TrendChart
-            trendData={trendData}
-            currentFilter={getEffectiveFilter(GraphType.TREND)}
-            globalFilter={periodFilter}
-            onFilterChange={handleGraphFilterChange}
-            onResetFilter={handleResetGraphFilter}
-          />
-
-          {/* Gráfico de Categorias */}
-          <CategoryChart
-            categoryData={categoryData}
-            currentFilter={getEffectiveFilter(GraphType.CATEGORY)}
-            globalFilter={periodFilter}
-            onFilterChange={handleGraphFilterChange}
-            onResetFilter={handleResetGraphFilter}
-          />
-
-          {/* Gráfico Mensal */}
-          <MonthlyChart
-            monthlyData={monthlyData}
-            currentFilter={getEffectiveFilter(GraphType.MONTHLY)}
-            globalFilter={periodFilter}
-            onFilterChange={handleGraphFilterChange}
-            onResetFilter={handleResetGraphFilter}
-          />
-        </div>
-
-        {/* Informações adicionais */}
-        <div className="max-w-7xl mx-auto mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-          <p>
-            Dados financeiros carregados com sucesso
-          </p>
-        </div>
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+        <DashboardSelector
+          dashboards={dashboards}
+          onSelect={handleSelect}
+          isLoading={false}
+        />
       </div>
     </AppLayout>
   );

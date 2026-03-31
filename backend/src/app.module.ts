@@ -1,11 +1,13 @@
 import { Module, Controller, Get } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EnvModule, EnvService } from './shared/infra/env';
+import { SentryConfigModule } from './shared/infra/sentry';
 import { AuthenticationModule } from './modules/authentication/infrastructure/authentication.module';
 import { CompanyModule } from './modules/company/company.module';
 import { FinancialModule } from './modules/financial/financial.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { SurveyModule } from './modules/survey/survey.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Controller()
 export class AppController {
@@ -18,6 +20,7 @@ export class AppController {
 @Module({
   imports: [
     EnvModule,
+    SentryConfigModule,
     TypeOrmModule.forRootAsync({
       inject: [EnvService],
       useFactory: (envService: EnvService) => ({
@@ -39,6 +42,7 @@ export class AppController {
     FinancialModule,
     PaymentModule,
     SurveyModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
 })

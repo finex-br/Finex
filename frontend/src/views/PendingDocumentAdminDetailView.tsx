@@ -93,7 +93,7 @@ export function PendingDocumentAdminDetailView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-6">
           <PageHeader
             breadcrumb="Revisar Documentos"
@@ -359,7 +359,7 @@ export function PendingDocumentAdminDetailView() {
 
               <div className="flex items-center gap-1">
                 <Button
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-success hover:bg-success/90 text-success-foreground"
                   onClick={approve}
                   disabled={isApproving || !documentId || !canApprove}
                 >

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import * as Sentry from '@sentry/react';
 
 /**
  * User interface (alinhado com backend)
@@ -13,12 +14,12 @@ interface User {
 
 /**
  * AuthStore - Estado Global de Autenticação
- * 
+ *
  * Usa Zustand para gerenciar APENAS:
  * - Token de autenticação
  * - Dados do usuário
- * - Empresa atual (currentCompanyId)
- * 
+ * - Empresa atual (currentCompanyId + currentCompanyName)
+ *
  * NÃO contém lógica de negócio (apenas estado global).
  */
 interface AuthStore {
@@ -26,10 +27,11 @@ interface AuthStore {
   token: string | null;
   user: User | null;
   currentCompanyId: string | null;
+  currentCompanyName: string | null;
 
   // Actions
   setAuth: (token: string, user: User) => void;
-  setCurrentCompanyId: (companyId: string) => void;
+  setCurrentCompany: (companyId: string, companyName: string) => void;
   clearAuth: () => void;
 
   // Helpers
@@ -43,18 +45,21 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       user: null,
       currentCompanyId: null,
+      currentCompanyName: null,
 
       // Set authentication data
       setAuth: (token: string, user: User) => {
         localStorage.setItem('access_token', token);
         localStorage.setItem('user', JSON.stringify(user));
         set({ token, user });
+        Sentry.setUser({ id: user.id, email: user.email, username: user.name });
       },
 
-      // Set current company
-      setCurrentCompanyId: (companyId: string) => {
+      // Set current company (id + name)
+      setCurrentCompany: (companyId: string, companyName: string) => {
         localStorage.setItem('current_company_id', companyId);
-        set({ currentCompanyId: companyId });
+        localStorage.setItem('current_company_name', companyName);
+        set({ currentCompanyId: companyId, currentCompanyName: companyName });
       },
 
       // Clear authentication (logout)
@@ -63,7 +68,9 @@ export const useAuthStore = create<AuthStore>()(
         localStorage.removeItem('user');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('current_company_id');
-        set({ token: null, user: null, currentCompanyId: null });
+        localStorage.removeItem('current_company_name');
+        set({ token: null, user: null, currentCompanyId: null, currentCompanyName: null });
+        Sentry.setUser(null);
       },
 
       // Check if user is authenticated
@@ -75,9 +82,10 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: 'auth-storage', // Nome no localStorage
       partialize: (state) => ({
-        // Persiste apenas token e user (não o currentCompanyId)
         token: state.token,
         user: state.user,
+        currentCompanyId: state.currentCompanyId,
+        currentCompanyName: state.currentCompanyName,
       }),
     },
   ),

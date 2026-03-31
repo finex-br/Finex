@@ -22,7 +22,7 @@ export function MyDocumentDetailView() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen p-4 sm:p-6 lg:p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-6">
           <PageHeader
             breadcrumb="Meus Documentos"

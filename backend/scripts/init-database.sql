@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS financial_data (
   date_payment DATE,
   type VARCHAR(50) NOT NULL, -- INCOME, EXPENSE
   category VARCHAR(100),
+  operational_metadata JSONB DEFAULT NULL, -- Dados operacionais (vending machines, etc)
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -244,6 +245,79 @@ CREATE TABLE IF NOT EXISTS consulting_appointment (
 );
 
 -- ================================================
+-- MÓDULO ANALYTICS (DATASETS & DASHBOARDS)
+-- ================================================
+
+-- Tabela de Datasets (metadados dos uploads)
+CREATE TABLE IF NOT EXISTS datasets (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id UUID NOT NULL,
+  uploaded_by UUID NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  file_size INTEGER,
+  mime_type VARCHAR(100),
+  columns JSONB NOT NULL DEFAULT '[]',
+  row_count INTEGER NOT NULL DEFAULT 0,
+  status VARCHAR(50) DEFAULT 'ACTIVE',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tabela de Dataset Rows (dados brutos em JSONB)
+CREATE TABLE IF NOT EXISTS dataset_rows (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  dataset_id UUID NOT NULL REFERENCES datasets(id) ON DELETE CASCADE,
+  company_id UUID NOT NULL,
+  row_index INTEGER NOT NULL,
+  row_data JSONB NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tabela de Dashboards
+CREATE TABLE IF NOT EXISTS dashboards (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id UUID NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  is_default BOOLEAN DEFAULT FALSE,
+  embed_html TEXT,
+  created_by UUID NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tabela de Chart Configs
+CREATE TABLE IF NOT EXISTS chart_configs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  dashboard_id UUID NOT NULL REFERENCES dashboards(id) ON DELETE CASCADE,
+  company_id UUID NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  chart_type VARCHAR(50) NOT NULL,
+  data_source JSONB NOT NULL,
+  visual_config JSONB NOT NULL,
+  position JSONB DEFAULT '{"x":0,"y":0,"width":6,"height":4}',
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ================================================
+-- MIGRATION: operational_metadata (idempotente)
+-- ================================================
+ALTER TABLE financial_data ADD COLUMN IF NOT EXISTS operational_metadata JSONB DEFAULT NULL;
+
+-- ================================================
+-- MIGRATION: embed_html em dashboards (idempotente)
+-- ================================================
+ALTER TABLE dashboards ADD COLUMN IF NOT EXISTS embed_html TEXT;
+
+-- ================================================
+-- MIGRATION: metabase_dashboard_id em dashboards (idempotente)
+-- ================================================
+ALTER TABLE dashboards ADD COLUMN IF NOT EXISTS metabase_dashboard_id INTEGER;
+
+-- ================================================
 -- ÍNDICES PARA PERFORMANCE
 -- ================================================
 
@@ -270,6 +344,7 @@ CREATE INDEX IF NOT EXISTS idx_answers_question_id ON answers(question_id);
 CREATE INDEX IF NOT EXISTS idx_financial_data_company_id ON financial_data(company_id);
 CREATE INDEX IF NOT EXISTS idx_financial_data_date_competence ON financial_data(date_competence);
 CREATE INDEX IF NOT EXISTS idx_financial_data_type ON financial_data(type);
+CREATE INDEX IF NOT EXISTS idx_financial_data_operational_metadata ON financial_data USING GIN (operational_metadata);
 
 -- Índices para Financial Uploads
 CREATE INDEX IF NOT EXISTS idx_financial_uploads_status ON financial_uploads(status);
@@ -289,6 +364,16 @@ CREATE INDEX IF NOT EXISTS idx_checkouts_stripe_session_id ON checkouts(stripe_s
 CREATE INDEX IF NOT EXISTS idx_audit_logs_company_id ON audit_logs(company_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
+
+-- Índices para Analytics
+CREATE INDEX IF NOT EXISTS idx_datasets_company_id ON datasets(company_id);
+CREATE INDEX IF NOT EXISTS idx_datasets_status ON datasets(status);
+CREATE INDEX IF NOT EXISTS idx_dataset_rows_dataset_id ON dataset_rows(dataset_id);
+CREATE INDEX IF NOT EXISTS idx_dataset_rows_company_id ON dataset_rows(company_id);
+CREATE INDEX IF NOT EXISTS idx_dataset_rows_data ON dataset_rows USING GIN (row_data);
+CREATE INDEX IF NOT EXISTS idx_dashboards_company_id ON dashboards(company_id);
+CREATE INDEX IF NOT EXISTS idx_chart_configs_dashboard_id ON chart_configs(dashboard_id);
+CREATE INDEX IF NOT EXISTS idx_chart_configs_company_id ON chart_configs(company_id);
 
 -- ================================================
 -- DADOS INICIAIS (SEED)

@@ -30,6 +30,32 @@ export class CompanyController {
   async listMyCompanies(@Request() req: any) {
     const userId = await this.getUserId(req);
 
+    // Check if user is system admin
+    const userRows = await this.dataSource.query(
+      `SELECT role FROM users WHERE id = $1`,
+      [userId],
+    );
+    const isAdmin = userRows?.[0]?.role === 'ADMIN';
+
+    // If admin, return ALL companies in the system
+    if (isAdmin) {
+      const allCompanies = await this.dataSource.query(
+        `SELECT id, name, created_at
+         FROM companies
+         ORDER BY name ASC`,
+      );
+
+      return {
+        success: true,
+        companies: (allCompanies || []).map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          role: 'ADMIN',
+        })),
+        total: (allCompanies || []).length,
+      };
+    }
+
     const rows = await this.dataSource.query(
       `SELECT cm.company_id, c.name as company_name, cm.role as member_role
        FROM company_members cm
@@ -127,19 +153,6 @@ export class CompanyController {
     const name = String(body?.name || '').trim();
     if (!name) {
       throw new HttpException('Company name is required', HttpStatus.BAD_REQUEST);
-    }
-
-    // If user already has an active company, don't create another silently.
-    const existing = await this.dataSource.query(
-      'SELECT company_id FROM company_members WHERE user_id = $1 AND is_active = true LIMIT 1',
-      [userId],
-    );
-
-    if (existing && existing.length > 0) {
-      throw new HttpException(
-        'User is already associated with a company',
-        HttpStatus.CONFLICT,
-      );
     }
 
     const created = await this.dataSource.transaction(async (manager) => {

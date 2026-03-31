@@ -58,4 +58,22 @@ export class EnvService {
   get asaasWebhookSecret(): string {
     return this.get('ASAAS_WEBHOOK_SECRET');
   }
+
+  // Sentry Configuration
+  get sentryDsn(): string {
+    return this.get('SENTRY_DSN');
+  }
+
+  get sentryEnabled(): boolean {
+    return !!this.get('SENTRY_DSN') && this.nodeEnv === 'production';
+  }
+
+  // Metabase Embedding Configuration
+  get metabaseSecretKey(): string {
+    return this.get('METABASE_SECRET_KEY');
+  }
+
+  get metabaseSiteUrl(): string {
+    return this.get('METABASE_SITE_URL');
+  }
 }

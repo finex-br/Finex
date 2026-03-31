@@ -1,12 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { IFinancialRepository } from '../../domain/ports/financial-repository.interface';
 import { FinancialTransaction } from '../../domain/entities/financial-transaction';
+import {
+  SalesVolumeByMachineDTO,
+  ProductMixPerformanceDTO,
+  HardwareHealthDTO,
+  AverageTicketTrendDTO,
+} from '../../application/dtos/vending-machine-metrics.dto';
 
 /**
  * InMemoryFinancialRepository - Infrastructure Layer (Temporary)
  * 
  * Implementação em memória do IFinancialRepository.
- * Usado temporariamente até integrarmos DuckDB ou PostgreSQL.
+ * Usado temporariamente até migrar para TypeORM/PostgreSQL.
  * 
  * IMPORTANTE: Dados são perdidos quando o servidor reinicia.
  */
@@ -243,5 +249,39 @@ export class InMemoryFinancialRepository implements IFinancialRepository {
     const transactions = await this.findByCompanyId(companyId);
     console.log('[InMemoryRepository] countAll:', transactions.length);
     return transactions.length;
+  }
+
+  // FinancialTransaction não possui campos de metadados operacionais
+  // (deviceId, blend, nivelGalao). Esses dados são acessados via TypeORMFinancialRepository.
+
+  async getSalesVolumeByMachine(
+    companyId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<SalesVolumeByMachineDTO[]> {
+    return [];
+  }
+
+  async getProductMixPerformance(
+    companyId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<ProductMixPerformanceDTO[]> {
+    return [];
+  }
+
+  async getHardwareHealthStatus(
+    companyId: string,
+  ): Promise<HardwareHealthDTO[]> {
+    return [];
+  }
+
+  async getAverageTicketTrend(
+    companyId: string,
+    startDate?: Date,
+    endDate?: Date,
+    granularity: 'day' | 'week' | 'month' = 'day',
+  ): Promise<AverageTicketTrendDTO[]> {
+    return [];
   }
 }

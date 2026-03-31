@@ -1,14 +1,20 @@
 import { FinancialTransaction } from '../entities/financial-transaction';
+import {
+  SalesVolumeByMachineDTO,
+  ProductMixPerformanceDTO,
+  HardwareHealthDTO,
+  AverageTicketTrendDTO,
+} from '../../application/dtos/vending-machine-metrics.dto';
 
 /**
  * IFinancialRepository - Port (Interface)
  * 
  * Define o contrato para persistência de transações financeiras.
- * Implementação em Infrastructure Layer (DuckDB).
+ * Implementação em Infrastructure Layer (PostgreSQL/TypeORM).
  */
 export interface IFinancialRepository {
   /**
-   * Salva uma transação financeira no DuckDB
+   * Salva uma transação financeira
    */
   save(transaction: FinancialTransaction): Promise<void>;
 
@@ -135,4 +141,46 @@ export interface IFinancialRepository {
    * @returns Total de transações
    */
   countAll(companyId: string): Promise<number>;
+
+  // ========================================
+  // VENDING MACHINE OPERATIONAL METRICS
+  // ========================================
+
+  /**
+   * Retorna volume de vendas agregado por máquina/dispositivo
+   * Extrai dados do campo operational_metadata (JSONB)
+   */
+  getSalesVolumeByMachine(
+    companyId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<SalesVolumeByMachineDTO[]>;
+
+  /**
+   * Retorna performance de produtos (mix de cafés, etc.)
+   * Extrai dados do campo operational_metadata->>'blend'
+   */
+  getProductMixPerformance(
+    companyId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<ProductMixPerformanceDTO[]>;
+
+  /**
+   * Retorna status de saúde de hardware (nivelGalao)
+   * Busca última leitura de cada dispositivo
+   */
+  getHardwareHealthStatus(
+    companyId: string,
+  ): Promise<HardwareHealthDTO[]>;
+
+  /**
+   * Retorna tendência de ticket médio ao longo do tempo
+   */
+  getAverageTicketTrend(
+    companyId: string,
+    startDate?: Date,
+    endDate?: Date,
+    granularity?: 'day' | 'week' | 'month',
+  ): Promise<AverageTicketTrendDTO[]>;
 }

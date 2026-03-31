@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import * as Sentry from '@sentry/react';
 
 /**
  * Cliente HTTP base configurado para a API do FinEx
@@ -58,12 +59,37 @@ api.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
+    // Sentry: captura erros de servidor (5xx) e de rede
+    if (error.response) {
+      const status = error.response.status;
+      if (status >= 500) {
+        Sentry.captureException(error, {
+          tags: {
+            'http.status_code': String(status),
+            'http.url': error.config?.url || 'unknown',
+          },
+        });
+      } else {
+        Sentry.addBreadcrumb({
+          category: 'http',
+          message: `${error.config?.method?.toUpperCase()} ${error.config?.url} - ${status}`,
+          level: status >= 400 ? 'warning' : 'info',
+        });
+      }
+    } else if (error.request) {
+      Sentry.captureException(error, {
+        tags: { 'error.type': 'network' },
+      });
+    }
+
     // Verifica se o erro é 401 Unauthorized (token expirado/inválido)
     if (error.response?.status === 401) {
       // Limpa todos os dados de autenticação do localStorage
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
+      localStorage.removeItem('current_company_id');
+      localStorage.removeItem('current_company_name');
 
       // Redireciona para a página de login
       // Usamos window.location.href pois funciona melhor em interceptors
@@ -100,6 +126,7 @@ api.interceptors.response.use(
 
       if (looksLikeInvalidCompanyContext) {
         localStorage.removeItem('current_company_id');
+        localStorage.removeItem('current_company_name');
 
         if (window.location.pathname !== '/company/setup') {
           window.location.href = '/company/setup';

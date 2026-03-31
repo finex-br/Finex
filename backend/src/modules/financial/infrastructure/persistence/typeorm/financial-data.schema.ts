@@ -35,6 +35,20 @@ export class FinancialDataSchema {
   @Column({ type: 'varchar', length: 100, nullable: true })
   category: string | null;
 
+  /**
+   * Operational metadata (JSONB) for business-specific metrics
+   * Example for vending machines:
+   * {
+   *   deviceId: "Kombi_Mushspresso",
+   *   blend: "qCafe1",
+   *   nivelGalao: 75,
+   *   salesCount: 1,
+   *   hash: "abc123"
+   * }
+   */
+  @Column({ type: 'jsonb', name: 'operational_metadata', nullable: true })
+  operationalMetadata: Record<string, any> | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 

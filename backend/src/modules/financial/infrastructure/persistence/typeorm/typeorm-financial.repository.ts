@@ -8,6 +8,12 @@ import { Money } from '../../../domain/value-objects/money';
 import { TransactionType } from '../../../domain/value-objects/transaction-type';
 import { Category } from '../../../domain/value-objects/category';
 import { UniqueEntityID } from '../../../../../shared/core/unique-entity-id';
+import {
+  SalesVolumeByMachineDTO,
+  ProductMixPerformanceDTO,
+  HardwareHealthDTO,
+  AverageTicketTrendDTO,
+} from '../../../application/dtos/vending-machine-metrics.dto';
 
 /**
  * TypeORMFinancialRepository - Infrastructure Layer
@@ -362,5 +368,197 @@ export class TypeORMFinancialRepository implements IFinancialRepository {
       const expense = Number(r.expense || 0);
       return { date: r.date, revenue, expense, profit: revenue - expense };
     });
+  }
+
+  // ========================================
+  // VENDING MACHINE OPERATIONAL METRICS
+  // ========================================
+
+  /**
+   * Retorna volume de vendas por máquina
+   * Query JSONB: operational_metadata->>'deviceId'
+   */
+  async getSalesVolumeByMachine(
+    companyId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<SalesVolumeByMachineDTO[]> {
+    const qb = this.repository.createQueryBuilder('t')
+      .select("t.operational_metadata->>'deviceId'", 'deviceId')
+      .addSelect('COUNT(*)', 'totalSales')
+      .addSelect('COALESCE(SUM(t.amount), 0)', 'totalRevenue')
+      .addSelect('COALESCE(AVG(t.amount), 0)', 'averageTicket')
+      .addSelect("t.operational_metadata->>'location'", 'location')
+      .where('t.companyId = :companyId', { companyId })
+      .andWhere("t.operational_metadata->>'deviceId' IS NOT NULL");
+
+    if (startDate && endDate) {
+      qb.andWhere(
+        "COALESCE(t.dateCompetence, t.datePayment) BETWEEN :startDate AND :endDate",
+        {
+          startDate: startDate.toISOString().split('T')[0],
+          endDate: endDate.toISOString().split('T')[0],
+        },
+      );
+    }
+
+    const rows = await qb
+      .groupBy("t.operational_metadata->>'deviceId'")
+      .addGroupBy("t.operational_metadata->>'location'")
+      .getRawMany<{
+        deviceId: string;
+        totalSales: string;
+        totalRevenue: string;
+        averageTicket: string;
+        location: string | null;
+      }>();
+
+    return rows.map((r) => ({
+      deviceId: r.deviceId,
+      totalSales: Number(r.totalSales || 0),
+      totalRevenue: Number(r.totalRevenue || 0),
+      averageTicket: Number(r.averageTicket || 0),
+      location: r.location || undefined,
+    }));
+  }
+
+  /**
+   * Retorna performance de produtos (mix de cafés)
+   * Query JSONB: operational_metadata->>'blend'
+   */
+  async getProductMixPerformance(
+    companyId: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<ProductMixPerformanceDTO[]> {
+    const qb = this.repository.createQueryBuilder('t')
+      .select("t.operational_metadata->>'blend'", 'product')
+      .addSelect('COUNT(*)', 'salesCount')
+      .addSelect('COALESCE(SUM(t.amount), 0)', 'totalRevenue')
+      .where('t.companyId = :companyId', { companyId })
+      .andWhere("t.operational_metadata->>'blend' IS NOT NULL");
+
+    if (startDate && endDate) {
+      qb.andWhere(
+        "COALESCE(t.dateCompetence, t.datePayment) BETWEEN :startDate AND :endDate",
+        {
+          startDate: startDate.toISOString().split('T')[0],
+          endDate: endDate.toISOString().split('T')[0],
+        },
+      );
+    }
+
+    const rows = await qb
+      .groupBy("t.operational_metadata->>'blend'")
+      .getRawMany<{
+        product: string;
+        salesCount: string;
+        totalRevenue: string;
+      }>();
+
+    const totalRevenue = rows.reduce((sum, r) => sum + Number(r.totalRevenue || 0), 0);
+
+    return rows.map((r) => ({
+      product: r.product,
+      salesCount: Number(r.salesCount || 0),
+      totalRevenue: Number(r.totalRevenue || 0),
+      percentage: totalRevenue > 0 ? (Number(r.totalRevenue || 0) / totalRevenue) * 100 : 0,
+    }));
+  }
+
+  /**
+   * Retorna status de saúde de hardware (última leitura por dispositivo)
+   * Query JSONB: operational_metadata->>'nivelGalao'
+   */
+  async getHardwareHealthStatus(companyId: string): Promise<HardwareHealthDTO[]> {
+    // Subconsulta para obter última transação de cada dispositivo
+    const latestReadings = await this.repository
+      .createQueryBuilder('t')
+      .select("t.operational_metadata->>'deviceId'", 'deviceId')
+      .addSelect("(t.operational_metadata->>'nivelGalao')::numeric", 'nivelGalao')
+      .addSelect("t.operational_metadata->>'location'", 'location')
+      .addSelect('MAX(COALESCE(t.dateCompetence, t.datePayment))', 'lastUpdate')
+      .where('t.companyId = :companyId', { companyId })
+      .andWhere("t.operational_metadata->>'deviceId' IS NOT NULL")
+      .andWhere("t.operational_metadata->>'nivelGalao' IS NOT NULL")
+      .groupBy("t.operational_metadata->>'deviceId'")
+      .addGroupBy("t.operational_metadata->>'nivelGalao'")
+      .addGroupBy("t.operational_metadata->>'location'")
+      .getRawMany<{
+        deviceId: string;
+        nivelGalao: number | null;
+        location: string | null;
+        lastUpdate: string;
+      }>();
+
+    return latestReadings.map((r) => {
+      const nivelGalao = r.nivelGalao !== null ? Number(r.nivelGalao) : null;
+      let status: 'HEALTHY' | 'WARNING' | 'CRITICAL' = 'HEALTHY';
+      
+      if (nivelGalao !== null) {
+        if (nivelGalao < 20) {
+          status = 'CRITICAL';
+        } else if (nivelGalao < 40) {
+          status = 'WARNING';
+        }
+      }
+
+      return {
+        deviceId: r.deviceId,
+        nivelGalao,
+        status,
+        lastUpdate: r.lastUpdate,
+        location: r.location || undefined,
+      };
+    });
+  }
+
+  /**
+   * Retorna tendência de ticket médio ao longo do tempo
+   */
+  async getAverageTicketTrend(
+    companyId: string,
+    startDate?: Date,
+    endDate?: Date,
+    granularity: 'day' | 'week' | 'month' = 'day',
+  ): Promise<AverageTicketTrendDTO[]> {
+    const keyExpr =
+      granularity === 'month'
+        ? "to_char(COALESCE(t.dateCompetence, t.datePayment), 'YYYY-MM')"
+        : granularity === 'week'
+        ? "to_char(date_trunc('week', COALESCE(t.dateCompetence, t.datePayment))::date, 'YYYY-MM-DD')"
+        : "to_char(COALESCE(t.dateCompetence, t.datePayment), 'YYYY-MM-DD')";
+
+    const qb = this.repository.createQueryBuilder('t')
+      .select(`${keyExpr}`, 'date')
+      .addSelect('COALESCE(AVG(t.amount), 0)', 'averageTicket')
+      .addSelect('COUNT(*)', 'transactionCount')
+      .where('t.companyId = :companyId', { companyId })
+      .andWhere("t.operational_metadata->>'deviceId' IS NOT NULL"); // Only vending transactions
+
+    if (startDate && endDate) {
+      qb.andWhere(
+        "COALESCE(t.dateCompetence, t.datePayment) BETWEEN :startDate AND :endDate",
+        {
+          startDate: startDate.toISOString().split('T')[0],
+          endDate: endDate.toISOString().split('T')[0],
+        },
+      );
+    }
+
+    const rows = await qb
+      .groupBy('date')
+      .orderBy('date', 'ASC')
+      .getRawMany<{
+        date: string;
+        averageTicket: string;
+        transactionCount: string;
+      }>();
+
+    return rows.map((r) => ({
+      date: r.date,
+      averageTicket: Number(r.averageTicket || 0),
+      transactionCount: Number(r.transactionCount || 0),
+    }));
   }
 }
